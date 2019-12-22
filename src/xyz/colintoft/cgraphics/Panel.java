@@ -67,16 +67,18 @@ public class Panel extends JPanel {
 	/** Called many times per second depending on the games current update FPS, to change it use the {@link Game#setUpdateFPS(double)} method.
 	 * You should use it to update game logic (save the drawing for the {@link #draw(Graphics) method}). <br>
 	 * Note: if overriding this method, super.update() needs to be called. <br>
-	 * Note: This method is not called while the game is paused. */
-	public void update() {
+	 * Note: This method is not called while the game is paused. 
+	 * @param dt The amount of time (in seconds) since update was last called
+	 */
+	public void update(double dt) {
 		for (Component c: components) {
 			if (c instanceof Panel) {
-			    ((Panel) c).update();
+			    ((Panel) c).update(dt);
 		    }
 		}
 		
 		for (Drawable d: drawables) {
-			d.update();
+			d.update(dt);
 		}
 	}
 	

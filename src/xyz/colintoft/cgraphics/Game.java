@@ -11,17 +11,14 @@ import xyz.colintoft.cgraphics.Panel;
 /**
  * A class that handles window operations and manages Scenes to draw a Game to a Window.
  * @author Colin Toft
- *
  */
-public class Game extends JFrame {
+public abstract class Game extends JFrame {
 	
 	/**
 	 * Called just after this object is instantiated, and before the window is made visible to the user. In this method you should:
 	 * 1. Set a frame title and size (using the setFrame() method is recommended)
 	 * 2. Set the starting scene using the setScene() method
 	 * 3. Set the desired draw and update FPS using setFPS() method or both the setDrawFPS() and setUpdateFPS() methods
-	 *
-	 * @author Colin Toft
 	 */
 	public void init() {}
 	
@@ -35,6 +32,8 @@ public class Game extends JFrame {
 	/** The amount of times per second that the update() method of the current scene will be called. */
 	private double updateFPS = 60;
 	
+	private double lastUpdateTime;
+	
 	private Timer updateTimer, drawTimer;
 	
 	private boolean paused = false;
@@ -46,7 +45,9 @@ public class Game extends JFrame {
 		updateTimer = new Timer((int)(1000 / updateFPS), new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				updateScene();
+				double now = System.nanoTime() / 1000000000.0;
+				updateScene(now - lastUpdateTime);
+				lastUpdateTime = now;
 			}
 		});
 		
@@ -67,8 +68,8 @@ public class Game extends JFrame {
 		drawTimer.start();
 	}
 	
-	private void updateScene() {
-		currentScene.update();
+	private void updateScene(double dt) {
+		currentScene.update(dt);
 	}
 	
 	private void drawScene() {
@@ -87,7 +88,6 @@ public class Game extends JFrame {
 	
 	/**
 	 * Sets the width and height of the Game's frame.
-	 * @author Colin Toft
 	 */
 	protected void setFrame(String title, int width, int height) {
 		setTitle(title);
@@ -99,7 +99,6 @@ public class Game extends JFrame {
 	 * Note this does not affect the actual dimensions of the window:
 	 * use {@link Game#setFrame(String, int, int)} or {@link Game#setSize(int, int)}
 	 * to change the window's width and height in pixels.
-	 * @author Colin Toft
 	 */
 	protected void setFullscreen(boolean fullscreen) {
 		if (fullscreen) {
@@ -113,7 +112,6 @@ public class Game extends JFrame {
 	
 	/**
 	 * Sets the FPS (for both drawing and updating) of the game.
-	 * @author Colin Toft
 	 */
 	protected void setFPS(double fps) {
 		setDrawFPS(fps);
@@ -122,7 +120,6 @@ public class Game extends JFrame {
 	
 	/**
 	 * Sets the drawing FPS (how frequently the current scene is drawn to the screen).
-	 * @author Colin Toft
 	 */
 	protected void setDrawFPS(double fps) {
 		drawFPS = fps;
@@ -132,7 +129,6 @@ public class Game extends JFrame {
 	/**
 	 * Sets the update FPS (how frequently the current scene is update).
 	 * Note: the scene is not updated when the game is paused
-	 * @author Colin Toft
 	 */
 	protected void setUpdateFPS(double d) {
 		updateFPS = d;
