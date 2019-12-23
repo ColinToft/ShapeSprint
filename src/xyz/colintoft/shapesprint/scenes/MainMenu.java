@@ -43,17 +43,17 @@ public class MainMenu extends Scene {
 		
 		setBackground(ss.levelColors[currentLevel]);
 		rect1 = new RoundedRectangle(rectStartX, 0.2, rectWidth, 0.3, new Color(0, 0, 0, 70));
-		levelName1 = new Text(rect1.getCenterX(), rect1.getCenterY(), ss.levelNames[currentLevel], titleFont, Color.white, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		levelName1 = new OutlinedText(rect1.getCenterX(), rect1.getCenterY(), ss.levelNames[currentLevel], titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 		
 		// rect2 and levelName 2 start off the screen
 		rect2 = new RoundedRectangle(rectStartX + 1, 0.2, rectWidth, 0.3, new Color(0, 0, 0, 70));
-		levelName2 = new Text(rect2.getCenterX(), rect2.getCenterY(), ss.levelNames[currentLevel], titleFont, Color.white, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		levelName2 = new OutlinedText(rect2.getCenterX(), rect2.getCenterY(), ss.levelNames[currentLevel], titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 		
 		add(rect1);
 		add(levelName1);
 		add(rect2);
 		add(levelName2);
-		
+				
 		// TODO triangles
 		// TODO level progress bars
 		// TODO click on level or press enter

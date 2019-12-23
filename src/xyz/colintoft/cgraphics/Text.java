@@ -11,12 +11,12 @@ import java.awt.image.BufferedImage;
 
 public class Text extends Drawable {
 
-	private double anchorX, anchorY;
-	private Font font;
-	private Color color;
-	private String text;
-	private HorizontalAlign hAlign;
-	private VerticalAlign vAlign;
+	protected double anchorX, anchorY;
+	protected Font font;
+	protected Color color;
+	protected String text;
+	protected HorizontalAlign hAlign;
+	protected VerticalAlign vAlign;
 	
 	public Text(double x, double y, String text, Font font, Color color, HorizontalAlign hAlign, VerticalAlign vAlign) {
 		super(x, y, 0, 0);
@@ -76,12 +76,13 @@ public class Text extends Drawable {
 		}
 	}
 	
-	@Override
-	public void generateImage() {
+	protected void calculateDimensions() {
 		BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB); // Blank image to get font metrics
 		this.width = pixelToPanelWidthFraction(image.createGraphics().getFontMetrics(font).stringWidth(text));
 		this.height = pixelToPanelHeightFraction(image.createGraphics().getFontMetrics(font).getHeight());
-		
+	}
+	
+	protected void calculateCoordinates() {
 		switch (hAlign) {
 		case CENTER:
 			x = anchorX - this.width * 0.5; break;
@@ -99,6 +100,12 @@ public class Text extends Drawable {
 		case BOTTOM:
 			y = anchorY - this.height; break;
 		}
+	}
+	
+	@Override
+	public void generateImage() {
+		calculateDimensions();
+		calculateCoordinates();
 		super.generateImage();
 	}
 	
