@@ -92,7 +92,7 @@ public class Drawable implements KeyListener, MouseListener {
 	public void moveDown(double delta) {
 		y += delta;
 	}
-
+	
 	/**
 	 * Sets this drawable's current image to the specified filepath.
 	 * Note that this sets this object's "dynamic" property to false, meaning the {@link Drawable#draw(Graphics)} will not be called every frame.
@@ -209,6 +209,7 @@ public class Drawable implements KeyListener, MouseListener {
 	 * @param pixelX The original x coordinate, in pixels
 	 * @return The same coordinate, but as a fraction of the panel width (0 is on the very left of the panel, 1 is on the very right)
 	 */
+
 	public double pixelToParentWidthFraction(int pixelX) {
 		return (double) pixelX / panel.getWidth();
 	}
