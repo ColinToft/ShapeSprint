@@ -1,4 +1,4 @@
-package xyz.colintoft.cgraphics;
+package xyz.colintoft.cgraphics.components;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,13 +8,15 @@ import java.net.URL;
 
 import javax.imageio.ImageIO;
 
+import xyz.colintoft.cgraphics.Game;
+
 public class Drawable implements KeyListener, MouseListener {
 
 	protected BufferedImage currentImage;
 	
 	protected double x, y, width, height;
 	
-	protected Panel panel = null;
+	protected Panel parentPanel = null;
 	
 	protected Color backgroundColor = new Color(0, 0, 0, 0); // Transparent background by default
 	
@@ -120,8 +122,8 @@ public class Drawable implements KeyListener, MouseListener {
 	}
 	
 	public Image getImage() {
-		if (panel == null) {
-			System.out.println("No panel defined, cannot create image.");
+		if (parentPanel == null) {
+			System.out.println("Drawable.getImage(): No panel defined, cannot create image.");
 			return null;
 		}
 		
@@ -136,19 +138,19 @@ public class Drawable implements KeyListener, MouseListener {
 	}
 	
 	protected void togglePaused() {
-		panel.togglePaused();
+		parentPanel.togglePaused();
 	}
 	
 	protected void pauseGame() {
-		panel.pauseGame();
+		parentPanel.pauseGame();
 	}
 	
 	protected void resumeGame() {
-		panel.resumeGame();
+		parentPanel.resumeGame();
 	}
 	
 	protected boolean isPaused() {
-		return panel.isPaused();
+		return parentPanel.isPaused();
 	}
 	
 	/** Called after this Drawable is instantiated and added to a panel. */
@@ -164,8 +166,8 @@ public class Drawable implements KeyListener, MouseListener {
 	 */
 	public void update(double dt) {}
 	
-	public void setPanel(Panel p) {
-		panel = p;
+	public void setParentPanel(Panel p) {
+		parentPanel = p;
 		generateImage();
 	}
 	
@@ -183,25 +185,37 @@ public class Drawable implements KeyListener, MouseListener {
 	}
 	
 	public int pixelX(int xOffset) {
-		return (int) Math.round(x * panel.pixelWidth()) + xOffset;
+		if (parentPanel == null) {
+			System.out.println("Drawable.pixelX(): No panel defined, cannot calculate pixel X.");
+		}
+		return (int) Math.round(x * parentPanel.pixelWidth()) + xOffset;
 	}
 	
 	public int pixelY(int yOffset) {
-		return (int) Math.round(y * panel.pixelHeight()) + yOffset;
+		if (parentPanel == null) {
+			System.out.println("Drawable.pixelY(): No panel defined, cannot calculate pixel Y.");
+		}
+		return (int) Math.round(y * parentPanel.pixelHeight()) + yOffset;
 	}
 	
 	/**
 	 * @return The width of this Drawable in pixels.
 	 */
 	public int pixelWidth() {
-		return (int) Math.round(width * panel.pixelWidth());
+		if (parentPanel == null) {
+			System.out.println("Drawable.pixelWidth(): No panel defined, cannot calculate pixel width.");
+		}
+		return (int) Math.round(width * parentPanel.pixelWidth());
 	}
 	
 	/**
 	 * @return The height of this Drawable in pixels.
 	 */
 	public int pixelHeight() {
-		return (int) Math.round(height * panel.pixelHeight());
+		if (parentPanel == null) {
+			System.out.println("Drawable.pixelHeight(): No panel defined, cannot calculate pixel height.");
+		}
+		return (int) Math.round(height * parentPanel.pixelHeight());
 	}
 	
 	/**
@@ -210,7 +224,7 @@ public class Drawable implements KeyListener, MouseListener {
 	 * @return The same coordinate, but as a fraction of the panel width (0 is on the very left of the panel, 1 is on the very right)
 	 */
 	public double pixelToParentWidthFraction(int pixelX) {
-		return (double) pixelX / panel.pixelWidth();
+		return (double) pixelX / parentPanel.pixelWidth();
 	}
 	
 	/**
@@ -219,7 +233,7 @@ public class Drawable implements KeyListener, MouseListener {
 	 * @return The same coordinate, but as a fraction of the panel height (0 is at the very top of the panel, 1 is at the very bottom)
 	 */
 	public double pixelToParentHeightFraction(int pixelY) {
-		return (double) pixelY / panel.pixelHeight();
+		return (double) pixelY / parentPanel.pixelHeight();
 	}
 	
 	protected void setBackground(Color c) {

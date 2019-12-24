@@ -4,6 +4,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 
+import xyz.colintoft.cgraphics.components.Drawable;
+import xyz.colintoft.cgraphics.components.Panel;
+
 /**
  * A Scene represents one scene of the game, for example a menu, or one level of a game.
  * A Scene takes up the whole window, and can be filled with Panels, JComponents, or Drawables to have them be shown on the screen.
@@ -13,11 +16,11 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 	
 	protected Game game;
 	
+	protected int pixelWidth, pixelHeight;
 	
 	public Scene() {
 		super();
 		setBackground(Color.BLACK); // Black background by default
-		addComponentListener(this);
 	}
 	
 	/**
@@ -28,10 +31,11 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 		game = g;
 		game.addKeyListener(this);
 		game.addMouseListener(this);
+		setDimensions(g.getWidth(), g.getHeight());
 	}
 
     /**
-	 * Adds a drawble to the scene.
+	 * Adds a Drawable to the scene.
 	 * @author Colin Toft
 	 */
 	@Override
@@ -39,28 +43,6 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 		game.addMouseListener(d);
 		game.addKeyListener(d);
 		return super.add(d);
-	}
-	
-	/**
-	 * Adds a JComponent to the scene.
-	 * @author Colin Toft
-	 */
-	@Override
-	public Component add(Component comp) {
-		comp = super.add(comp);
-		comp.setLocation(comp.getX() + game.getInsets().left, comp.getY() + game.getInsets().top);
-		return comp;
-	}
-	
-	/**
-	 * Adds a JComponent to the scene at the specified location.
-	 * @author Colin Toft
-	 */
-	@Override
-	public Component add(Component comp, double x, double y, double width, double height) {
-		comp = super.add(comp, x, y, width, height);
-		comp.setLocation(comp.getX() + game.getInsets().left, comp.getY() + game.getInsets().top);
-		return comp;
 	}
 	
 	/**
@@ -101,13 +83,25 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 
 	@Override
 	public void componentResized(ComponentEvent e) {
-		for (Component c: components) {
-			// rescaleComponent(c);
-		}
-		
+		setDimensions(game.getWidth(), game.getHeight());
+	}
+	
+	public void setDimensions(int width, int height) {
+		pixelWidth = width;
+		pixelHeight = height;
 		for (Drawable d: drawables) {
-			d.setPanel(this);
+			d.setParentPanel(this);
 		}
+	}
+	
+	@Override
+	public int pixelWidth() {
+		return pixelWidth;
+	}
+	
+	@Override
+	public int pixelHeight() {
+		return pixelHeight;
 	}
 
 	@Override

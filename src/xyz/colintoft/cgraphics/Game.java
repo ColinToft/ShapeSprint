@@ -6,7 +6,7 @@ import java.awt.image.BufferStrategy;
 
 import javax.swing.*;
 
-import xyz.colintoft.cgraphics.Panel;
+import xyz.colintoft.cgraphics.components.Panel;
 
 /**
  * A class that handles window operations and manages Scenes to draw a Game to a Window.
@@ -38,6 +38,8 @@ public abstract class Game extends JFrame {
 	
 	private boolean paused = false;
 	
+	private boolean buffersCreated = false;
+	
 	public Game() {
 
 		setLocationRelativeTo(null);
@@ -59,10 +61,10 @@ public abstract class Game extends JFrame {
 		});
 		
 		init();
-		
+
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
-		createBufferStrategy(2);
+		
 		
 		updateTimer.start();
 		drawTimer.start();
@@ -72,15 +74,28 @@ public abstract class Game extends JFrame {
 		currentScene.update(dt);
 	}
 	
+	public void addNotify() {
+        super.addNotify();
+        
+        do {
+        	try {
+            	createBufferStrategy(2);  
+            	buffersCreated = true;
+        	} catch (IllegalStateException e) {}
+        } while (!buffersCreated);
+    }
+	
 	private void drawScene() {
-		if (!isDisplayable()) return; // Avoid errors where buffers have not yet been created
+		if (!isDisplayable() || !buffersCreated) return; // Avoid errors where buffers have not yet been created
 		
 		BufferStrategy strategy = getBufferStrategy();
 		Graphics g = (Graphics2D) strategy.getDrawGraphics();
 		
 		g.clearRect(0, 0, getWidth(), getHeight());
 		
-		currentScene.draw(g, getInsets().left, getInsets().top);
+		if (currentScene != null) {
+			currentScene.draw(g, getInsets().left, getInsets().top);
+		}
 		
 		g.dispose();
 		strategy.show();
@@ -92,6 +107,13 @@ public abstract class Game extends JFrame {
 	protected void setFrame(String title, int width, int height) {
 		setTitle(title);
 		setSize(width, height);
+		
+	}
+	
+	@Override
+	public void setSize(int width, int height) {
+		super.setSize(width, height);
+		setPreferredSize(new Dimension(width, height));
 	}
 	
 	/**
@@ -137,27 +159,22 @@ public abstract class Game extends JFrame {
 	
 	public void setScene(Scene s) {
 		currentScene = s;
-		currentScene.setPreferredSize(new Dimension(getWidth(), getHeight()));
 		currentScene.setGame(this);
-		currentScene.setBounds(0, 0, getWidth(), getHeight());
+		
+		JPanel contentPane = new JPanel();
+		contentPane.setPreferredSize(new Dimension(getWidth(), getHeight()));
+		contentPane.addComponentListener(currentScene);
+		setContentPane(contentPane);
+
 		currentScene.init();
-		setContentPane(currentScene);
+		
 		pack();
-		revalidate();
 		currentScene.start();
 	}
 	
 	public void run() {
 		setVisible(true);
 		start();
-	}
-	
-	public Component add(Component comp) {
-		return currentScene.add(comp);
-	}
-	
-	public Component add(Component comp, double x, double y, double w, double h) {
-		return currentScene.add(comp, x, y, w, h);
 	}
 	
 	public boolean isPaused() {

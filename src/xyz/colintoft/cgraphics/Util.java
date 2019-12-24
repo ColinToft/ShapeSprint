@@ -41,4 +41,23 @@ public class Util {
 		}
 	}
 	
+	public static double min(double[] array) {
+		double smallest = array[0];
+		for (double d: array) {
+			if (d < smallest) {
+				smallest = d;
+			}
+		}
+		return smallest;
+	}
+	
+	public static double max(double[] array) {
+		double largest = array[0];
+		for (double d: array) {
+			if (d > largest) {
+				largest = d;
+			}
+		}
+		return largest;
+	}
 }

@@ -1,16 +1,11 @@
-package xyz.colintoft.cgraphics;
+package xyz.colintoft.cgraphics.components;
 
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import javax.swing.*;
+import xyz.colintoft.cgraphics.Game;
 
 public class Panel extends Drawable {
 
@@ -37,17 +32,20 @@ public class Panel extends Drawable {
 	
 	/** Sets the parent of this panel. */
 	@Override
-	public void setPanel(Panel p) {
-		super.setPanel(p);
+	public void setParentPanel(Panel p) {
+		parentPanel = p;
 		
 		for (Drawable d: drawables) {
-			d.setPanel(this);
+			d.setParentPanel(this);
 		}
+		
+		super.setParentPanel(p);
+		
 	}
 
 	
 	public boolean fillsParent() {
-		return x == 0 && x == 0 && width == 1 && height == 1;
+		return x == 0 && y == 0 && width == 1 && height == 1;
 	}
 	
 	/**
@@ -100,7 +98,9 @@ public class Panel extends Drawable {
 	
 	/** Adds a drawable to the JPanel. */
 	public Drawable add(Drawable d) {
-		d.setPanel(this);
+		if (parentPanel != null) {
+			d.setParentPanel(this);
+		}
 		drawables.add(d);
 		d.start();
 		return d;
@@ -126,7 +126,7 @@ public class Panel extends Drawable {
 	public void onRescale() {
 		// Set the panel of each drawable so they will regenerate their image
 		for (Drawable d: drawables) {
-			d.setPanel(this);
+			d.setParentPanel(this);
 		}
 	}
 	

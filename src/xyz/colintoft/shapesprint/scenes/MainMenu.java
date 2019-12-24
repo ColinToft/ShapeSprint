@@ -7,6 +7,11 @@ import java.awt.event.KeyEvent;
 import javax.sound.sampled.Clip;
 
 import xyz.colintoft.cgraphics.*;
+import xyz.colintoft.cgraphics.components.DrawableOutlinedText;
+import xyz.colintoft.cgraphics.components.DrawableRoundedRectangle;
+import xyz.colintoft.cgraphics.components.DrawableShape;
+import xyz.colintoft.cgraphics.components.DrawableText;
+import xyz.colintoft.cgraphics.components.Panel;
 import xyz.colintoft.shapesprint.ShapeSprint;
 
 /**
@@ -25,11 +30,11 @@ public class MainMenu extends Scene {
 	private Panel panel1; // Main panel
 	private Panel panel2; // Secondary panel (used during transitions)
 	
-	private RoundedRectangle rect1; // Main rectangle
-	private RoundedRectangle rect2; // Secondary rectangle (used during transitions)
+	private DrawableRoundedRectangle rect1; // Main rectangle
+	private DrawableRoundedRectangle rect2; // Secondary rectangle (used during transitions)
 	
-	private Text levelName1; // Main level text
-	private Text levelName2; // Secondary level text (used for transitions)
+	private DrawableText levelName1; // Main level text
+	private DrawableText levelName2; // Secondary level text (used for transitions)
 	
 	private boolean isSwitching = false;
 	private Direction switchDirection = Direction.NONE;
@@ -47,22 +52,25 @@ public class MainMenu extends Scene {
 		setBackground(ss.levelColors[currentLevel]);
 		
 		panel1 = new Panel(panelStartX, 0.2, panelWidth, 0.6);
-		rect1 = new RoundedRectangle(0, 0, 1, 0.4, new Color(0, 0, 0, 70));
-		levelName1 = new OutlinedText(rect1.getCenterX(), rect1.getCenterY(), ss.levelNames[currentLevel], titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		rect1 = new DrawableRoundedRectangle(0, 0, 1, 0.4, new Color(0, 0, 0, 70));
+		levelName1 = new DrawableOutlinedText(rect1.getCenterX(), rect1.getCenterY(), ss.levelNames[currentLevel], titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 		panel1.add(rect1);
 		panel1.add(levelName1);
 		
 		// rect2 and levelName 2 start off the screen
 		panel2 = new Panel(panelStartX + 1, 0.2, panelWidth, 0.6);
-		rect2 = new RoundedRectangle(0, 0, 1, 0.4, new Color(0, 0, 0, 70));
-		levelName2 = new OutlinedText(rect2.getCenterX(), rect2.getCenterY(), ss.levelNames[currentLevel], titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		rect2 = new DrawableRoundedRectangle(0, 0, 1, 0.4, new Color(0, 0, 0, 70));
+		levelName2 = new DrawableOutlinedText(rect2.getCenterX(), rect2.getCenterY(), ss.levelNames[currentLevel], titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 		panel2.add(rect2);
 		panel2.add(levelName2);
 		
 		add(panel1);
 		add(panel2);
 				
-		// TODO triangles
+		// Triangles
+		DrawableShape t1 = DrawableShape.triangle(0.0, 0.0, 0.5, 0.5, 0.7, 0.3, Color.black, 5f, Color.white);
+		add(t1);
+		
 		// TODO level progress bars
 		// TODO click on level or press enter
 		Clip music = Util.getAudioClip(getClass(), "menuLoop.wav");
@@ -71,14 +79,14 @@ public class MainMenu extends Scene {
 	
 	public void update(double dt) {
 		if (isSwitching) {
-			if (Math.abs(panel1.getParentFractionX() - panelStartX) < 0.001 && Math.abs(velocity) < 0.001) {
+			if (Math.abs(panel1.getX() - panelStartX) < 0.001 && Math.abs(velocity) < 0.001) {
 				isSwitching = false;
 				panel1.setX(panelStartX);
 			}
 			
 			switch (switchDirection) {
 			case LEFT:
-				velocity += bounceFactor * (panelStartX - panel1.getParentFractionX()) * dt;
+				velocity += bounceFactor * (panelStartX - panel1.getX()) * dt;
 				velocity *= bounceDecay;
 				
 				panel1.moveRight(velocity * dt);
@@ -86,7 +94,7 @@ public class MainMenu extends Scene {
 				break;
 				
 			case RIGHT:
-				velocity -= bounceFactor * (panelStartX - panel1.getParentFractionX()) * dt;
+				velocity -= bounceFactor * (panelStartX - panel1.getX()) * dt;
 				velocity *= bounceDecay;
 				
 				panel1.moveLeft(velocity * dt);
@@ -115,7 +123,7 @@ public class MainMenu extends Scene {
 				currentLevel = (currentLevel - 1 + ss.levelNames.length) % ss.levelNames.length;
 			}
 			
-			panel2.setX(panel1.getParentFractionX()); // Make rect2 start where rect1 currently is (at the center of the screen), it will then move off to the left
+			panel2.setX(panel1.getX()); // Make rect2 start where rect1 currently is (at the center of the screen), it will then move off to the left
 			levelName2.setText(levelName1.getText()); 
 			
 			panel1.moveRight(switchDirection == Direction.RIGHT ? 1 : -1); // Make rect1 start one screen width to the side (the side depends on the direction), it will then slide onto the screen
