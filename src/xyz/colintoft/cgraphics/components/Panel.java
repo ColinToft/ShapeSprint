@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import xyz.colintoft.cgraphics.Game;
+import xyz.colintoft.cgraphics.Util;
 
 public class Panel extends Drawable {
 
@@ -19,7 +20,7 @@ public class Panel extends Drawable {
 		setBackground(new Color(0, 0, 0, 0)); // Transparent background by default
 	}
 	
-	/** Creates a new panel with the dimensions of its parent. */
+	/** Creates a new Panel with the dimensions of its parent. */
 	public Panel() {
 		this(0, 0, 1, 1);
 	}
@@ -40,7 +41,6 @@ public class Panel extends Drawable {
 		}
 		
 		super.setParentPanel(p);
-		
 	}
 
 	
@@ -61,8 +61,11 @@ public class Panel extends Drawable {
 	 * @param g The graphics object that is used to draw graphics to the screen.
 	 */
 	public void draw(Graphics g, int xOffset, int yOffset) {
-		g.setColor(backgroundColor);
-		g.fillRect(0, 0, pixelWidth() + xOffset, pixelHeight() + yOffset);
+		
+		if (backgroundColor.getAlpha() > 0) {
+			g.setColor(backgroundColor);
+			g.fillRect(0, 0, pixelWidth() + xOffset, pixelHeight() + yOffset);
+		}
 		
 	
 		for (Drawable d: drawables) {
@@ -79,7 +82,7 @@ public class Panel extends Drawable {
 	}
 	
 	public BufferedImage getImage() {
-		BufferedImage i = new BufferedImage(pixelWidth() + 1, pixelHeight() + 1, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage i = Util.getEmptyImage(pixelWidth(), pixelHeight());
 		draw(i.createGraphics());
 		return i;
 	}
@@ -102,8 +105,13 @@ public class Panel extends Drawable {
 			d.setParentPanel(this);
 		}
 		drawables.add(d);
-		d.start();
 		return d;
+	}
+	
+	public void dispose() {
+		for (Drawable d: drawables) {
+			d.dispose();
+		}
 	}
 	
 	/** This method will be automatically called whenever the game is paused. If overriding this method, make sure to call super.onPause() inside this method. */
@@ -148,5 +156,27 @@ public class Panel extends Drawable {
 	/** Returns true if the game is currently paused. */
 	public boolean isPaused() {
 		return parent.isPaused();
+	}
+	
+	@Override
+	public void onMousePressed(double x, double y, int button) {
+		for (Drawable d: drawables) {
+			if (d.isPointInFrame(x, y)) {
+				double objectX = (x - d.x) / d.width;
+				double objectY = (y - d.y) / d.height;
+				d.onMousePressed(objectX, objectY, button);
+			}
+		}
+	}
+	
+	@Override
+	public void onMouseReleased(double x, double y, int button) {
+		for (Drawable d: drawables) {
+			if (d.isPointInFrame(x, y)) {
+				double objectX = (x - d.x) / d.width;
+				double objectY = (y - d.y) / d.height;
+				d.onMouseReleased(objectX, objectY, button);
+			}
+		}
 	}
 }

@@ -20,19 +20,30 @@ public class ShapeSprint extends Game {
 	
 	public static ShapeSprint game;
 	
-	public String[] levelNames;
-	public Color[] levelColors;
+	public Level[] levels;
 	
 	@Override
 	public void init() {
 		
-		levelNames = new String[] {"Dimensional Vortex", "Bouncing", "Spatial Plane"};
-		levelColors = new Color[] {Color.BLUE, Color.GREEN, Color.MAGENTA};
+		levels = new Level[] {
+			new Level("Dimensional Vortex" , Color.BLUE, "dimensionalvortex.txt", "DimensionalVortex.wav"),
+			new Level("Spatial Plane", Color.MAGENTA, "spatialplane.txt", "SpatialPlane.wav"),
+			new Level("Temporal Nebula", new Color(255, 230, 0), "temporalnebula.txt", "TemporalNebula.wav"),
+			new Level("Endless", Color.GREEN, "dimensionalvortex.txt", "Bouncing.wav")
+		};
 		
+		levels[0].setNormalProgress(0.2748375);
+		levels[0].setPracticeProgress(1.0);
+		
+		levels[1].setNormalProgress(0);
+		levels[1].setPracticeProgress(0.49293485234897);
+		
+		levels[2].setNormalProgress(0.12);
+		levels[2].setPracticeProgress(0.37893579);
 		
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		setFrame("Shape Sprint", (int) dim.getWidth(), (int) dim.getHeight());
-		
+		setFPS(100);
 		setFullscreen(true);
 		setScene(new MainMenu());
 	}

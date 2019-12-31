@@ -34,6 +34,11 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 		setDimensions(g.getWidth(), g.getHeight());
 	}
 
+	@Override
+	public boolean hasParentPanel() {
+		return game != null;
+	}
+	
     /**
 	 * Adds a Drawable to the scene.
 	 * @author Colin Toft
@@ -43,6 +48,13 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 		game.addMouseListener(d);
 		game.addKeyListener(d);
 		return super.add(d);
+	}
+	
+	@Override
+	public void dispose() {
+		game.removeComponentListener(this);
+		game.removeKeyListener(this);
+		game.removeMouseListener(this);
 	}
 	
 	/**
@@ -113,17 +125,20 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 	@Override
 	public void componentHidden(ComponentEvent e) {
 		pauseGame();
-		
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {}
 
 	@Override
-	public void mousePressed(MouseEvent e) {}
+	public void mousePressed(MouseEvent e) {
+		onMousePressed((double)e.getX() / pixelWidth(), (double)e.getY() / pixelHeight(), e.getButton());
+	}
 
 	@Override
-	public void mouseReleased(MouseEvent e) {}
+	public void mouseReleased(MouseEvent e) {
+		onMouseReleased((double)e.getX() / pixelWidth(), (double)e.getY() / pixelHeight(), e.getButton());
+	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {}

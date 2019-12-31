@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
@@ -15,6 +16,7 @@ public class DrawableShape extends Drawable {
 	private Color borderColor, fillColor;
 	private double xCoords[], yCoords[];
 	private float borderWidth;
+	private GeneralPath bounds;
 	
 	public DrawableShape(double[] xCoords, double[] yCoords, Color borderColor, float borderWidth, Color fillColor) {
 		super(Util.min(xCoords), Util.min(yCoords), Util.max(xCoords) - Util.min(xCoords), Util.max(yCoords) - Util.min(yCoords));
@@ -23,6 +25,14 @@ public class DrawableShape extends Drawable {
 		this.xCoords = xCoords;
 		this.yCoords = yCoords;
 		this.borderWidth = borderWidth;
+		
+		bounds = new GeneralPath();
+		bounds.moveTo((xCoords[0] - x), (yCoords[0] - y));
+		for (int i = 1; i < xCoords.length; i++) {
+			bounds.lineTo((xCoords[i] - x), (yCoords[i] - y));
+		}
+		bounds.closePath();
+		
 		setDynamic(false);
 	}
 	
@@ -37,8 +47,10 @@ public class DrawableShape extends Drawable {
 	@Override
 	public void draw(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
-		g2d.setColor(fillColor);
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+		g2d.setColor(fillColor);
+		
 		Shape s = getShape();
 		g2d.fill(s);
 		
@@ -68,15 +80,16 @@ public class DrawableShape extends Drawable {
 	/** Creates a Shape object from a list of coordinates (the vertices of the shape). */
 	private Shape getShape() {
 		GeneralPath shape = new GeneralPath();
-		shape.moveTo((xCoords[0] - x) * parentPanel.pixelWidth(), (yCoords[0] - x) * parentPanel.pixelHeight());
-		System.out.println(shape.getCurrentPoint());
+		shape.moveTo((xCoords[0] - x) * parentPanel.pixelWidth(), (yCoords[0] - y) * parentPanel.pixelHeight());
 		for (int i = 1; i < xCoords.length; i++) {
 			shape.lineTo((xCoords[i] - x) * parentPanel.pixelWidth(), (yCoords[i] - y) * parentPanel.pixelHeight());
-			System.out.println(shape.getCurrentPoint());
 		}
 		shape.closePath();
-		System.out.println(shape.contains(new Point2D.Double(5, 5)));
-		System.out.println(shape.getBounds());
 		return shape;
+	}
+	
+	@Override
+	public boolean isPointInFrame(double x, double y) {
+		return bounds.contains(x - this.x, y - this.y);
 	}
 }

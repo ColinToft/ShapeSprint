@@ -10,6 +10,7 @@ import java.awt.Shape;
 import java.awt.image.BufferedImage;
 
 import xyz.colintoft.cgraphics.HorizontalAlign;
+import xyz.colintoft.cgraphics.Util;
 import xyz.colintoft.cgraphics.VerticalAlign;
 
 public class DrawableText extends Drawable {
@@ -30,6 +31,7 @@ public class DrawableText extends Drawable {
 		this.text = text;
 		this.hAlign = hAlign;
 		this.vAlign = vAlign;
+		setDynamic(false);
 	}
 	
 	public DrawableText(double x, double y, String text, Font font, Color color) {
@@ -80,7 +82,7 @@ public class DrawableText extends Drawable {
 	}
 	
 	protected void calculateDimensions() {
-		BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB); // Blank image to get font metrics
+		BufferedImage image = Util.getEmptyImage(1, 1); // Blank image to get font metrics
 		this.width = pixelToParentWidthFraction(image.createGraphics().getFontMetrics(font).stringWidth(text));
 		this.height = pixelToParentHeightFraction(image.createGraphics().getFontMetrics(font).getHeight());
 	}

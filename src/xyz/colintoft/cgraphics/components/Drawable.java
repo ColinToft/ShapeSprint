@@ -9,6 +9,7 @@ import java.net.URL;
 import javax.imageio.ImageIO;
 
 import xyz.colintoft.cgraphics.Game;
+import xyz.colintoft.cgraphics.Util;
 
 public class Drawable implements KeyListener, MouseListener {
 
@@ -17,6 +18,8 @@ public class Drawable implements KeyListener, MouseListener {
 	protected double x, y, width, height;
 	
 	protected Panel parentPanel = null;
+	
+	private boolean started = false;
 	
 	protected Color backgroundColor = new Color(0, 0, 0, 0); // Transparent background by default
 	
@@ -32,6 +35,11 @@ public class Drawable implements KeyListener, MouseListener {
 
 	public Drawable(double x, double y, double size) {
 		this(x, y, size, size);
+	}
+	
+	/** Creates a new Drawable with the dimensions of its parent. */
+	public Drawable() {
+		this(0, 0, 1, 1);
 	}
 	
 	/** Sets whether the image needs to be updated every frame. */
@@ -103,12 +111,7 @@ public class Drawable implements KeyListener, MouseListener {
 	 * @see Drawable#setDynamic(boolean)
 	 */
 	public void setImage(String name) {
-		InputStream is = getClass().getResourceAsStream("/images/" + name + ".jpg");
-		try {
-			setImage(ImageIO.read(is));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		setImage(Util.loadImageFromFile(getClass(), name));
 	}
 
 	/**
@@ -129,8 +132,10 @@ public class Drawable implements KeyListener, MouseListener {
 		
 		if (dynamic) {
 			Graphics2D g = currentImage.createGraphics();
-			g.setColor(backgroundColor);
-			g.fillRect(0, 0, currentImage.getWidth(), currentImage.getHeight());
+			if (backgroundColor.getAlpha() > 0) {
+				g.setColor(backgroundColor);
+				g.fillRect(0, 0, currentImage.getWidth(), currentImage.getHeight());
+			}
 			draw(g);
 		}
 		
@@ -166,9 +171,21 @@ public class Drawable implements KeyListener, MouseListener {
 	 */
 	public void update(double dt) {}
 	
+	public void dispose() {
+		currentImage = null;
+	}
+	
 	public void setParentPanel(Panel p) {
 		parentPanel = p;
 		generateImage();
+		if (!started) {
+			started = true;
+			start();
+		}
+	}
+	
+	public boolean hasParentPanel() {
+		return parentPanel != null;
 	}
 	
 	/**
@@ -177,7 +194,7 @@ public class Drawable implements KeyListener, MouseListener {
 	 * By default, it calls the {@link Drawable#draw(Graphics)} method to create the image.
 	 */
 	protected void generateImage() {
-		currentImage = new BufferedImage(pixelWidth() + 1, pixelHeight() + 1, BufferedImage.TYPE_INT_ARGB);
+		currentImage = Util.getEmptyImage(pixelWidth(), pixelHeight());
 		Graphics2D g = currentImage.createGraphics();
 		g.setColor(backgroundColor);
 		g.fillRect(0, 0, currentImage.getWidth(), currentImage.getHeight());
@@ -236,9 +253,25 @@ public class Drawable implements KeyListener, MouseListener {
 		return (double) pixelY / parentPanel.pixelHeight();
 	}
 	
-	protected void setBackground(Color c) {
+	public void setBackground(Color c) {
 		backgroundColor = c;
 	}
+	
+	public boolean isPointInFrame(double x, double y) {
+		return x >= this.x && x <= (this.x + this.width) && y >= this.y && y <= (this.y + this.height);
+	}
+	
+	/** This method is called whenever this drawable is clicked.
+	 * @param x The x coordinate of the click based on the width of this drawable (0 is the left of this object, 1 is the right) 
+	 * @param y The y coordinate of the click based on the height of this drawable (0 is the top of this object, 1 is the bottom)
+	 * @param button The button pressed, as returned from {@link MouseEvent#getButton()} */
+	public void onMousePressed(double x, double y, int button) {}
+	
+	/** This method is called whenever a click on this drawable is released. 
+	 * @param x The x coordinate of the click based on the width of this drawable (0 is the left of this object, 1 is the right) 
+	 * @param y The y coordinate of the click based on the height of this drawable (0 is the top of this object, 1 is the bottom)
+	 * @param button The button pressed, as returned from {@link MouseEvent#getButton()} */
+	public void onMouseReleased(double x, double y, int button) {}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {}

@@ -26,6 +26,8 @@ public abstract class Game extends JFrame {
 	
 	private Scene currentScene = null;
 	
+	private JPanel contentPane;
+	
 	/** The amount of times per second that the draw() method of the current scene will be called. */
 	private double drawFPS = 60;
 	
@@ -93,7 +95,7 @@ public abstract class Game extends JFrame {
 		
 		g.clearRect(0, 0, getWidth(), getHeight());
 		
-		if (currentScene != null) {
+		if (currentScene != null && currentScene.hasParentPanel()) {
 			currentScene.draw(g, getInsets().left, getInsets().top);
 		}
 		
@@ -158,10 +160,17 @@ public abstract class Game extends JFrame {
 	}
 	
 	public void setScene(Scene s) {
+		drawTimer.stop();
+		updateTimer.stop();
+		
+		if (currentScene != null) {
+			currentScene.dispose();
+		}
+		
 		currentScene = s;
 		currentScene.setGame(this);
 		
-		JPanel contentPane = new JPanel();
+		contentPane = new JPanel();
 		contentPane.setPreferredSize(new Dimension(getWidth(), getHeight()));
 		contentPane.addComponentListener(currentScene);
 		setContentPane(contentPane);
@@ -169,7 +178,17 @@ public abstract class Game extends JFrame {
 		currentScene.init();
 		
 		pack();
+		
+		drawTimer.restart();
+		updateTimer.restart();
+		
 		currentScene.start();
+	}
+	
+	@Override
+	public void removeComponentListener(ComponentListener l) {
+		super.removeComponentListener(l);
+		contentPane.removeComponentListener(l);
 	}
 	
 	public void run() {
