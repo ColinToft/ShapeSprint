@@ -8,8 +8,14 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioFormat;
@@ -62,6 +68,32 @@ public class Util {
 		}
 	}
 	
+	// 8
+	public static boolean fileExists(Class resourceGrabber, String filename) {
+		return resourceGrabber.getResourceAsStream(filename) != null;
+	}
+	
+	public static String[] readLinesFromFile(Class resourceGrabber, String filename) {
+		BufferedReader in = null;
+		String contents = "";
+		try {
+			in = new BufferedReader(new InputStreamReader(resourceGrabber.getResourceAsStream(filename)));
+			while (in.ready()) {
+				contents += in.readLine() + "\n"; //read in a line
+			}
+			in.close();
+			return contents.split("\n");
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
 	public static BufferedImage getEmptyImage(int width, int height) {
 		return getEmptyImage(width, height, true);
 	} 
@@ -102,7 +134,7 @@ public class Util {
 	}
 	
 	public static String toPercentageString(double value) {
-		return Math.round(value * 100) + "%";
+		return (int) Math.floor(value * 100) + "%";
 	}
 	
 	public static double sigmoid(double x) {
@@ -118,5 +150,33 @@ public class Util {
 		Graphics g = newImage.createGraphics();
 		g.drawImage(image, 0, 0, width, height, null);
 		return newImage;
+	}
+	
+	// Jan 8
+	public static int constrain(int value, int low, int high) {
+		if (low > high) {
+			throw new IllegalArgumentException("Low value (" + low + ") should be smaller or equal to high value (" + high + ")");
+		}
+		if (value < low) {
+			return low;
+		} else if (value > high) {
+			return high;
+		}
+		
+		return value;
+	}
+	
+	// Jan 8
+	public static double constrain(double value, double low, double high) {
+		if (low > high) {
+			throw new IllegalArgumentException("Low value (" + low + ") should be smaller or equal to high value (" + high + ")");
+		}
+		if (value < low) {
+			return low;
+		} else if (value > high) {
+			return high;
+		}
+		
+		return value;
 	}
 }

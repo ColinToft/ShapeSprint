@@ -25,7 +25,7 @@ import xyz.colintoft.shapesprint.ShapeSprint;
 */
 public class MainMenu extends Scene {
 	
-	private int currentLevel = 0; // The level that is being displayed
+	private int currentLevel; // The level that is being displayed
 
 	private Panel panel1, panel2;
 	private DrawableOutlinedText levelText1, levelText2;
@@ -45,6 +45,15 @@ public class MainMenu extends Scene {
 	private final double panelWidth = 0.6;
 	private final double panelStartX = (1 - panelWidth) * 0.5;
 	
+	public MainMenu(int currentLevel) {
+		super();
+		this.currentLevel = currentLevel;
+	}
+	
+	public MainMenu() {
+		this(0);
+	}
+	
 	// Dec 21
 	// Mod 22, 24, 26, 27
 	public void init() {
@@ -61,12 +70,14 @@ public class MainMenu extends Scene {
 			}
 		};
 		levelText1 = new DrawableOutlinedText(rect.getCenterX(), rect.getCenterY(), ss.levels[currentLevel].name, titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		levelText1.setMaxWidth(rect.getWidth() * 0.9);
 		
 		normalProgressBar1 = new DrawableProgressBar(0, 0.6, 1, 0.1, 0.05, 0.16, Color.BLACK, 2f, Color.GREEN, new Color(0, 0, 0, 70));
 		normalProgressBar1.setValue(ss.levels[currentLevel].normalProgress);
 		DrawableOutlinedText normalModeText1 = new DrawableOutlinedText(0.5, normalProgressBar1.getY() - 0.01, "Normal Mode", titleFont.deriveFont(75f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.BOTTOM);
 		normalPercentageText1 = new DrawableOutlinedText(normalProgressBar1.getCenterX(), normalProgressBar1.getCenterY(),
 				Util.toPercentageString(normalProgressBar1.getValue()), titleFont.deriveFont(60f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		normalPercentageText1.setMaxHeight(normalProgressBar1.getHeight() * 0.9);
 		
 		practiceProgressBar1 = new DrawableProgressBar(0, 0.85, 1, 0.1, 0.05, 0.16, Color.BLACK, 2f, Color.CYAN, new Color(0, 0, 0, 70));
 		practiceProgressBar1.setValue(ss.levels[currentLevel].practiceProgress);
@@ -88,6 +99,7 @@ public class MainMenu extends Scene {
 		panel2 = new Panel(panelStartX + 1, 0.15, panelWidth, 0.7);
 		DrawableRoundedRectangle rect2 = new DrawableRoundedRectangle(0, 0, 1, 0.4, 0.07, 0.125, new Color(0, 0, 0, 70));
 		levelText2 = new DrawableOutlinedText(rect2.getCenterX(), rect2.getCenterY(), ss.levels[currentLevel + 1].name, titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		levelText2.setMaxWidth(rect2.getWidth() * 0.9);
 		
 		normalProgressBar2 = new DrawableProgressBar(0, 0.6, 1, 0.1, 0.05, 0.16, Color.BLACK, 2f, Color.GREEN, new Color(0, 0, 0, 70));
 		DrawableOutlinedText normalModeText2 = new DrawableOutlinedText(0.5, normalProgressBar2.getY() - 0.01, "Normal Mode", titleFont.deriveFont(75f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.BOTTOM);
@@ -131,9 +143,13 @@ public class MainMenu extends Scene {
 		add(leftTriangle);
 		add(rightTriangle);
 		
-		// TODO text based on width or height
-		// TODO switch ends based on time
-		// TODO click on level or press enter
+		// TODO instructions
+		// TODO pause menu
+		// TODO rocket mode
+
+		// TODO practice mode
+		// TODO endless mode?
+
 		menuMusic = Util.getAudioClip(getClass(), "menuLoop.wav");
 		menuMusic.loop(Clip.LOOP_CONTINUOUSLY);
 	}
@@ -176,11 +192,12 @@ public class MainMenu extends Scene {
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			game.exit();
-		}
-		
-		if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT) {
+		} else if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT) {
 			Direction direction = e.getKeyCode() == KeyEvent.VK_LEFT ? Direction.LEFT : Direction.RIGHT;
+			System.out.println("Key press");
 			switchLevel(direction);
+		} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+			startLevel(currentLevel);
 		}
 	}
 	

@@ -2,6 +2,8 @@ package xyz.colintoft.shapesprint;
 
 import java.awt.Color;
 
+import xyz.colintoft.cgraphics.Util;
+
 // Dec 24th, 2019
 public class Level {
 	
@@ -12,7 +14,8 @@ public class Level {
 	public double normalProgress;
 	public double practiceProgress;
 	
-	public Obstacle[] obstacles;
+	public Obstacle[][] obstacles;
+	public int width, height;
 	
 	// Dec 24th mod 30
 	public Level(String name, Color backgroundColor, String filename, String musicFile) {
@@ -29,14 +32,66 @@ public class Level {
 		normalProgress = value;
 	}
 	
+	// 8
+	public void updateNormalProgress(double value) {
+		if (value > normalProgress) {
+			normalProgress = value;
+			ShapeSprint.game.saveProgress();
+		}
+	}
+	
 	// 24
 	public void setPracticeProgress(double value) {
 		practiceProgress = value;
 	}
 	
+	// 8
+	public void updatePracticeProgress(double value) {
+		if (value > practiceProgress) {
+			practiceProgress = value;
+		}
+	}
+	
 	// 30
 	public void load() {
-		//loadObstaclesFromFile();
-		//sortObstacles();
+		loadObstaclesFromFile();
+	}
+	
+	// 31
+	private void loadObstaclesFromFile() {
+		String[] lines = Util.readLinesFromFile(getClass(), "/levels/" + filename);
+		
+		// First find the necessary width and height based on the largest x and y values
+		width = 0;
+		height = 0;
+		int x, y;
+		String[] values;
+		for (String line: lines) {
+			if (line.length() > 0 && Character.isDigit(line.charAt(0))) {
+				values = line.split(" ");
+				x = Integer.valueOf(values[0]);
+				y = Integer.valueOf(values[1]);
+				if (x > width) {
+					width = x;
+				}
+				if (y > height) {
+					height = y;
+				}
+			}
+		}
+		
+		width++;
+		height++;
+		
+		obstacles = new Obstacle[width][height];
+		
+		for (String line: lines) {
+			if (line.length() > 0 && Character.isDigit(line.charAt(0))) {
+				values = line.split(" ");
+				x = Integer.valueOf(values[0]);
+				y = Integer.valueOf(values[1]);
+				obstacles[x][y] = Obstacle.fromString(values[2]);
+			}
+		}
 	}
 }

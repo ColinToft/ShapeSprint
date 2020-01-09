@@ -34,42 +34,18 @@ public abstract class Game extends JFrame {
 	/** The amount of times per second that the update() method of the current scene will be called. */
 	private double updateFPS = 60;
 	
-	private double lastUpdateTime;
+	private double lastUpdateTime, lastDrawTime;
 	
-	private Timer updateTimer, drawTimer;
-	
+	private boolean running;
 	private boolean paused = false;
+	private volatile boolean loadingScene = true;
 	
 	private boolean buffersCreated = false;
 	
 	public Game() {
-
 		setLocationRelativeTo(null);
-		
-		updateTimer = new Timer((int)(1000 / updateFPS), new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				double now = System.nanoTime() / 1000000000.0;
-				updateScene(now - lastUpdateTime);
-				lastUpdateTime = now;
-			}
-		});
-		
-		drawTimer = new Timer((int)(1000 / drawFPS), new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				drawScene();
-			}
-		});
-		
-		init();
-
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		
-		
-		
-		updateTimer.start();
-		drawTimer.start();
+		init();
 	}
 	
 	private void updateScene(double dt) {
@@ -81,7 +57,7 @@ public abstract class Game extends JFrame {
         
         do {
         	try {
-            	createBufferStrategy(2);  
+            	createBufferStrategy(2);
             	buffersCreated = true;
         	} catch (IllegalStateException e) {}
         } while (!buffersCreated);
@@ -90,17 +66,16 @@ public abstract class Game extends JFrame {
 	private void drawScene() {
 		if (!isDisplayable() || !buffersCreated) return; // Avoid errors where buffers have not yet been created
 		
-		BufferStrategy strategy = getBufferStrategy();
-		Graphics g = (Graphics2D) strategy.getDrawGraphics();
-		
-		g.clearRect(0, 0, getWidth(), getHeight());
-		
 		if (currentScene != null && currentScene.hasParentPanel()) {
+			BufferStrategy strategy = getBufferStrategy();
+			Graphics g = (Graphics2D) strategy.getDrawGraphics();
+			
+			g.clearRect(0, 0, getWidth(), getHeight());
+			
 			currentScene.draw(g, getInsets().left, getInsets().top);
+			g.dispose();
+			strategy.show();
 		}
-		
-		g.dispose();
-		strategy.show();
 	}
 	
 	/**
@@ -147,21 +122,18 @@ public abstract class Game extends JFrame {
 	 */
 	protected void setDrawFPS(double fps) {
 		drawFPS = fps;
-		drawTimer.setDelay((int)(1000 / drawFPS));
 	}
 	
 	/**
 	 * Sets the update FPS (how frequently the current scene is update).
-	 * Note: the scene is not updated when the game is paused
+	 * Note: the scene is not updated when the game is paused.
 	 */
 	protected void setUpdateFPS(double d) {
 		updateFPS = d;
-		updateTimer.setDelay((int)(1000 / updateFPS));
 	}
 	
 	public void setScene(Scene s) {
-		drawTimer.stop();
-		updateTimer.stop();
+		loadingScene = true;
 		
 		if (currentScene != null) {
 			currentScene.dispose();
@@ -176,13 +148,13 @@ public abstract class Game extends JFrame {
 		setContentPane(contentPane);
 
 		currentScene.init();
+		loadingScene = false;
 		
 		pack();
 		
-		drawTimer.restart();
-		updateTimer.restart();
-		
 		currentScene.start();
+		lastUpdateTime = System.nanoTime() / 1000000000.0;
+		paused = false;
 	}
 	
 	@Override
@@ -194,6 +166,31 @@ public abstract class Game extends JFrame {
 	public void run() {
 		setVisible(true);
 		start();
+		
+		running = true;
+		
+		while (running) {
+			double now = System.nanoTime() / 1000000000.0;
+            if (now - lastDrawTime > 1 / this.drawFPS && !loadingScene) {
+				drawScene();
+				lastDrawTime = now;
+            } else {
+            	BufferStrategy strategy = getBufferStrategy();
+    			Graphics g = (Graphics2D) strategy.getDrawGraphics();
+    			
+    			g.setColor(Color.black);
+    			g.fillRect(0, 0, getWidth(), getHeight());
+    			
+    			g.dispose();
+    			strategy.show();
+            }
+            
+            now = System.nanoTime() / 1000000000.0;
+            if (now - lastUpdateTime > 1 / this.updateFPS && !paused && !loadingScene) {
+            	updateScene(now - lastUpdateTime);
+				lastUpdateTime = now;
+            } 
+		}
 	}
 	
 	public boolean isPaused() {
@@ -204,6 +201,7 @@ public abstract class Game extends JFrame {
 	 * Exits the game. By default, this disposes the frame and calls {@link System#exit(int)} to stop the program.
 	 */
 	public void exit() {
+		running = false;
 		setVisible(false);
 		dispose();
 		System.exit(0);
@@ -211,14 +209,13 @@ public abstract class Game extends JFrame {
 	
 	public void pauseGame() {
 		paused = true;
-		updateTimer.stop();
 		currentScene.onPause();
 	}
 	
 	public void resumeGame() {
 		paused = false;
-		updateTimer.start();
 		currentScene.onResume();
+		lastUpdateTime = System.nanoTime() / 1000000000.0;
 	}
 	
 	public void togglePaused() {

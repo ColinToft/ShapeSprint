@@ -47,6 +47,9 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 	public Drawable add(Drawable d) {
 		game.addMouseListener(d);
 		game.addKeyListener(d);
+		if (game != null) {
+			d.setParentPanel(this);
+		}
 		return super.add(d);
 	}
 	

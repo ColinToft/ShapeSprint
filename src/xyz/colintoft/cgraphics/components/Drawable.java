@@ -26,6 +26,8 @@ public class Drawable implements KeyListener, MouseListener {
 	/** Whether the image needs to be updated every frame. */
 	private boolean dynamic = true;
 	
+	protected boolean visible = true;
+	
 	public Drawable(double x, double y, double width, double height) {
 		this.x = x;
 		this.y = y;
@@ -88,19 +90,27 @@ public class Drawable implements KeyListener, MouseListener {
 	}
 	
 	public void moveLeft(double delta) {
-		x -= delta;
+		setX(x - delta);
 	}
 
 	public void moveRight(double delta) {
-		x += delta;
+		setX(x + delta);
 	}
 
 	public void moveUp(double delta) {
-		y -= delta;
+		setY(y - delta);
 	}
 
 	public void moveDown(double delta) {
-		y += delta;
+		setY(y + delta);
+	}
+	
+	public void show() {
+		visible = true;
+	}
+	
+	public void hide() {
+		visible = false;
 	}
 
 	/**
@@ -185,6 +195,7 @@ public class Drawable implements KeyListener, MouseListener {
 	}
 	
 	public boolean hasParentPanel() {
+		System.out.println(parentPanel);
 		return parentPanel != null;
 	}
 	
@@ -203,14 +214,14 @@ public class Drawable implements KeyListener, MouseListener {
 	
 	public int pixelX(int xOffset) {
 		if (parentPanel == null) {
-			System.out.println("Drawable.pixelX(): No panel defined, cannot calculate pixel X.");
+			System.out.println("Drawable.pixelX(): No panel defined for object " + this + ", cannot calculate pixel X.");
 		}
 		return (int) Math.round(x * parentPanel.pixelWidth()) + xOffset;
 	}
 	
 	public int pixelY(int yOffset) {
 		if (parentPanel == null) {
-			System.out.println("Drawable.pixelY(): No panel defined, cannot calculate pixel Y.");
+			System.out.println("Drawable.pixelY(): No panel defined for object " + this + ", cannot calculate pixel Y.");
 		}
 		return (int) Math.round(y * parentPanel.pixelHeight()) + yOffset;
 	}
@@ -251,6 +262,14 @@ public class Drawable implements KeyListener, MouseListener {
 	 */
 	public double pixelToParentHeightFraction(int pixelY) {
 		return (double) pixelY / parentPanel.pixelHeight();
+	}
+	
+	public double parentWidthFractionToParentHeightFraction(double x) {
+		return x * pixelWidth() / pixelHeight();
+	}
+	
+	public double parentHeightFractionToParentWidthFraction(double y) {
+		return y * pixelHeight() / pixelWidth();
 	}
 	
 	public void setBackground(Color c) {

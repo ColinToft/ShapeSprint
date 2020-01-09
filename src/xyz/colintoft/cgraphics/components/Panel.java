@@ -11,16 +11,14 @@ import xyz.colintoft.cgraphics.Util;
 public class Panel extends Drawable {
 
 	protected ArrayList<Drawable> drawables;
-	
-	private Panel parent = null;
-	
+		
 	public Panel(double x, double y, double width, double height) {
 		super(x, y, width, height);
 		drawables = new ArrayList<Drawable>();
 		setBackground(new Color(0, 0, 0, 0)); // Transparent background by default
 	}
 	
-	/** Creates a new Panel with the dimensions of its parent. */
+	/** Creates a new Panel with the dimensions of its parentPanel. */
 	public Panel() {
 		this(0, 0, 1, 1);
 	}
@@ -34,6 +32,7 @@ public class Panel extends Drawable {
 	/** Sets the parent of this panel. */
 	@Override
 	public void setParentPanel(Panel p) {
+		System.out.println("Setting parent of panel " + this + " to " + p);
 		parentPanel = p;
 		
 		for (Drawable d: drawables) {
@@ -66,9 +65,11 @@ public class Panel extends Drawable {
 			g.setColor(backgroundColor);
 			g.fillRect(0, 0, pixelWidth() + xOffset, pixelHeight() + yOffset);
 		}
-		
 	
 		for (Drawable d: drawables) {
+			if (!d.visible) {
+				continue;
+			}
 			if (d instanceof Panel) {
 		    	if (((Panel) d).fillsParent()) {
 		    		((Panel) d).draw(g, xOffset, yOffset);
@@ -140,22 +141,22 @@ public class Panel extends Drawable {
 	
 	/** Pauses the game. */
 	public void pauseGame() {
-		parent.pauseGame();
+		parentPanel.pauseGame();
 	}
 	
 	/** Resumes/unpauses the game. */
 	public void resumeGame() {
-		parent.resumeGame();
+		parentPanel.resumeGame();
 	}
 	
 	/** If the game is paused, unpause it, and vice versa. */
 	public void togglePaused() {
-		parent.togglePaused();
+		parentPanel.togglePaused();
 	}
 	
 	/** Returns true if the game is currently paused. */
 	public boolean isPaused() {
-		return parent.isPaused();
+		return parentPanel.isPaused();
 	}
 	
 	@Override
