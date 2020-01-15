@@ -11,8 +11,8 @@ public class Level {
 	public Color backgroundColor;
 	public String filename;
 	public String musicFile;
-	public double normalProgress;
-	public double practiceProgress;
+	public double normalProgress = 0;
+	public double practiceProgress = 0;
 	
 	public Obstacle[][] obstacles;
 	public int width, height;
@@ -49,6 +49,7 @@ public class Level {
 	public void updatePracticeProgress(double value) {
 		if (value > practiceProgress) {
 			practiceProgress = value;
+			ShapeSprint.game.saveProgress();
 		}
 	}
 	

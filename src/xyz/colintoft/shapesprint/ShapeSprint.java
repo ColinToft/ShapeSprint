@@ -27,6 +27,8 @@ public class ShapeSprint extends Game {
 	public static ShapeSprint game;
 	
 	public Level[] levels;
+
+	private boolean firstTime;
 	
 	public static final String saveFile = "/saveGame.txt";
 	
@@ -44,7 +46,7 @@ public class ShapeSprint extends Game {
 		
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		setFrame("Shape Sprint", (int) dim.getWidth(), (int) dim.getHeight());
-		setSize(1024, 720);
+		setSize(800, 600);
 		setFPS(400);
 		setFullscreen(false);
 		setScene(new MainMenu());
@@ -70,20 +72,28 @@ public class ShapeSprint extends Game {
 		}
 	}
 	
+	// 8
 	public void loadProgress() {
 		if (Util.fileExists(getClass(), saveFile)) {
 			int i = 0;
 			String[] lines = Util.readLinesFromFile(getClass(), saveFile);
-			for (Level level: levels) {
-				level.setNormalProgress(Double.valueOf(lines[i++]));
-				level.setPracticeProgress(Double.valueOf(lines[i++]));
+			if (lines.length <= 2) {
+				firstTime = true;
+			} else {
+				for (Level level: levels) {
+					level.setNormalProgress(Double.valueOf(lines[i++]));
+					level.setPracticeProgress(Double.valueOf(lines[i++]));
+				}
+				firstTime = false;
 			}
 		} else {
-			for (Level level: levels) {
-				level.setNormalProgress(0);
-				level.setPracticeProgress(0);
-			}
+			firstTime = true;
 		}
+	}
+	
+	// 10
+	public boolean isFirstTime() {
+		return firstTime;
 	}
 
 }

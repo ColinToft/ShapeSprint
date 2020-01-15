@@ -139,7 +139,11 @@ public class Util {
 	
 	public static double sigmoid(double x) {
 	    return (1/( 1 + Math.pow(Math.E,(-1*x))));
-	  }
+	}
+	
+	public static BufferedImage scaleImage(BufferedImage image, double scaleFactor) {
+		return scaleImage(image, (int) Math.round(image.getWidth() * scaleFactor), (int) Math.round(image.getHeight() * scaleFactor));
+	}
 
 	public static BufferedImage scaleImage(BufferedImage image, int width, int height) {
 		return scaleImage(image, width, height, true);
@@ -148,7 +152,7 @@ public class Util {
 	public static BufferedImage scaleImage(BufferedImage image, int width, int height, boolean fixSides) {
 		BufferedImage newImage = getEmptyImage(width, height, fixSides);
 		Graphics g = newImage.createGraphics();
-		g.drawImage(image, 0, 0, width, height, null);
+		g.drawImage(image, 0, 0, newImage.getWidth(), newImage.getHeight(), null);
 		return newImage;
 	}
 	

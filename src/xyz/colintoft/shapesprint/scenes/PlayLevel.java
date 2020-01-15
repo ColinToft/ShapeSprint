@@ -16,6 +16,7 @@ import xyz.colintoft.cgraphics.components.Panel;
 import xyz.colintoft.cgraphics.components.Sprite;
 import xyz.colintoft.cgraphics.components.DrawableOutlinedText;
 import xyz.colintoft.cgraphics.components.DrawableProgressBar;
+import xyz.colintoft.cgraphics.components.DrawableRectangle;
 import xyz.colintoft.cgraphics.components.DrawableRoundedRectangle;
 import xyz.colintoft.shapesprint.Level;
 import xyz.colintoft.shapesprint.LevelView;
@@ -30,6 +31,10 @@ public class PlayLevel extends Scene {
 	private int attemptNumber = 1;
 	private DrawableOutlinedText attemptText;
 	private final double attemptTextStartX = 0.9;
+	
+	private DrawableOutlinedText helpText;
+	public boolean needsJumpHelp = true;
+	private final String jumpHelpMessage = "Click or tap to jump over obstacles";
 
 	private DrawableProgressBar progressBar;
 	private final double progressBarWidth = 0.3;
@@ -45,6 +50,10 @@ public class PlayLevel extends Scene {
 	private DrawableProgressBar practiceProgressBar;
 	private DrawableOutlinedText practicePercentageText;
 	
+	private Panel winScreen;
+	
+	private Sprite changeModeButton;
+	
 	// Dec 27 mod 30
 	public PlayLevel(Level level) {
 		super();
@@ -52,7 +61,7 @@ public class PlayLevel extends Scene {
 		this.level = level;
 	}
 	
-	// Dec 27 mod 30, 7, 8
+	// Dec 27 mod 30, 7, 8, 9, 10
 	public void init() {
 		level.load();
 		
@@ -63,10 +72,18 @@ public class PlayLevel extends Scene {
 		attemptText = new DrawableOutlinedText(attemptTextStartX, 0.25, "Attempt " + attemptNumber, titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 		add(attemptText);
 		
-		progressBar = new DrawableProgressBar(0.5 - progressBarWidth * 0.5, 0.02, progressBarWidth, progressBarHeight, progressBarHeight * 0.65, progressBarHeight, Color.WHITE, 2f, Color.red, new Color(0, 0, 0, 0));
-		add(progressBar);
+		helpText = new DrawableOutlinedText(0.5, 0.4, jumpHelpMessage, titleFont.deriveFont(100f), Color.white, Color.black, 1f, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		helpText.setMaxWidth(0.75);
+		needsJumpHelp = ((ShapeSprint) game).isFirstTime();
+		if (!needsJumpHelp) {
+			helpText.hide();
+		}
+		add(helpText);
 		
-		percentageText = new DrawableOutlinedText(progressBar.getX() + progressBar.getWidth() + 0.002, progressBar.getCenterY(), "0%", titleFont.deriveFont(60f), Color.white, Color.black, HorizontalAlign.LEFT, VerticalAlign.CENTER);
+		progressBar = new DrawableProgressBar(0.5 * (1 - progressBarWidth), 0.02, progressBarWidth, progressBarHeight, progressBarHeight * 0.65, progressBarHeight, Color.WHITE, 2f, Color.red, new Color(0, 0, 0, 0));
+		add(progressBar);
+				
+		percentageText = new DrawableOutlinedText(progressBar.getX() + progressBar.getWidth(), progressBar.getCenterY(), "0%", titleFont.deriveFont(60f), Color.white, Color.black, 1f, HorizontalAlign.LEFT, VerticalAlign.CENTER);
 		percentageText.setMaxHeight(progressBarHeight);
 		add(percentageText);
 		
@@ -91,21 +108,22 @@ public class PlayLevel extends Scene {
 		double progressBarBottom = practiceProgressBar.getY() + practiceProgressBar.getHeight();
 		double buttonHeight = parentWidthFractionToParentHeightFraction(buttonWidth);
 		
-		Sprite practiceModeButton = new Sprite(0.25, (1 - progressBarBottom - buttonHeight) / 2 + progressBarBottom, buttonWidth, buttonHeight, "menuItems/practiceMode.png") {
+		changeModeButton = new Sprite(0.25, (1 - progressBarBottom - buttonHeight) / 2 + progressBarBottom, buttonWidth, buttonHeight, "menuItems/practiceMode.png") {
 			@Override
 			public void onMouseReleased(double x, double y, int button) {
-				startPracticeMode();
+				changeMode();
 			}
 		};
 		
-		Sprite playButton = new Sprite(0.5 * (1 - buttonWidth * 1.5), (1 - progressBarBottom - buttonHeight * 1.5) / 2 + progressBarBottom, buttonWidth * 1.5, buttonHeight * 1.5, "menuItems/resume.png") {
+		Sprite resumeButton = new Sprite(0.5 * (1 - buttonWidth * 1.5), (1 - progressBarBottom - buttonHeight * 1.5) / 2 + progressBarBottom, buttonWidth * 1.5, buttonHeight * 1.5, "menuItems/resume.png") {
 			@Override
 			public void onMouseReleased(double x, double y, int button) {
-				startPracticeMode();
+				pauseMenu.hide();
+				resumeGame();
 			}
 		};
 		
-		Sprite menuButton = new Sprite(1 - practiceModeButton.getX() - buttonWidth, (1 - progressBarBottom - buttonHeight) / 2 + progressBarBottom, buttonWidth, buttonHeight, "menuItems/menu.png") {
+		Sprite menuButton = new Sprite(1 - changeModeButton.getX() - buttonWidth, (1 - progressBarBottom - buttonHeight) / 2 + progressBarBottom, buttonWidth, buttonHeight, "menuItems/menu.png") {
 			@Override
 			public void onMouseReleased(double x, double y, int button) {
 				exitToMenu();
@@ -120,11 +138,40 @@ public class PlayLevel extends Scene {
 		pauseMenu.add(practiceProgressBar);
 		pauseMenu.add(practiceModeText);
 		pauseMenu.add(practicePercentageText);
-		pauseMenu.add(practiceModeButton);
+		pauseMenu.add(changeModeButton);
+		pauseMenu.add(resumeButton);
 		pauseMenu.add(menuButton);
 		
 		add(pauseMenu);
 		pauseMenu.hide();
+		
+		winScreen = new Panel(0.03, 0.03, 0.94, 0.94);
+		DrawableRoundedRectangle rect2 = new DrawableRoundedRectangle(0, 0, 1, 1, 0.07, 0.125, new Color(0, 0, 0, 180));
+		DrawableOutlinedText levelCompleteText = new DrawableOutlinedText(rect.getCenterX(), 0.15, "Level Complete!", titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		levelText.setMaxWidth(rect.getWidth() * 0.9);
+		
+		Sprite playAgainButton = new Sprite(0.5 * (1 - buttonWidth * 1.5), (1 - progressBarBottom - buttonHeight * 1.5) / 2 + progressBarBottom, buttonWidth * 1.5, buttonHeight * 1.5, "menuItems/resume.png") {
+			@Override
+			public void onMouseReleased(double x, double y, int button) {
+				winScreen.hide();
+				resumeGame();
+				levelView.restartLevel();
+			}
+		};
+		
+		Sprite menuButton2 = new Sprite(1 - changeModeButton.getX() - buttonWidth, (1 - progressBarBottom - buttonHeight) / 2 + progressBarBottom, buttonWidth, buttonHeight, "menuItems/menu.png") {
+			@Override
+			public void onMouseReleased(double x, double y, int button) {
+				exitToMenu();
+			}
+		};
+		
+		winScreen.add(rect2);
+		winScreen.add(levelCompleteText);
+		winScreen.add(playAgainButton);
+		winScreen.add(menuButton2);
+		add(winScreen);
+		winScreen.hide();
 	}
 	
 	@Override
@@ -141,6 +188,11 @@ public class PlayLevel extends Scene {
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			togglePaused();
 			if (isPaused()) {
+				if (levelView.isPracticeMode()) {
+					changeModeButton.setImage("menuItems/normalMode.png");
+				} else {
+					changeModeButton.setImage("menuItems/practiceMode.png");
+				}
 				pauseMenu.show();
 			} else {
 				pauseMenu.hide();
@@ -148,22 +200,45 @@ public class PlayLevel extends Scene {
 		}
 	}
 
-	// 7 mod 8
-	public void restart() {
+	// 7 mod 8, 9
+	public void restartLevel() {
 		attemptNumber++;
 		attemptText.setText("Attempt " + attemptNumber);
 		attemptText.setX(attemptTextStartX);
 		
-		level.updateNormalProgress(levelView.getPlayerProgress());
+		if (attemptNumber > 2 && !levelView.hasJumped) {
+			helpText.setText(jumpHelpMessage);
+			helpText.show();
+		}
+		
+		saveLevelProgress();
+		
+		normalProgressBar.setValue(level.normalProgress);
+		normalPercentageText.setText(Util.toPercentageString(level.normalProgress));
+		practiceProgressBar.setValue(level.practiceProgress);
+		practicePercentageText.setText(Util.toPercentageString(level.practiceProgress));
 	}
 	
-	// 8
-	public void startPracticeMode() {
-		
+	// 8 mod 9
+	public void changeMode() {
+		pauseMenu.hide();
+		resumeGame();
+		levelView.changeMode();
+	}
+	
+	// 10
+	private void saveLevelProgress() {
+		if (levelView.isPracticeMode()) {
+			level.updatePracticeProgress(levelView.getPlayerProgress());
+		} else {
+			level.updateNormalProgress(levelView.getPlayerProgress());
+		}
 	}
 	
 	// 8
 	public void exitToMenu() {
+		saveLevelProgress();
+		
 		levelView.exitingToMenu();
 		ShapeSprint ss = ((ShapeSprint) game);
 		for (int i = 0; i < ss.levels.length; i++) {
@@ -173,5 +248,18 @@ public class PlayLevel extends Scene {
 			}
 		}
 		game.setScene(new MainMenu());
+	}
+
+	// 10
+	public void hideJumpHelp() {
+		needsJumpHelp = false;
+		helpText.hide();
+		
+	}
+
+	// 14
+	public void showWinScreen() {
+		winScreen.show();
+		
 	}
 }

@@ -54,8 +54,10 @@ public class DrawableText extends Drawable {
 	}
 	
 	public void setText(String newText) {
-		text = newText;
-		generateImage();
+		if (!text.equals(newText)) {
+			text = newText;
+			generateImage();
+		}
 	}
 	
 	@Override

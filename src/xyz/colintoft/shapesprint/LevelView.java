@@ -37,7 +37,9 @@ public class LevelView extends Drawable {
 	private final double xSpeed = 10.386;
 	private final double levelHeight = 10; // Height of the level in blocks
 	private final double groundHeight = 0.3; // Fraction of the height of the screen that the ground takes up
-	private final double playerScreenX = 0.3; // Fraction of the width
+	private final double playerScreenX = 0.34; // Fraction of the width
+	private final int levelEndOffset = 8;
+	private final double backgroundSpeed = 0.125;
 	
 	private final double playerWidth = 1;
 	private int groundTileWidth;
@@ -48,9 +50,19 @@ public class LevelView extends Drawable {
 	private double playerX = -15; // in blocks
 	private double playerY = 0; // in blocks (0 is ground level)
 	
+	private boolean hasDied = false;
+	private double deathTimer = 0;
+	private boolean hasBeatLevel = false;
+	private double winTimer = 0;
+	private double winAnimationLength = 1;
+	
 	private boolean jumping = false;
 	private boolean holding = false;
+	public boolean hasJumped = false;
+	private double lastJumpY = 0;
 		
+	private boolean playingMusic = false;
+	
 	private double ySpeed = 0;
 	private final double gravity = 0.876 * xSpeed * xSpeed;
 	private final double minYSpeed = -2.6 * xSpeed;
@@ -64,14 +76,14 @@ public class LevelView extends Drawable {
 	private double prevCheckpointY = checkpointY;
 	private double prevCheckpointYSpeed = checkpointYSpeed;
 	
-	
-	BufferedImage playerImage, backgroundImage, groundImage;
+	private BufferedImage playerImage, backgroundImage, groundImage, checkpointImage;
 		
 	HashMap<Obstacle, BufferedImage> images;
 	
-	private Clip music;
+	private Clip music, practiceMusic;
+	private Clip deathSound, winSound;
 	
-	// Dec 30
+	// Dec 30 mod 9
 	public LevelView(double x, double y, double width, double height, Level level) {
 		super(x, y, width, height);
 		setBackground(new Color(0, 0, 0, 0));
@@ -81,6 +93,9 @@ public class LevelView extends Drawable {
 		
 		// Load Music
 		music = Util.getAudioClip(getClass(), level.musicFile);
+		practiceMusic = Util.getAudioClip(getClass(), "AsItShouldBeLoop.wav");
+		deathSound = Util.getAudioClip(getClass(), "explodeSound.wav");
+		winSound = Util.getAudioClip(getClass(), "levelCompleteSound.wav");
 	}
 	
 	// Dec 30
@@ -88,6 +103,7 @@ public class LevelView extends Drawable {
 		this(0, 0, 1, 1, level);
 	}
 	
+	// Dec 30
 	public void start() {
 		ratio = (double) parentPanel.pixelWidth() / parentPanel.pixelHeight();
 	}
@@ -98,6 +114,7 @@ public class LevelView extends Drawable {
 		// Load Background Image
 		BufferedImage originalBackground = Util.loadImageFromFile(getClass(), "backgrounds/background1classic.png");
 		backgroundImage = Util.scaleImage(originalBackground, pixelWidth(), pixelWidth());
+		
 		Graphics g = backgroundImage.createGraphics();
 		Color bgColor = new Color(level.backgroundColor.getRed(), level.backgroundColor.getGreen(), level.backgroundColor.getBlue(), 205);
 	    g.setColor(bgColor);
@@ -133,16 +150,25 @@ public class LevelView extends Drawable {
 			images.put(type, image);
 		}
 		
+		// Load checkpoint image
+		checkpointImage = Util.loadImageFromFile(getClass(), "other/checkpoint.png");
+		checkpointImage = Util.scaleImage(checkpointImage, getBlockSize() * 0.5 / checkpointImage.getWidth());
+		
 		super.generateImage();
 	}
 	
-	// 30
+	// 30 mod 8, 9, 13, 14
 	@Override
 	public void draw(Graphics g) {
-		long start = System.nanoTime();
 		Graphics2D g2d = (Graphics2D) g;
 	    
-	    g2d.drawImage(backgroundImage, 0, pixelHeight() - backgroundImage.getHeight(), null);
+		int backgroundX = (int)(-getBlockSize() * (playerX * backgroundSpeed % (backgroundImage.getWidth() / getBlockSize())));
+		if (backgroundX > 0) {
+			backgroundX -= backgroundImage.getWidth();
+	    }
+	    g2d.drawImage(backgroundImage, backgroundX, pixelHeight() - backgroundImage.getHeight(), null);
+	    g2d.drawImage(backgroundImage, backgroundX + backgroundImage.getWidth(), pixelHeight() - backgroundImage.getHeight(), null);
+	    
 	    int groundX = (int)(-getBlockSize() * (playerX % (groundTileWidth / getBlockSize())));
 	    if (groundX > 0) {
 	    	groundX -= groundTileWidth;
@@ -155,14 +181,26 @@ public class LevelView extends Drawable {
 	    
 	    //g2d.fillRect(0, 0, pixelWidth(), (int)(pixelHeight() * (1 - groundHeight)));
 	    
-	    int playerImageX = (int)(pixelWidth() * playerScreenX);
-		int playerImageY = (int)(pixelHeight() * (1 - groundHeight) - getBlockSize() * (playerY + playerWidth));
-		
-		AffineTransform backup = g2d.getTransform();
-	    AffineTransform rotate = AffineTransform.getRotateInstance(playerRotation, playerImage.getWidth() / 2.0, playerImage.getHeight() / 2.0);
-	    AffineTransformOp op = new AffineTransformOp(rotate, AffineTransformOp.TYPE_BILINEAR);
-	    g2d.drawImage(op.filter(playerImage, null), playerImageX, playerImageY, null);
-	    g2d.setTransform(backup);
+	    if (!hasDied) {
+	    	int playerImageX, playerImageY;
+	    	if (hasBeatLevel) {
+	    		int beginX = blockXToPixelX(level.width);
+	    		int endX = blockXToPixelX(level.width + levelEndOffset);
+	    		double endProgress = winTimer / winAnimationLength;
+	    		endProgress *= endProgress;
+			    playerImageX = (int)(beginX + (endX - beginX) * endProgress);
+				playerImageY = blockYToPixelY(playerY + playerWidth + -7 * (endProgress) * (endProgress - 1.6));
+	    	} else {
+	    		playerImageX = (int)(pixelWidth() * playerScreenX);
+	    		playerImageY = blockYToPixelY(playerY + playerWidth);
+	    	}
+			
+			AffineTransform backup = g2d.getTransform();
+		    AffineTransform rotate = AffineTransform.getRotateInstance(playerRotation, playerImage.getWidth() / 2.0, playerImage.getHeight() / 2.0);
+		    AffineTransformOp op = new AffineTransformOp(rotate, AffineTransformOp.TYPE_BILINEAR);
+		    g2d.drawImage(op.filter(playerImage, null), playerImageX, playerImageY, null);
+		    g2d.setTransform(backup);
+	    }
 	    
 	    // Draw obstacles
 	    Obstacle o;
@@ -173,26 +211,53 @@ public class LevelView extends Drawable {
 	    	for (int obstacleY = 0; obstacleY < Math.min((int) screenYToBlockY(0) + 1, level.height); obstacleY++) {
     			o = level.obstacles[obstacleX][obstacleY];
     			if (o != null) {
-    				g2d.drawImage(images.get(o), blockXToPixelX(obstacleX), blockYToPixelY(obstacleY), null);
+    				g2d.drawImage(images.get(o), blockXToPixelX(obstacleX), blockYToPixelY(obstacleY + 1), null);
     			}
+	    	}
+	    }
+	    
+	    // Draw the end of the level
+	    if (screenXToBlockX(1) > level.width + levelEndOffset) {
+	    	g2d.setColor(Color.BLACK);
+	    	g2d.fillRect(blockXToPixelX(level.width + levelEndOffset), 0, pixelWidth() - blockXToPixelX(level.width + levelEndOffset), (int)(pixelHeight() * Math.min(1, 1 - groundHeight)));
+	    	g2d.setColor(Color.WHITE);
+	    	g2d.fillRect(blockXToPixelX(level.width + levelEndOffset), 0, (int)(pixelWidth() * 0.005), (int)(pixelHeight() * Math.min(1, 1 - groundHeight)));
+	    }
+	    
+	    if (practiceMode) {
+	    	// Draw checkpoints
+	    	if (checkpointX > 0) {
+	    		g2d.drawImage(checkpointImage, blockXToPixelX(checkpointX) + (int)(getBlockSize() - checkpointImage.getWidth()) / 2, blockYToPixelY(checkpointY + 1) + (int)(getBlockSize() - checkpointImage.getHeight()) / 2, null);
+	    	}
+	    	
+	    	if (prevCheckpointX > 0) {
+	    		g2d.drawImage(checkpointImage, blockXToPixelX(prevCheckpointX) + (int)(getBlockSize() - checkpointImage.getWidth()) / 2, blockYToPixelY(prevCheckpointY + 1) + (int)(getBlockSize() - checkpointImage.getHeight()) / 2, null);
 	    	}
 	    }
 	}
 	
-	// 30 mod 7
+	// 30 mod 7, 9, 10, 13, 14
 	@Override
 	public void update(double dt) {
 		playerRotation += playerRotationSpeed * dt;
 		playerRotation %= 2 * Math.PI;
 		
-		playerX += xSpeed * dt;
-		
-		ySpeed = Math.max(ySpeed - gravity * dt, minYSpeed);
-		playerY += ySpeed * dt;
+		if (!hasDied && !hasBeatLevel) {
+			playerX += xSpeed * dt;
+		}
 		
 		double minY = getMinY();
 		
+		if (playerY > minY || ySpeed != 0) {
+			ySpeed = Math.max(ySpeed - gravity * dt, minYSpeed);
+			playerY += ySpeed * dt;
+		}
+		
 		if (playerY <= minY && ySpeed <= 0) {
+			if (practiceMode && playerX - checkpointX > 20 && ySpeed < 0) {
+				createCheckpoint();
+			}
+			
 			ySpeed = 0;
 			playerY = minY;
 			if (jumping) {
@@ -201,18 +266,52 @@ public class LevelView extends Drawable {
 			}
 		}
 
-		if (shouldDie()) {
-			die();
+		if (!hasDied && shouldDie()) {
+			hasDied = true;
+			deathTimer = 0;
+			stopMusic();
+			deathSound.start();
+		}
+		
+		if (hasDied) {
+			deathTimer += dt;
+			if (deathTimer > 1) {
+				deathSound.stop();
+				restartLevel();
+			}
 			return;
 		}
 		
-		if (!music.isActive() && playerX >= 0) {
-			System.out.println("Time to start music");
-			music.start();
-			playerX = 0;
-			
-			music.setMicrosecondPosition(0);
+		if (playerX > level.width && !hasBeatLevel) {
+			hasBeatLevel = true;
+			winTimer = 0;
+			stopMusic();
+			winSound.start();
 		}
+		
+		if (hasBeatLevel) {
+			winTimer += dt;
+			if (winTimer > 3) {
+				winSound.stop();
+				((PlayLevel) parentPanel).showWinScreen();
+			}
+		}
+		
+		if (!playingMusic && playerX >= 0 && !hasDied && !hasBeatLevel) {
+			startMusic();
+			playerX = Math.max(checkpointX, 0);
+		}
+	}
+	
+	// 9
+	private void createCheckpoint() {
+		System.out.println("Creating checkpoint at " + playerX + " " + playerY);
+		prevCheckpointX = checkpointX;
+		prevCheckpointY = checkpointY;
+		prevCheckpointYSpeed = checkpointYSpeed;
+		checkpointX = playerX;
+		checkpointY = playerY;
+		checkpointYSpeed = ySpeed;
 	}
 	
 	// 7
@@ -299,7 +398,7 @@ public class LevelView extends Drawable {
 	
 	// 31
 	public int blockYToPixelY(double blockY) {
-		return (int) Math.round((1 - groundHeight) * pixelHeight() - (blockY + 1) * getBlockSize());
+		return (int) Math.round((1 - groundHeight) * pixelHeight() - blockY * getBlockSize());
 	}
 	
 	// 31
@@ -309,7 +408,7 @@ public class LevelView extends Drawable {
 	
 	// 31
 	public double pixelYToBlockY(int pixelY) {
-		return (pixelY - (1 - groundHeight) * pixelHeight()) / -getBlockSize() - 1;
+		return (pixelY - (1 - groundHeight) * pixelHeight()) / -getBlockSize();
 	}
 	
 	// 7
@@ -351,36 +450,42 @@ public class LevelView extends Drawable {
 		holding = false;
 	}
 	
-	// 30
+	// 30 mod 10, 13
 	private void jump() {
 		ySpeed = jumpYSpeed;
+		((PlayLevel) parentPanel).hideJumpHelp();
+		hasJumped = true;
 	}
 	
-	// 7 mod 9
-	private void die() {
-		((PlayLevel) parentPanel).restart();
-
-		music.stop();
+	// 7 mod 9, 13
+	public void restartLevel() {
+		((PlayLevel) parentPanel).restartLevel();
 		
 		playerRotation = 0;
 		
 		if (practiceMode) {
+			System.out.println("Restarting player from checkpointX " + checkpointX);
 			playerX = checkpointX;
 			playerY = checkpointY;
 			ySpeed = checkpointYSpeed;
 		} else {
+			stopMusic();
+
 			playerX = -10; 
 			playerY = 0;
 			ySpeed = 0;
 			
 			checkpointX = playerX;
 			checkpointY = playerY;
+			checkpointYSpeed = ySpeed;
 			prevCheckpointX = checkpointX;
 			prevCheckpointY = checkpointY;
+			prevCheckpointYSpeed = checkpointYSpeed;
 		}
 		
 		jumping = false;
 		holding = false;
+		hasDied = false;
 	}
 
 	// 7
@@ -396,7 +501,7 @@ public class LevelView extends Drawable {
 
 	// 8
 	public void exitingToMenu() {
-		music.stop();
+		stopMusic();
 		level.updateNormalProgress(getPlayerProgress());
 	}
 	
@@ -404,27 +509,60 @@ public class LevelView extends Drawable {
 	// 8
 	public void onPause() {
 		super.onPause();
-		music.stop();
+		stopMusic();
 	}
 	
 	@Override
 	// 8
 	public void onResume() {
 		super.onResume();
-		if (playerX >= 0 && !music.isRunning()) {
-			System.out.println("Starting on resume");
-			music.start();
+		if (playerX >= 0 && !playingMusic) {
+			startMusic();
 		}
 	}
 
 	// 9
-	public void startPracticeMode() {
-		practiceMode = true;
-		music.stop();
-		music = Util.getAudioClip(getClass(), "AsItShouldBe.wav");
-		if (playerX >= 0) {
-			System.out.println("Starting practice mode");
+	public void changeMode() {
+		practiceMode = !practiceMode;
+		stopMusic();
+		if (!practiceMode) {
+			restartLevel();
+		} else if (playerX >= 0) {
+			startMusic();
+		}
+	}
+	
+	// 9
+	public boolean isPracticeMode() {
+		return practiceMode;
+	}
+	
+	// 9
+	public void startMusic() {
+		playingMusic = true;
+		if (practiceMode) {
+			practiceMusic.loop(Clip.LOOP_CONTINUOUSLY);
+			practiceMusic.setFramePosition(0);
+		} else {
+			music.start();
+			music.setFramePosition(0);
+		}
+	}
+	
+	// 9
+	public void resumeMusic() {
+		playingMusic = true;
+		if (practiceMode) {
+			practiceMusic.start();
+		} else {
 			music.start();
 		}
+	}
+	
+	//9
+	public void stopMusic() {
+		music.stop();
+		practiceMusic.stop();
+		playingMusic = false;
 	}
 }

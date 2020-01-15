@@ -67,14 +67,17 @@ public abstract class Game extends JFrame {
 		if (!isDisplayable() || !buffersCreated) return; // Avoid errors where buffers have not yet been created
 		
 		if (currentScene != null && currentScene.hasParentPanel()) {
-			BufferStrategy strategy = getBufferStrategy();
-			Graphics g = (Graphics2D) strategy.getDrawGraphics();
+			try {
+				BufferStrategy strategy = getBufferStrategy();
+				Graphics g = (Graphics2D) strategy.getDrawGraphics();
+				
+				g.clearRect(0, 0, getWidth(), getHeight());
+				
+				currentScene.draw(g, getInsets().left, getInsets().top);
+				g.dispose();
 			
-			g.clearRect(0, 0, getWidth(), getHeight());
-			
-			currentScene.draw(g, getInsets().left, getInsets().top);
-			g.dispose();
-			strategy.show();
+				strategy.show();
+			} catch (IllegalStateException e) {}
 		}
 	}
 	
