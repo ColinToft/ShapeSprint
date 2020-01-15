@@ -49,7 +49,8 @@ public class Util {
 		InputStream is = resourceGrabber.getResourceAsStream("/images/" + filename);
 		try {
 			return ImageIO.read(is);
-		} catch (IOException e) {
+		} catch (Exception e) {
+			System.out.println("Unable to load image: " + filename);
 			e.printStackTrace();
 			return null;
 		}

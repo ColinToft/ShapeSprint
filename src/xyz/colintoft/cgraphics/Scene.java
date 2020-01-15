@@ -117,12 +117,12 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 	
 	@Override
 	public int pixelWidth() {
-		return pixelWidth;
+		return pixelWidth - game.leftInset() - game.rightInset();
 	}
 	
 	@Override
 	public int pixelHeight() {
-		return pixelHeight;
+		return pixelHeight - game.bottomInset() - game.topInset();
 	}
 
 	@Override
@@ -141,12 +141,12 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		onMousePressed((double)e.getX() / pixelWidth(), (double)e.getY() / pixelHeight(), e.getButton());
+		onMousePressed((double)(e.getX() - game.leftInset()) / pixelWidth(), (double)e.getY() / pixelHeight(), e.getButton());
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		onMouseReleased((double)e.getX() / pixelWidth(), (double)e.getY() / pixelHeight(), e.getButton());
+		onMouseReleased((double)(e.getX() - game.topInset()) / pixelWidth(), (double)e.getY() / pixelHeight(), e.getButton());
 	}
 
 	@Override

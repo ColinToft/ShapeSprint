@@ -40,6 +40,8 @@ public abstract class Game extends JFrame {
 	private boolean paused = false;
 	private volatile boolean loadingScene = true;
 	
+	private boolean fullscreen = false;
+	
 	private boolean buffersCreated = false;
 	
 	public Game() {
@@ -73,7 +75,7 @@ public abstract class Game extends JFrame {
 				
 				g.clearRect(0, 0, getWidth(), getHeight());
 				
-				currentScene.draw(g, getInsets().left, getInsets().top);
+				currentScene.draw(g, getInsets());
 				g.dispose();
 			
 				strategy.show();
@@ -96,6 +98,22 @@ public abstract class Game extends JFrame {
 		setPreferredSize(new Dimension(width, height));
 	}
 	
+	public int leftInset() {
+		return getInsets().left;
+	}
+	
+	public int rightInset() {
+		return getInsets().right;
+	}
+	
+	public int topInset() {
+		return getInsets().top;
+	}
+	
+	public int bottomInset() {
+		return getInsets().bottom;
+	}
+	
 	/**
 	 * Sets whether or not the game is fullscreen.
 	 * Note this does not affect the actual dimensions of the window:
@@ -103,6 +121,7 @@ public abstract class Game extends JFrame {
 	 * to change the window's width and height in pixels.
 	 */
 	protected void setFullscreen(boolean fullscreen) {
+		this.fullscreen = fullscreen;
 		if (fullscreen) {
 			setExtendedState(MAXIMIZED_BOTH); 
 			setUndecorated(true);
@@ -200,6 +219,10 @@ public abstract class Game extends JFrame {
 	
 	public boolean isPaused() {
 		return paused;
+	}
+	
+	public boolean isFullscreen() {
+		return fullscreen;
 	}
 	
 	/**

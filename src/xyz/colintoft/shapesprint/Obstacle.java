@@ -4,16 +4,21 @@ import java.awt.image.BufferedImage;
 
 import xyz.colintoft.cgraphics.Util;
 
-// 30 mod 7
+// 30 mod 7, 15
 public enum Obstacle {
 	SQUARE,
 	SQUARE_TOP_1, SQUARE_BOTTOM_1, SQUARE_LEFT_1, SQUARE_RIGHT_1,
 	SQUARE_TOP_3, SQUARE_BOTTOM_3, SQUARE_LEFT_3, SQUARE_RIGHT_3,
 	SQUARE_TOP_LEFT, SQUARE_TOP_RIGHT, SQUARE_BOTTOM_LEFT, SQUARE_BOTTOM_RIGHT,
-	SQUARE_VERTICAL, SQUARE_HORIZONTAL, SQUARE_CENTER,
-	TRIANGLE;
+	SQUARE_VERTICAL, SQUARE_HORIZONTAL,
+	SQUARE_CENTER,
+	SQUARE_CENTER_TOP_LEFT, SQUARE_CENTER_TOP_RIGHT,
+	SQUARE_CENTER_TOP_LEFT_LINE_BOTTOM, SQUARE_CENTER_TOP_RIGHT_LINE_BOTTOM,
+	TRIANGLE,
+	CUBE_PORTAL_BOTTOM, CUBE_PORTAL_TOP,
+	ROCKET_PORTAL_BOTTOM, ROCKET_PORTAL_TOP;
 
-	// 31
+	// 31 mod 15
 	public static Obstacle fromString(String string) {
 		switch (string) {
 		case "S": return SQUARE;
@@ -32,14 +37,23 @@ public enum Obstacle {
 		case "SV": return SQUARE_VERTICAL;
 		case "SH": return SQUARE_HORIZONTAL;
 		case "SC": return SQUARE_CENTER;
+		case "SCTL": return SQUARE_CENTER_TOP_LEFT;
+		case "SCTR": return SQUARE_CENTER_TOP_RIGHT;
+		case "SCTLB": return SQUARE_CENTER_TOP_LEFT_LINE_BOTTOM;
+		case "SCTRB": return SQUARE_CENTER_TOP_RIGHT_LINE_BOTTOM;
 		
 		case "T": return TRIANGLE;
+		
+		case "CPB": return CUBE_PORTAL_BOTTOM;
+		case "CPT": return CUBE_PORTAL_TOP;
+		case "RPB": return ROCKET_PORTAL_BOTTOM;
+		case "RPT": return ROCKET_PORTAL_TOP;
 		
 		default: return null;
 		}
 	}
 	
-	// 31
+	// 31 mod 15
 	public String getImageFilename() {
 		switch (this) {
 		case SQUARE:
@@ -74,9 +88,26 @@ public enum Obstacle {
 			return "obstacles/BlackSquareHorizontal.png";
 		case SQUARE_CENTER:
 			return "obstacles/BlackSquareCenter.png";
+		case SQUARE_CENTER_TOP_LEFT:
+			return "obstacles/BlackSquareCenterTopLeft.png";
+		case SQUARE_CENTER_TOP_RIGHT:
+			return "obstacles/BlackSquareCenterTopRight.png";
+		case SQUARE_CENTER_TOP_LEFT_LINE_BOTTOM:
+			return "obstacles/BlackSquareCenterTopLeftLineBottom.png";
+		case SQUARE_CENTER_TOP_RIGHT_LINE_BOTTOM:
+			return "obstacles/BlackSquareCenterTopRightLineBottom.png";
 			
 		case TRIANGLE:
 			return "obstacles/BlackTriangle.png";
+			
+		case CUBE_PORTAL_BOTTOM:
+			return "obstacles/CubePortalBottom.png";
+		case CUBE_PORTAL_TOP:
+			return "obstacles/CubePortalTop.png";
+		case ROCKET_PORTAL_BOTTOM:
+			return "obstacles/RocketPortalBottom.png";
+		case ROCKET_PORTAL_TOP:
+			return "obstacles/RocketPortalTop.png";
 			
 		default:
 			return "";

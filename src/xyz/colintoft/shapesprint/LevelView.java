@@ -35,8 +35,11 @@ public class LevelView extends Drawable {
 	private double ratio;
 	
 	private final double xSpeed = 10.386;
-	private final double levelHeight = 10; // Height of the level in blocks
-	private final double groundHeight = 0.3; // Fraction of the height of the screen that the ground takes up
+	private final double levelHeight = 11; // Height of the level in blocks
+	private final double baseGroundHeight = 0.3;
+	private double groundHeight = baseGroundHeight; // Fraction of the height of the screen that the ground takes up
+	private final double groundHeightMoveSpeed = 0.5;
+	private final double groundHeightThreshold = 0.55;
 	private final double playerScreenX = 0.34; // Fraction of the width
 	private final int levelEndOffset = 8;
 	private final double backgroundSpeed = 0.125;
@@ -59,14 +62,14 @@ public class LevelView extends Drawable {
 	private boolean jumping = false;
 	private boolean holding = false;
 	public boolean hasJumped = false;
-	private double lastJumpY = 0;
+	private double lastGroundY = 0;
 		
 	private boolean playingMusic = false;
 	
 	private double ySpeed = 0;
 	private final double gravity = 0.876 * xSpeed * xSpeed;
 	private final double minYSpeed = -2.6 * xSpeed;
-	private final double jumpYSpeed = 1.94 * xSpeed;
+	private final double jumpYSpeed = 2 * xSpeed;
 	
 	private boolean practiceMode = false;
 	private double checkpointX = playerX;
@@ -257,14 +260,22 @@ public class LevelView extends Drawable {
 		}
 		
 		if (playerY <= minY && ySpeed <= 0) {
-			justLanded = ySpeed < 0;
+			justLanded = true;
 			
 			ySpeed = 0;
 			playerY = minY;
+			lastGroundY = playerY;
 			if (jumping && !hasDied && !hasBeatLevel) {
 				jump();
 				holding = true;
 			}
+		}
+		
+		double targetGroundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (lastGroundY * getBlockSize() / pixelHeight()));
+		if (targetGroundHeight < groundHeight && !hasBeatLevel) {
+			groundHeight = Math.max(targetGroundHeight, groundHeight - groundHeightMoveSpeed * dt);
+		} else if (targetGroundHeight > groundHeight && !hasBeatLevel) {
+			groundHeight = Math.min(targetGroundHeight, groundHeight + groundHeightMoveSpeed * dt);
 		}
 
 		if (!hasDied && shouldDie()) {
@@ -393,9 +404,9 @@ public class LevelView extends Drawable {
 		return false;
 	}
 	
-	 // 30
+	// 30 mod 14, 15
 	public double getBlockSize() {
-		return ((1 - groundHeight) * pixelHeight()) / levelHeight;
+		return pixelHeight() / levelHeight;
 	}
 	
 	// 31
@@ -464,11 +475,12 @@ public class LevelView extends Drawable {
 		hasJumped = true;
 	}
 	
-	// 7 mod 9, 13, 14
+	// 7 mod 9, 13, 14, 15
 	public void startNextAttempt() {
 		((PlayLevel) parentPanel).restartLevel();
 		
 		playerRotation = 0;
+		groundHeight = baseGroundHeight;
 		
 		if (practiceMode) {
 			System.out.println("Restarting player from checkpointX " + checkpointX);

@@ -97,15 +97,18 @@ public class PlayLevel extends Scene {
 		normalProgressBar = new DrawableProgressBar(0.1, 0.3, 0.8, 0.1, 0.05, 0.16, Color.BLACK, 2f, Color.GREEN, new Color(0, 0, 0, 70));
 		normalProgressBar.setValue(level.normalProgress);
 		DrawableOutlinedText normalModeText = new DrawableOutlinedText(0.5, normalProgressBar.getY() - 0.01, "Normal Mode", titleFont.deriveFont(75f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.BOTTOM);
+		normalModeText.setMaxHeight(normalProgressBar.getHeight() * 0.7);
 		normalPercentageText = new DrawableOutlinedText(normalProgressBar.getCenterX(), normalProgressBar.getCenterY(),
 				Util.toPercentageString(normalProgressBar.getValue()), titleFont.deriveFont(60f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
-		normalPercentageText.setMaxHeight(normalProgressBar.getHeight() * 0.9);
+		normalPercentageText.setMaxHeight(normalProgressBar.getHeight() * 0.7);
 		
 		practiceProgressBar = new DrawableProgressBar(0.1, 0.55, 0.8, 0.1, 0.05, 0.16, Color.BLACK, 2f, Color.CYAN, new Color(0, 0, 0, 70));
 		practiceProgressBar.setValue(level.practiceProgress);
 		DrawableOutlinedText practiceModeText = new DrawableOutlinedText(0.5, practiceProgressBar.getY() - 0.01, "Practice Mode", titleFont.deriveFont(75f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.BOTTOM);
+		practiceModeText.setMaxHeight(practiceProgressBar.getHeight() * 0.7);
 		practicePercentageText = new DrawableOutlinedText(practiceProgressBar.getCenterX(), practiceProgressBar.getCenterY(),
 				Util.toPercentageString(practiceProgressBar.getValue()), titleFont.deriveFont(60f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		practicePercentageText.setMaxHeight(practiceProgressBar.getHeight() * 0.7);
 		
 		double progressBarBottom = practiceProgressBar.getY() + practiceProgressBar.getHeight();
 		double buttonHeight = parentWidthFractionToParentHeightFraction(buttonWidth);

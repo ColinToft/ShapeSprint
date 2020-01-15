@@ -212,18 +212,33 @@ public class Drawable implements KeyListener, MouseListener {
 		draw(g);
 	}
 	
-	public int pixelX(int xOffset) {
+	public int pixelX() {
 		if (parentPanel == null) {
 			System.out.println("Drawable.pixelX(): No panel defined for object " + this + ", cannot calculate pixel X.");
 		}
-		return (int) Math.round(x * parentPanel.pixelWidth()) + xOffset;
+		return (int) Math.round(x * parentPanel.pixelWidth());
 	}
 	
-	public int pixelY(int yOffset) {
+	public int pixelY() {
 		if (parentPanel == null) {
 			System.out.println("Drawable.pixelY(): No panel defined for object " + this + ", cannot calculate pixel Y.");
 		}
-		return (int) Math.round(y * parentPanel.pixelHeight()) + yOffset;
+		return (int) Math.round(y * parentPanel.pixelHeight());
+	}
+	
+	
+	public int pixelX(int leftInset) {
+		if (parentPanel == null) {
+			System.out.println("Drawable.pixelX(): No panel defined for object " + this + ", cannot calculate pixel X.");
+		}
+		return (int) Math.round(x * parentPanel.pixelWidth()) + leftInset;
+	}
+	
+	public int pixelY(int topInset) {
+		if (parentPanel == null) {
+			System.out.println("Drawable.pixelY(): No panel defined for object " + this + ", cannot calculate pixel Y.");
+		}
+		return (int) Math.round(y * parentPanel.pixelHeight()) + topInset;
 	}
 	
 	/**
@@ -233,7 +248,7 @@ public class Drawable implements KeyListener, MouseListener {
 		if (parentPanel == null) {
 			System.out.println("Drawable.pixelWidth(): No panel defined, cannot calculate pixel width.");
 		}
-		return (int) Math.round(width * parentPanel.pixelWidth());
+		return (int) Math.round(width * (parentPanel.pixelWidth()));
 	}
 	
 	/**

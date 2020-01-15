@@ -2,6 +2,7 @@ package xyz.colintoft.cgraphics.components;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -51,18 +52,22 @@ public class Panel extends Drawable {
 	 * @param g The graphics object that is used to draw graphics to the screen.
 	 */
 	public void draw(Graphics g) {
-		draw(g, 0, 0);
+		draw(g, 0, 0, 0, 0);
+	}
+	
+	public void draw(Graphics g, Insets insets) {
+		draw(g, insets.left, insets.top, insets.right, insets.bottom);
 	}
 	
 	/**
 	 * Draws all child components and Drawables to the screen.
 	 * @param g The graphics object that is used to draw graphics to the screen.
 	 */
-	public void draw(Graphics g, int xOffset, int yOffset) {
+	public void draw(Graphics g, int leftInset, int topInset, int rightInset, int bottomInset) {
 		
 		if (backgroundColor.getAlpha() > 0) {
 			g.setColor(backgroundColor);
-			g.fillRect(0, 0, pixelWidth() + xOffset, pixelHeight() + yOffset);
+			g.fillRect(leftInset, topInset, pixelWidth(), pixelHeight());
 		}
 	
 		for (Drawable d: drawables) {
@@ -71,12 +76,12 @@ public class Panel extends Drawable {
 			}
 			if (d instanceof Panel) {
 		    	if (((Panel) d).fillsParent()) {
-		    		((Panel) d).draw(g, xOffset, yOffset);
+		    		((Panel) d).draw(g);
 		    	} else {
-		    		g.drawImage(((Panel) d).getImage(), d.pixelX(xOffset), d.pixelY(yOffset), d.pixelWidth(), d.pixelHeight(), null);
+		    		g.drawImage(((Panel) d).getImage(), d.pixelX(leftInset), d.pixelY(topInset), d.pixelWidth(), d.pixelHeight(), null);
 		    	}
 		    } else {
-		    	g.drawImage(d.getImage(), d.pixelX(xOffset), d.pixelY(yOffset), d.pixelWidth(), d.pixelHeight(), null);
+		    	g.drawImage(d.getImage(), d.pixelX(leftInset), d.pixelY(topInset), d.pixelWidth(), d.pixelHeight(), null);
 		    }
 		}
 	}
