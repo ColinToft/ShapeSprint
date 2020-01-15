@@ -150,7 +150,6 @@ public class MainMenu extends Scene {
 		add(rightTriangle);
 		
 		// TODO rocket mode
-		// TODO change groundHeight with player
 		// TODO dimensions of pause menu text
 		// TODO offsets on windowed screen?
 		
