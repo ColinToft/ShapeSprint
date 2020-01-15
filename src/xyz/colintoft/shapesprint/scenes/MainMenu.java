@@ -149,20 +149,31 @@ public class MainMenu extends Scene {
 		add(leftTriangle);
 		add(rightTriangle);
 		
-		// TODO move ground along with player
-		// TODO beat level
-		// TODO instructions
 		// TODO rocket mode
+		// TODO change groundHeight with player
+		// TODO dimensions of pause menu text
+		// TODO offsets on windowed screen?
 		
-		// TODO calling setParentPanel twice?
-		// TODO goes off bottom of screen
-
+		// TODO other images
+		// TODO finish levels
+		// TODO comments and method headers
+		// TODO flow chart
+		
+		// TODO dots & pads
+		// TODO song credits
 		// TODO editing checkpoints?
 		// TODO endless mode?
 		// TODO attemps and jump count when beating level
 
 		menuMusic = Util.getAudioClip(getClass(), "menuLoop.wav");
 		menuMusic.loop(Clip.LOOP_CONTINUOUSLY);
+	}
+	
+	@Override
+	// 14
+	public void dispose() {
+		super.dispose();
+		menuMusic.stop();
 	}
 	
 	// Dec 21

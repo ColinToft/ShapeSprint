@@ -46,7 +46,7 @@ public class ShapeSprint extends Game {
 		
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		setFrame("Shape Sprint", (int) dim.getWidth(), (int) dim.getHeight());
-		setSize(800, 600);
+		setSize(640, 480);
 		setFPS(400);
 		setFullscreen(false);
 		setScene(new MainMenu());

@@ -32,8 +32,6 @@ public class Panel extends Drawable {
 	/** Sets the parent of this panel. */
 	@Override
 	public void setParentPanel(Panel p) {
-		System.out.println("Setting parent of panel " + this + " to " + p);
-		System.out.println("Parent dimensions: " + p.pixelWidth() + " " + p.pixelHeight());
 		parentPanel = p;
 		
 		for (Drawable d: drawables) {

@@ -177,15 +177,17 @@ public abstract class Game extends JFrame {
             if (now - lastDrawTime > 1 / this.drawFPS && !loadingScene) {
 				drawScene();
 				lastDrawTime = now;
-            } else {
-            	BufferStrategy strategy = getBufferStrategy();
-    			Graphics g = (Graphics2D) strategy.getDrawGraphics();
-    			
-    			g.setColor(Color.black);
-    			g.fillRect(0, 0, getWidth(), getHeight());
-    			
-    			g.dispose();
-    			strategy.show();
+            } else if (loadingScene) {
+            	try {
+	            	BufferStrategy strategy = getBufferStrategy();
+	    			Graphics g = (Graphics2D) strategy.getDrawGraphics();
+	    			
+	    			g.setColor(Color.black);
+	    			g.fillRect(0, 0, getWidth(), getHeight());
+	    			
+	    			g.dispose();
+	    			strategy.show();
+            	} catch (IllegalStateException e) {}
             }
             
             now = System.nanoTime() / 1000000000.0;

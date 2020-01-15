@@ -102,10 +102,16 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 	}
 	
 	public void setDimensions(int width, int height) {
-		pixelWidth = width;
-		pixelHeight = height;
-		for (Drawable d: drawables) {
-			d.setParentPanel(this);
+		if (pixelWidth != width || pixelHeight != height) {
+			pixelWidth = width;
+			pixelHeight = height;
+			for (Drawable d: drawables) {
+				if (d instanceof Panel) {
+					((Panel) d).onRescale();
+				} else {
+					d.setParentPanel(this);
+				}
+			}
 		}
 	}
 	

@@ -52,7 +52,7 @@ public class LevelView extends Drawable {
 	
 	private boolean hasDied = false;
 	private double deathTimer = 0;
-	private boolean hasBeatLevel = false;
+	public boolean hasBeatLevel = false;
 	private double winTimer = 0;
 	private double winAnimationLength = 1;
 	
@@ -195,11 +195,13 @@ public class LevelView extends Drawable {
 	    		playerImageY = blockYToPixelY(playerY + playerWidth);
 	    	}
 			
-			AffineTransform backup = g2d.getTransform();
-		    AffineTransform rotate = AffineTransform.getRotateInstance(playerRotation, playerImage.getWidth() / 2.0, playerImage.getHeight() / 2.0);
-		    AffineTransformOp op = new AffineTransformOp(rotate, AffineTransformOp.TYPE_BILINEAR);
-		    g2d.drawImage(op.filter(playerImage, null), playerImageX, playerImageY, null);
-		    g2d.setTransform(backup);
+	    	if (!hasBeatLevel || playerImageX < blockXToPixelX(level.width + levelEndOffset + playerWidth)) {
+				AffineTransform backup = g2d.getTransform();
+			    AffineTransform rotate = AffineTransform.getRotateInstance(playerRotation, playerImage.getWidth() / 2.0, playerImage.getHeight() / 2.0);
+			    AffineTransformOp op = new AffineTransformOp(rotate, AffineTransformOp.TYPE_BILINEAR);
+			    g2d.drawImage(op.filter(playerImage, null), playerImageX, playerImageY, null);
+			    g2d.setTransform(backup);
+	    	}
 	    }
 	    
 	    // Draw obstacles
@@ -247,6 +249,7 @@ public class LevelView extends Drawable {
 		}
 		
 		double minY = getMinY();
+		boolean justLanded = false;
 		
 		if (playerY > minY || ySpeed != 0) {
 			ySpeed = Math.max(ySpeed - gravity * dt, minYSpeed);
@@ -254,13 +257,11 @@ public class LevelView extends Drawable {
 		}
 		
 		if (playerY <= minY && ySpeed <= 0) {
-			if (practiceMode && playerX - checkpointX > 20 && ySpeed < 0) {
-				createCheckpoint();
-			}
+			justLanded = ySpeed < 0;
 			
 			ySpeed = 0;
 			playerY = minY;
-			if (jumping) {
+			if (jumping && !hasDied && !hasBeatLevel) {
 				jump();
 				holding = true;
 			}
@@ -269,15 +270,22 @@ public class LevelView extends Drawable {
 		if (!hasDied && shouldDie()) {
 			hasDied = true;
 			deathTimer = 0;
-			stopMusic();
+			if (!practiceMode) {
+				stopMusic();
+			}
+			deathSound.setFramePosition(0);
 			deathSound.start();
+		}
+		
+		if (practiceMode && !hasDied && justLanded && playerX - checkpointX > 15) {
+			createCheckpoint();
 		}
 		
 		if (hasDied) {
 			deathTimer += dt;
 			if (deathTimer > 1) {
 				deathSound.stop();
-				restartLevel();
+				startNextAttempt();
 			}
 			return;
 		}
@@ -286,13 +294,13 @@ public class LevelView extends Drawable {
 			hasBeatLevel = true;
 			winTimer = 0;
 			stopMusic();
+			winSound.setFramePosition(0);
 			winSound.start();
 		}
 		
 		if (hasBeatLevel) {
 			winTimer += dt;
-			if (winTimer > 3) {
-				winSound.stop();
+			if (winTimer > winAnimationLength + 0.7) {
 				((PlayLevel) parentPanel).showWinScreen();
 			}
 		}
@@ -305,7 +313,6 @@ public class LevelView extends Drawable {
 	
 	// 9
 	private void createCheckpoint() {
-		System.out.println("Creating checkpoint at " + playerX + " " + playerY);
 		prevCheckpointX = checkpointX;
 		prevCheckpointY = checkpointY;
 		prevCheckpointYSpeed = checkpointYSpeed;
@@ -457,8 +464,8 @@ public class LevelView extends Drawable {
 		hasJumped = true;
 	}
 	
-	// 7 mod 9, 13
-	public void restartLevel() {
+	// 7 mod 9, 13, 14
+	public void startNextAttempt() {
 		((PlayLevel) parentPanel).restartLevel();
 		
 		playerRotation = 0;
@@ -486,12 +493,24 @@ public class LevelView extends Drawable {
 		jumping = false;
 		holding = false;
 		hasDied = false;
+		hasBeatLevel = false;
+	}
+	
+	// 14
+	public void restartLevel() {
+		practiceMode = false;
+		startNextAttempt();
+		playerX = -15; // in blocks
 	}
 
-	// 7
+	// 7 mod 14
 	// Scroll speed in screen widths per second
 	public double getScrollSpeed() {
-		return xSpeed / (pixelWidth() / getBlockSize());
+		if (!hasDied) {
+			return xSpeed / (pixelWidth() / getBlockSize());
+		} else {
+			return 0;
+		}
 	}
 
 	// 8
@@ -526,7 +545,7 @@ public class LevelView extends Drawable {
 		practiceMode = !practiceMode;
 		stopMusic();
 		if (!practiceMode) {
-			restartLevel();
+			startNextAttempt();
 		} else if (playerX >= 0) {
 			startMusic();
 		}
@@ -541,11 +560,11 @@ public class LevelView extends Drawable {
 	public void startMusic() {
 		playingMusic = true;
 		if (practiceMode) {
-			practiceMusic.loop(Clip.LOOP_CONTINUOUSLY);
 			practiceMusic.setFramePosition(0);
+			practiceMusic.loop(Clip.LOOP_CONTINUOUSLY);
 		} else {
-			music.start();
 			music.setFramePosition(0);
+			music.start();
 		}
 	}
 	
@@ -563,6 +582,8 @@ public class LevelView extends Drawable {
 	public void stopMusic() {
 		music.stop();
 		practiceMusic.stop();
+		winSound.stop();
+		deathSound.stop();
 		playingMusic = false;
 	}
 }
