@@ -15,8 +15,8 @@ public enum Obstacle {
 	SQUARE_CENTER_TOP_LEFT, SQUARE_CENTER_TOP_RIGHT,
 	SQUARE_CENTER_TOP_LEFT_LINE_BOTTOM, SQUARE_CENTER_TOP_RIGHT_LINE_BOTTOM,
 	TRIANGLE,
-	CUBE_PORTAL_BOTTOM, CUBE_PORTAL_TOP,
-	ROCKET_PORTAL_BOTTOM, ROCKET_PORTAL_TOP;
+	CIRCLE_PORTAL_BOTTOM, CIRCLE_PORTAL_TOP,
+	TRIANGLE_PORTAL_BOTTOM, TRIANGLE_PORTAL_TOP;
 
 	// 31 mod 15
 	public static Obstacle fromString(String string) {
@@ -44,10 +44,10 @@ public enum Obstacle {
 		
 		case "T": return TRIANGLE;
 		
-		case "CPB": return CUBE_PORTAL_BOTTOM;
-		case "CPT": return CUBE_PORTAL_TOP;
-		case "RPB": return ROCKET_PORTAL_BOTTOM;
-		case "RPT": return ROCKET_PORTAL_TOP;
+		case "CPB": return CIRCLE_PORTAL_BOTTOM;
+		case "CPT": return CIRCLE_PORTAL_TOP;
+		case "RPB": return TRIANGLE_PORTAL_BOTTOM;
+		case "RPT": return TRIANGLE_PORTAL_TOP;
 		
 		default: return null;
 		}
@@ -100,13 +100,13 @@ public enum Obstacle {
 		case TRIANGLE:
 			return "obstacles/BlackTriangle.png";
 			
-		case CUBE_PORTAL_BOTTOM:
+		case CIRCLE_PORTAL_BOTTOM:
 			return "obstacles/CubePortalBottom.png";
-		case CUBE_PORTAL_TOP:
+		case CIRCLE_PORTAL_TOP:
 			return "obstacles/CubePortalTop.png";
-		case ROCKET_PORTAL_BOTTOM:
+		case TRIANGLE_PORTAL_BOTTOM:
 			return "obstacles/RocketPortalBottom.png";
-		case ROCKET_PORTAL_TOP:
+		case TRIANGLE_PORTAL_TOP:
 			return "obstacles/RocketPortalTop.png";
 			
 		default:
@@ -116,12 +116,21 @@ public enum Obstacle {
 	
 	// 7
 	public boolean killsPlayer() {
-		return this == Obstacle.TRIANGLE;
+		return this == TRIANGLE;
 	}
 
 	// 7
 	public boolean isSolid() {
-		return this != Obstacle.TRIANGLE;
+		return !(this == TRIANGLE || this == CIRCLE_PORTAL_BOTTOM || this == CIRCLE_PORTAL_TOP || this == TRIANGLE_PORTAL_BOTTOM || this == TRIANGLE_PORTAL_TOP);
+	}
+
+	// 15
+	public boolean isCirclePortal() {
+		return this == CIRCLE_PORTAL_BOTTOM || this == CIRCLE_PORTAL_TOP;
 	}
 	
+	// 15
+	public boolean isTrianglePortal() {
+		return this == TRIANGLE_PORTAL_BOTTOM || this == TRIANGLE_PORTAL_TOP;
+	}
 }

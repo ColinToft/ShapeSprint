@@ -149,9 +149,10 @@ public class MainMenu extends Scene {
 		add(leftTriangle);
 		add(rightTriangle);
 		
-		// TODO rocket mode
-		// TODO Offsets affect click
+		// TODO rocket mode fixed ground and ceiling height
+		// TODO offsets affect click
 		
+		// TODO something
 		// TODO finish levels
 		// TODO comments and method headers
 		// TODO flow chart

@@ -194,11 +194,7 @@ public class PlayLevel extends Scene {
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			if (levelView.hasBeatLevel) {
-				resumeGame();
-				attemptNumber = 0;
-				levelView.restartLevel();
-				levelView.hasBeatLevel = false;
-				winScreen.hide();
+				exitToMenu();
 			} else {
 				togglePaused();
 				if (isPaused()) {
@@ -211,6 +207,14 @@ public class PlayLevel extends Scene {
 				} else {
 					pauseMenu.hide();
 				}
+			}
+		} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+			if (levelView.hasBeatLevel) {
+				resumeGame();
+				attemptNumber = 0;
+				levelView.restartLevel();
+				levelView.hasBeatLevel = false;
+				winScreen.hide();
 			}
 		}
 	}
