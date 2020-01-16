@@ -4,9 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Shape;
-import java.awt.color.ColorSpace;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -15,16 +12,12 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 
-import javax.imageio.ImageIO;
 import javax.sound.sampled.Clip;
 
 import xyz.colintoft.cgraphics.Util;
 import xyz.colintoft.cgraphics.components.Drawable;
-import xyz.colintoft.cgraphics.components.Panel;
 import xyz.colintoft.shapesprint.scenes.PlayLevel;
 
 // Dec 30
