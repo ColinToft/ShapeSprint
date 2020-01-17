@@ -35,6 +35,9 @@ public class PlayLevel extends Scene {
 	private DrawableOutlinedText helpText;
 	public boolean needsJumpHelp = true;
 	private final String jumpHelpMessage = "Click or tap to jump over obstacles";
+	private final String triangleHelpMessage = "Hold the mouse or space bar to fly";
+	
+	private DrawableOutlinedText pauseMenuText;
 
 	private DrawableProgressBar progressBar;
 	private final double progressBarWidth = 0.3;
@@ -49,6 +52,7 @@ public class PlayLevel extends Scene {
 	private DrawableOutlinedText normalPercentageText;
 	private DrawableProgressBar practiceProgressBar;
 	private DrawableOutlinedText practicePercentageText;
+	private Sprite practiceTip;
 	
 	private Panel winScreen;
 	private DrawableOutlinedText levelCompleteText;
@@ -81,6 +85,10 @@ public class PlayLevel extends Scene {
 			helpText.hide();
 		}
 		add(helpText);
+		
+		pauseMenuText = new DrawableOutlinedText(0.9, 0.01, "Press escape for more options", titleFont.deriveFont(100f), Color.white, Color.black, 1f, HorizontalAlign.RIGHT, VerticalAlign.TOP);
+		pauseMenuText.setMaxWidth(0.5);
+		add(pauseMenuText);
 		
 		progressBar = new DrawableProgressBar(0.5 * (1 - progressBarWidth), 0.02, progressBarWidth, progressBarHeight, progressBarHeight * 0.65, progressBarHeight, Color.WHITE, 2f, Color.red, new Color(0, 0, 0, 0));
 		add(progressBar);
@@ -135,6 +143,8 @@ public class PlayLevel extends Scene {
 			}
 		};
 		
+		practiceTip = new Sprite(changeModeButton.getX() - 0.12, changeModeButton.getY() - 0.01, 0.13, 0.1, "tips/practiceModeTip.png");
+		
 		pauseMenu.add(rect);
 		pauseMenu.add(levelText);
 		pauseMenu.add(normalProgressBar);
@@ -146,6 +156,7 @@ public class PlayLevel extends Scene {
 		pauseMenu.add(changeModeButton);
 		pauseMenu.add(resumeButton);
 		pauseMenu.add(menuButton);
+		pauseMenu.add(practiceTip);
 		
 		add(pauseMenu);
 		pauseMenu.hide();
@@ -182,16 +193,34 @@ public class PlayLevel extends Scene {
 	}
 	
 	@Override
-	// 7 mod 8
+	// 7 mod 8, 16
 	public void update(double dt) {
 		super.update(dt);
 		attemptText.moveLeft(dt * levelView.getScrollSpeed());
 		progressBar.setValue(levelView.getPlayerProgress());
 		percentageText.setText(Util.toPercentageString(levelView.getPlayerProgress()));
+		
+		ShapeSprint ss = (ShapeSprint) game;
+
+		if (levelView.hasJumped && helpText.getText().equals(jumpHelpMessage) || ss.hasUsedTriangleMode && helpText.getText().equals(triangleHelpMessage)) {
+			needsJumpHelp = false;
+			helpText.hide();
+		} 
+		
+		if (ss.hasPausedGame) {
+			pauseMenuText.hide();
+		}
+	
+		if (levelView.isTriangleMode() && !ss.hasUsedTriangleMode) {
+			helpText.setText(triangleHelpMessage);
+			helpText.show();
+		}
 	}
 	
 	// Dec 30 mod 8, 14
 	public void keyPressed(KeyEvent e) {
+		ShapeSprint ss = (ShapeSprint) game;
+		
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			if (levelView.hasBeatLevel) {
 				exitToMenu();
@@ -204,8 +233,15 @@ public class PlayLevel extends Scene {
 						changeModeButton.setImage("menuItems/practiceMode.png");
 					}
 					pauseMenu.show();
+					pauseMenuText.hide();
+					if (ss.hasUsedPracticeMode) {
+						practiceTip.hide();
+					} else {
+						practiceTip.show();
+					}
 				} else {
 					pauseMenu.hide();
+					ss.hasPausedGame = true;
 				}
 			}
 		} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -238,11 +274,12 @@ public class PlayLevel extends Scene {
 		practicePercentageText.setText(Util.toPercentageString(level.practiceProgress));
 	}
 	
-	// 8 mod 9
+	// 8 mod 9, 17
 	public void changeMode() {
 		pauseMenu.hide();
 		resumeGame();
 		levelView.changeMode();
+		((ShapeSprint) game).hasUsedPracticeMode = true;
 	}
 	
 	// 10
@@ -267,12 +304,6 @@ public class PlayLevel extends Scene {
 			}
 		}
 		game.setScene(new MainMenu());
-	}
-
-	// 10
-	public void hideJumpHelp() {
-		needsJumpHelp = false;
-		helpText.hide();
 	}
 
 	// 14

@@ -195,8 +195,15 @@ public class Drawable implements KeyListener, MouseListener {
 	}
 	
 	public boolean hasParentPanel() {
-		System.out.println(parentPanel);
 		return parentPanel != null;
+	}
+	
+	public Game getGame() {
+		if (parentPanel != null) {
+			return parentPanel.getGame();
+		} else {
+			return null;
+		}
 	}
 	
 	/**

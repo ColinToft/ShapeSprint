@@ -42,6 +42,7 @@ public class LevelView extends Drawable {
 	
 	private final double playerRotationSpeed = xSpeed / (playerWidth * 0.5);
 	private double playerRotation = 0;
+	private final double triangleCeilingRotation = -0.33;
 	
 	private double playerX = -15; // in blocks
 	private double playerY = 0; // in blocks (0 is ground level)
@@ -55,6 +56,7 @@ public class LevelView extends Drawable {
 	private boolean jumping = false;
 	private boolean holding = false;
 	public boolean hasJumped = false;
+	private boolean hasUsedTriangleMode = false;
 	private double lastGroundY = 0;
 		
 	private boolean playingMusic = false;
@@ -78,7 +80,7 @@ public class LevelView extends Drawable {
 	private boolean triangleMode = false;
 	
 	private BufferedImage playerCircleImage, playerTriangleImage;
-	private BufferedImage backgroundImage, groundImage, checkpointImage;
+	private BufferedImage backgroundImage, groundImage, ceilingImage, checkpointImage;
 	private double triangleImagePadding = 0.5 * playerWidth;
 		
 	HashMap<Obstacle, BufferedImage> images;
@@ -134,10 +136,25 @@ public class LevelView extends Drawable {
 			g.drawImage(groundTile, i, 0, groundTileWidth, groundTileWidth, null);
 		}
 		
-	    g.setColor(bgColor);
+		g.setColor(bgColor);
 	    g.fillRect(0, 0, groundImage.getWidth(), groundImage.getHeight());
 	    g.setColor(new Color(0, 0, 0, 50));
 	    g.fillRect(0, 0, groundImage.getWidth(), groundImage.getHeight());
+	    g.dispose();
+		
+		// Load Ceiling Image
+		BufferedImage ceilingTile = Util.loadImageFromFile(getClass(), "backgrounds/ceiling1.png");
+		
+		ceilingImage = Util.getEmptyImage((pixelWidth() / groundTileWidth + 2) * groundTileWidth, groundTileWidth);
+		g = ceilingImage.createGraphics();
+		for (int i = 0; i < ceilingImage.getWidth(); i += groundTileWidth) {
+			g.drawImage(ceilingTile, i, 0, groundTileWidth, groundTileWidth, null);
+		}
+		
+		g.setColor(bgColor);
+	    g.fillRect(0, 0, ceilingImage.getWidth(), ceilingImage.getHeight());
+	    g.setColor(new Color(0, 0, 0, 50));
+	    g.fillRect(0, 0, ceilingImage.getWidth(), ceilingImage.getHeight());
 	    g.dispose();
 	    
 	    // Load Player Image
@@ -177,10 +194,20 @@ public class LevelView extends Drawable {
 	    g2d.drawImage(backgroundImage, backgroundX, pixelHeight() - backgroundImage.getHeight(), null);
 	    g2d.drawImage(backgroundImage, backgroundX + backgroundImage.getWidth(), pixelHeight() - backgroundImage.getHeight(), null);
 	    
+	    // Draw the ground
 	    int groundX = (int)(-getBlockSize() * (playerX % (groundTileWidth / getBlockSize())));
 	    if (groundX > 0) {
 	    	groundX -= groundTileWidth;
 	    }
+	    
+	    if (triangleMode) {
+		    g2d.drawImage(ceilingImage, groundX, (int)(pixelHeight() * (0.5 / levelHeight) - ceilingImage.getHeight()), null);
+		    
+		    g2d.setStroke(new BasicStroke(2f));
+		    g2d.setColor(Color.WHITE);
+		    g2d.drawLine(0, (int)(pixelHeight() * (1 - groundHeight)), pixelWidth(), (int)(pixelHeight() * (1 - groundHeight)));
+	    }
+	    
 	    g2d.drawImage(groundImage, groundX, (int)(pixelHeight() * (1 - groundHeight)), null);
 	    
 	    g2d.setStroke(new BasicStroke(2f));
@@ -255,7 +282,7 @@ public class LevelView extends Drawable {
 	    }
 	}
 	
-	// 30 mod 7, 9, 10, 13, 14, 15
+	// 30 mod 7, 9, 10, 13, 14, 15, 17
 	@Override
 	public void update(double dt) {
 		if (!triangleMode) {
@@ -279,7 +306,7 @@ public class LevelView extends Drawable {
 			
 			playerY += ySpeed * dt;
 		}
-		
+				
 		if (playerY <= minY + 0.03 && ySpeed <= 0) {
 			justLanded = ySpeed < 0;
 			
@@ -292,21 +319,45 @@ public class LevelView extends Drawable {
 			}
 		}
 		
+		double maxY = getMaxY();
+		boolean circleHitCeiling = false;
+		if (playerY >= maxY - playerWidth && ySpeed >= 0) {	
+			if (triangleMode) {
+				ySpeed = 0;
+				playerY = maxY - playerWidth;
+			} else {
+				circleHitCeiling = true;
+			}
+		}
+		
+		double targetGroundHeight;
 		if (triangleMode) {
 			if (jumping) {
 				ySpeed = Math.min(triangleMaxYSpeed, ySpeed + triangleYSpeedIncrease * dt);
+				if (!hasUsedTriangleMode) {
+					((ShapeSprint) getGame()).hasUsedTriangleMode = true;
+				}
 			}
-			playerRotation = Math.atan2(-ySpeed, xSpeed);
+			if (playerY == 0) {
+				playerRotation = Math.max(playerRotation - playerRotationSpeed * dt, 0);
+			} else if (playerY == maxY - playerWidth) {
+				playerRotation = Math.min(playerRotation + playerRotationSpeed * dt, 0);
+			} else {
+				playerRotation = Math.atan2(-ySpeed, xSpeed);
+			}
+			
+			targetGroundHeight = 0.5 / levelHeight;
+		} else {
+			targetGroundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (lastGroundY * getBlockSize() / pixelHeight()));
 		}
 		
-		double targetGroundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (lastGroundY * getBlockSize() / pixelHeight()));
 		if (targetGroundHeight < groundHeight && !hasBeatLevel && !hasDied) {
 			groundHeight = Math.max(targetGroundHeight, groundHeight - groundHeightMoveSpeed * dt);
 		} else if (targetGroundHeight > groundHeight && !hasBeatLevel && !hasDied) {
 			groundHeight = Math.min(targetGroundHeight, groundHeight + groundHeightMoveSpeed * dt);
 		}
 
-		if (!hasDied && shouldDie()) {
+		if (!hasDied && (shouldDie() || circleHitCeiling)) {
 			hasDied = true;
 			deathTimer = 0;
 			if (!practiceMode) {
@@ -347,6 +398,7 @@ public class LevelView extends Drawable {
 		}
 		
 		if (!playingMusic && playerX >= 0 && !hasDied && !hasBeatLevel) {
+			music.setFramePosition(0);
 			startMusic();
 			playerX = Math.max(checkpointX, 0);
 		}
@@ -392,6 +444,36 @@ public class LevelView extends Drawable {
 		return minY;
 	}
 	
+	// 16
+	private double getMaxY() {
+		double circleRadius = playerWidth * 0.5;
+		double playerCenterX = playerX + circleRadius;
+		
+		double maxY = triangleMode ? levelHeight - 1 : 1000000;
+		
+		for (int obstacleX = (int) playerX; obstacleX <= (int) playerX + 1; obstacleX++) {
+			for (int obstacleY = (int)(playerY + playerWidth); obstacleY < level.height; obstacleY++) {
+				try {
+					if (level.obstacles[obstacleX][obstacleY] != null && level.obstacles[obstacleX][obstacleY].isSolid()) {
+						double blockMaxY;
+						if ((int)playerCenterX == obstacleX) {
+							blockMaxY = obstacleY;
+						} else {
+							double cornerX = Math.round(playerX);
+							blockMaxY = obstacleY + Math.abs(Math.cos(Math.asin((cornerX - playerCenterX) / circleRadius))) * circleRadius;
+						}
+						if (maxY > blockMaxY) {
+							maxY = blockMaxY;
+						}
+						break;
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {}
+			}
+		}
+		
+		return maxY;
+	}
+	
 	// 7
 	private boolean shouldDie() {
 		Area playerArea = new Area(new Ellipse2D.Double(playerX, playerY, playerWidth, playerWidth));
@@ -434,7 +516,7 @@ public class LevelView extends Drawable {
 		return false;
 	}
 	
-	// 15
+	// 15 mod 16
 	private void updateMode() {
 		int xCoord = (int) playerX;
 		int bottomY = (int) playerY;
@@ -527,7 +609,6 @@ public class LevelView extends Drawable {
 	// 30 mod 10, 13
 	private void jump() {
 		ySpeed = jumpYSpeed;
-		((PlayLevel) parentPanel).hideJumpHelp();
 		hasJumped = true;
 	}
 	
@@ -630,6 +711,11 @@ public class LevelView extends Drawable {
 		return practiceMode;
 	}
 	
+	// 17
+	public boolean isTriangleMode() {
+		return triangleMode;
+	}
+	
 	// 9
 	public void startMusic() {
 		playingMusic = true;
@@ -637,7 +723,6 @@ public class LevelView extends Drawable {
 			practiceMusic.setFramePosition(0);
 			practiceMusic.loop(Clip.LOOP_CONTINUOUSLY);
 		} else {
-			music.setFramePosition(0);
 			music.start();
 		}
 	}

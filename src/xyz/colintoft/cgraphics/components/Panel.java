@@ -41,7 +41,6 @@ public class Panel extends Drawable {
 		
 		super.setParentPanel(p);
 	}
-
 	
 	public boolean fillsParent() {
 		return x == 0 && y == 0 && width == 1 && height == 1;
@@ -165,22 +164,30 @@ public class Panel extends Drawable {
 	
 	@Override
 	public void onMousePressed(double x, double y, int button) {
-		for (Drawable d: drawables) {
-			if (d.isPointInFrame(x, y)) {
-				double objectX = (x - d.x) / d.width;
-				double objectY = (y - d.y) / d.height;
-				d.onMousePressed(objectX, objectY, button);
+		if (visible) {
+			for (Drawable d: drawables) {
+				if (d.isPointInFrame(x, y)) {
+					double objectX = (x - d.x) / d.width;
+					double objectY = (y - d.y) / d.height;
+					if (d.visible) {
+						d.onMousePressed(objectX, objectY, button);
+					}
+				}
 			}
 		}
 	}
 	
 	@Override
 	public void onMouseReleased(double x, double y, int button) {
-		for (Drawable d: drawables) {
-			if (d.isPointInFrame(x, y)) {
-				double objectX = (x - d.x) / d.width;
-				double objectY = (y - d.y) / d.height;
-				d.onMouseReleased(objectX, objectY, button);
+		if (visible) {
+			for (Drawable d: drawables) {
+				if (d.isPointInFrame(x, y)) {
+					double objectX = (x - d.x) / d.width;
+					double objectY = (y - d.y) / d.height;
+					if (d.visible) {
+						d.onMouseReleased(objectX, objectY, button);
+					}
+				}
 			}
 		}
 	}

@@ -33,6 +33,11 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 		game.addMouseListener(this);
 		setDimensions(g.getWidth(), g.getHeight());
 	}
+	
+	@Override
+	public Game getGame() {
+		return game;
+	}
 
 	@Override
 	public boolean hasParentPanel() {

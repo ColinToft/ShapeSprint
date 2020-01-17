@@ -29,6 +29,9 @@ public class ShapeSprint extends Game {
 	public Level[] levels;
 
 	private boolean firstTime;
+	public boolean hasUsedTriangleMode;
+	public boolean hasPausedGame;
+	public boolean hasUsedPracticeMode;
 	
 	public static final String saveFile = "/saveGame.txt";
 	
@@ -46,9 +49,9 @@ public class ShapeSprint extends Game {
 		
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		setFrame("Shape Sprint", (int) dim.getWidth(), (int) dim.getHeight());
-		//setSize(640, 480);
+		setSize(640, 480);
 		setFPS(400);
-		setFullscreen(true);
+		setFullscreen(false);
 		setScene(new MainMenu());
 	}
 	
@@ -57,7 +60,7 @@ public class ShapeSprint extends Game {
 		game.run();
 	}
 
-	// 8
+	// 8 mod 17
 	public void saveProgress() {
 		try {
 			PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter("assets" + saveFile))); //create a filewriter to output to the file
@@ -65,6 +68,9 @@ public class ShapeSprint extends Game {
 				writer.println(level.normalProgress);
 				writer.println(level.practiceProgress);
 			}
+			writer.println(hasUsedTriangleMode);
+			writer.println(hasPausedGame);
+			writer.println(hasUsedPracticeMode);
 			writer.close();
 		} catch (IOException e) {
 			System.out.println("Unable to save progress to file: ");
@@ -77,15 +83,19 @@ public class ShapeSprint extends Game {
 		if (Util.fileExists(getClass(), saveFile)) {
 			int i = 0;
 			String[] lines = Util.readLinesFromFile(getClass(), saveFile);
-			if (lines.length <= 2) {
-				firstTime = true;
-			} else {
-				for (Level level: levels) {
-					level.setNormalProgress(Double.valueOf(lines[i++]));
-					level.setPracticeProgress(Double.valueOf(lines[i++]));
+			firstTime = true;
+			for (Level level: levels) {
+				level.setNormalProgress(Double.valueOf(lines[i++]));
+				level.setPracticeProgress(Double.valueOf(lines[i++]));
+				
+				if (level.normalProgress + level.practiceProgress > 0) {
+					// If the user has any progress in the level, it is not their first time
+					firstTime = false;
 				}
-				firstTime = false;
 			}
+			hasUsedTriangleMode = Boolean.valueOf(lines[i++]);
+			hasPausedGame = Boolean.valueOf(lines[i++]);
+			hasUsedPracticeMode = Boolean.valueOf(lines[i++]);
 		} else {
 			firstTime = true;
 		}
@@ -94,6 +104,12 @@ public class ShapeSprint extends Game {
 	// 10
 	public boolean isFirstTime() {
 		return firstTime;
+	}
+	
+	// 17
+	@Override
+	public void onWindowClosing() {
+		saveProgress();
 	}
 
 }

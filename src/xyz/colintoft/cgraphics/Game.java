@@ -12,7 +12,7 @@ import xyz.colintoft.cgraphics.components.Panel;
  * A class that handles window operations and manages Scenes to draw a Game to a Window.
  * @author Colin Toft
  */
-public abstract class Game extends JFrame {
+public abstract class Game extends JFrame implements WindowListener {
 	
 	/**
 	 * Called just after this object is instantiated, and before the window is made visible to the user. In this method you should:
@@ -46,7 +46,7 @@ public abstract class Game extends JFrame {
 	
 	public Game() {
 		setLocationRelativeTo(null);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		init();
 	}
 	
@@ -225,10 +225,15 @@ public abstract class Game extends JFrame {
 		return fullscreen;
 	}
 	
+	public void onWindowClosing() {
+		
+	}
+	
 	/**
 	 * Exits the game. By default, this disposes the frame and calls {@link System#exit(int)} to stop the program.
 	 */
 	public void exit() {
+		onWindowClosing();
 		running = false;
 		setVisible(false);
 		dispose();
@@ -253,4 +258,18 @@ public abstract class Game extends JFrame {
 			pauseGame();
 		}
 	}
+	
+	public void windowOpened(WindowEvent e) {}
+
+    public void windowClosing(WindowEvent e) {}
+
+    public void windowClosed(WindowEvent e) {}
+
+    public void windowIconified(WindowEvent e) {}
+
+    public void windowDeiconified(WindowEvent e) {}
+
+    public void windowActivated(WindowEvent e) {}
+
+    public void windowDeactivated(WindowEvent e) {}
 }

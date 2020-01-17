@@ -14,7 +14,7 @@ public enum Obstacle {
 	SQUARE_CENTER,
 	SQUARE_CENTER_TOP_LEFT, SQUARE_CENTER_TOP_RIGHT,
 	SQUARE_CENTER_TOP_LEFT_LINE_BOTTOM, SQUARE_CENTER_TOP_RIGHT_LINE_BOTTOM,
-	TRIANGLE,
+	TRIANGLE, TRIANGLE_UPSIDE_DOWN,
 	CIRCLE_PORTAL_BOTTOM, CIRCLE_PORTAL_TOP,
 	TRIANGLE_PORTAL_BOTTOM, TRIANGLE_PORTAL_TOP;
 
@@ -43,17 +43,18 @@ public enum Obstacle {
 		case "SCTRB": return SQUARE_CENTER_TOP_RIGHT_LINE_BOTTOM;
 		
 		case "T": return TRIANGLE;
+		case "TU": return TRIANGLE_UPSIDE_DOWN;
 		
 		case "CPB": return CIRCLE_PORTAL_BOTTOM;
 		case "CPT": return CIRCLE_PORTAL_TOP;
-		case "RPB": return TRIANGLE_PORTAL_BOTTOM;
-		case "RPT": return TRIANGLE_PORTAL_TOP;
+		case "TPB": return TRIANGLE_PORTAL_BOTTOM;
+		case "TPT": return TRIANGLE_PORTAL_TOP;
 		
 		default: return null;
 		}
 	}
 	
-	// 31 mod 15
+	// 31 mod 15, 16
 	public String getImageFilename() {
 		switch (this) {
 		case SQUARE:
@@ -99,6 +100,8 @@ public enum Obstacle {
 			
 		case TRIANGLE:
 			return "obstacles/BlackTriangle.png";
+		case TRIANGLE_UPSIDE_DOWN:
+			return "obstacles/BlackTriangleUpsideDown.png"; 
 			
 		case CIRCLE_PORTAL_BOTTOM:
 			return "obstacles/CubePortalBottom.png";
@@ -114,14 +117,14 @@ public enum Obstacle {
 		}
 	}
 	
-	// 7
+	// 7 mod 16
 	public boolean killsPlayer() {
-		return this == TRIANGLE;
+		return this == TRIANGLE || this == TRIANGLE_UPSIDE_DOWN;
 	}
 
-	// 7
+	// 7 mod 15, 16
 	public boolean isSolid() {
-		return !(this == TRIANGLE || this == CIRCLE_PORTAL_BOTTOM || this == CIRCLE_PORTAL_TOP || this == TRIANGLE_PORTAL_BOTTOM || this == TRIANGLE_PORTAL_TOP);
+		return !(this.killsPlayer() || this == CIRCLE_PORTAL_BOTTOM || this == CIRCLE_PORTAL_TOP || this == TRIANGLE_PORTAL_BOTTOM || this == TRIANGLE_PORTAL_TOP);
 	}
 
 	// 15
