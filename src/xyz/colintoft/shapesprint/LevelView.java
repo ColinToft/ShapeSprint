@@ -253,7 +253,7 @@ public class LevelView extends Drawable {
 		    
 		    g2d.setStroke(new BasicStroke(2f));
 		    g2d.setColor(Color.WHITE);
-		    g2d.drawLine(0, (int)(pixelHeight() * (0.5 / levelHeight), pixelWidth(), (int)(pixelHeight() * (0.5 / levelHeight));
+		    g2d.drawLine(0, (int)(pixelHeight() * (0.5 / levelHeight)), pixelWidth(), (int)(pixelHeight() * (0.5 / levelHeight)));
 	    }
 	    
 	    g2d.drawImage(groundImage, groundX, (int)(pixelHeight() * (1 - groundHeight)), null);
@@ -269,8 +269,8 @@ public class LevelView extends Drawable {
 	    	if (hasBeatLevel) {
 	    		int beginX = blockXToPixelX(level.width);
 	    		int endX = blockXToPixelX(level.width + levelEndOffset);
-	    		double endProgress = winTimer / winAnimationLength;
-	    		endProgress *= endProgress;
+	    		double endProgress = Math.pow(winTimer / winAnimationLength, 2.5);
+	    		playerRotation = endProgress * Math.PI * 0.7;
 			    playerImageX = (int)(beginX + (endX - beginX) * endProgress);
 				playerImageY = blockYToPixelY(playerY + playerWidth + -7 * (endProgress) * (endProgress - 1.6));
 	    	} else {
@@ -874,7 +874,7 @@ public class LevelView extends Drawable {
 	/** Method Name: startNextAttempt()
 	 * @Author Colin Toft
 	 * @Date January 7th, 2020
-	 * @Modified January 9th, 13th, 14th & 15th
+	 * @Modified January 9th, 13th, 14th, 15th & 18th
 	 * @Description Restarts the player from the beginning of the level
 	 * @Parameters N/A
 	 * @Returns N/A
@@ -900,7 +900,11 @@ public class LevelView extends Drawable {
 			playerY = checkpointY;
 			ySpeed = checkpointYSpeed;
 			triangleMode = checkpointTriangleMode;
-			groundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (playerY * getBlockSize() / pixelHeight()));
+			if (triangleMode) {
+				groundHeight = 0.5 / levelHeight;
+			} else {
+				groundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (playerY * getBlockSize() / pixelHeight()));
+			}
 			
 		} else {
 			stopMusic();
@@ -1038,7 +1042,7 @@ public class LevelView extends Drawable {
 	 * @Description Toggles the mode between practice mode and normal mode
 	 * @Parameters N/A
 	 * @Returns N/A
-	 * Data Type: N/A
+	 * Data Type: boolean
 	 * Dependencies: N/A
 	 * Throws/Exceptions: N/A
 	 */
@@ -1052,17 +1056,47 @@ public class LevelView extends Drawable {
 		}
 	}
 	
-	// 9
+	/** Method Name: isPracticeMode()
+	 * @Author Colin Toft
+	 * @Date January 9th, 2020
+	 * @Modified N/A
+	 * @Description Returns if the level is currently being played in practice mode
+	 * @Parameters N/A
+	 * @Returns True if practice mode is enabled, otherwise false
+	 * Data Type: boolean
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public boolean isPracticeMode() {
 		return practiceMode;
 	}
 	
-	// 17
+	/** Method Name: isTriangleMode()
+	 * @Author Colin Toft
+	 * @Date January 17th, 2020
+	 * @Modified N/A
+	 * @Description Returns if the player is currently in triangle mode
+	 * @Parameters N/A
+	 * @Returns True if triangle mode is enabled, otherwise false
+	 * Data Type: boolean
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public boolean isTriangleMode() {
 		return triangleMode;
 	}
 	
-	// 9
+	/** Method Name: startMusic()
+	 * @Author Colin Toft
+	 * @Date January 9th, 2020
+	 * @Modified N/A
+	 * @Description Starts the music (level music if playing in normal mode, otherwise practice music)
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: boolean, Clip
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public void startMusic() {
 		playingMusic = true;
 		if (practiceMode) {
@@ -1073,7 +1107,17 @@ public class LevelView extends Drawable {
 		}
 	}
 	
-	// 9
+	/** Method Name: resumeMusic()
+	 * @Author Colin Toft
+	 * @Date January 9th, 2020
+	 * @Modified N/A
+	 * @Description Resumes the music (level music if playing in normal mode, otherwise practice music)
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: boolean, Clip
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public void resumeMusic() {
 		playingMusic = true;
 		if (practiceMode) {
@@ -1083,7 +1127,17 @@ public class LevelView extends Drawable {
 		}
 	}
 	
-	//9
+	/** Method Name: stopMusic()
+	 * @Author Colin Toft
+	 * @Date January 9th, 2020
+	 * @Modified N/A
+	 * @Description Stops all currently playing music and sounds
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: boolean, Clip
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public void stopMusic() {
 		music.stop();
 		practiceMusic.stop();

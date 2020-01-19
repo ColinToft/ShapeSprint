@@ -56,6 +56,7 @@ public class DrawableOutlinedText extends DrawableText {
 		AffineTransform transform = new AffineTransform();
 		Shape outline = textTl.getOutline(null);
 		java.awt.Rectangle outlineBounds = outline.getBounds();
+		
 		transform = g2d.getTransform();
 		transform.translate(pixelWidth() / 2 - (outlineBounds.width / 2), pixelHeight() / 2 + (outlineBounds.height / 2));
 		g2d.transform(transform);

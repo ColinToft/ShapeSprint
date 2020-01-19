@@ -63,6 +63,9 @@ public class PlayLevel extends Scene {
 	
 	private Panel winScreen;
 	private DrawableOutlinedText levelCompleteText;
+	private DrawableOutlinedText attemptCountText;
+	private DrawableOutlinedText jumpCountText;
+	private DrawableOutlinedText elapsedTimeText;
 	
 	private Sprite changeModeButton;
 
@@ -193,6 +196,7 @@ public class PlayLevel extends Scene {
 		DrawableRoundedRectangle rect2 = new DrawableRoundedRectangle(0, 0, 1, 1, 0.07, 0.125, new Color(0, 0, 0, 180));
 		levelCompleteText = new DrawableOutlinedText(rect.getCenterX(), 0.15, "Level Complete!", titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 		levelCompleteText.setMaxWidth(rect.getWidth() * 0.9);
+		attemptCountText = new DrawableOutlinedText(rect.getCenterX(), 0.15, "Level Complete!", titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 		
 		Sprite playAgainButton = new Sprite(0.5 * (1 - buttonWidth * 1.5), (1 - progressBarBottom - buttonHeight * 1.5) / 2 + progressBarBottom, buttonWidth * 1.5, buttonHeight * 1.5, "menuItems/playAgain.png") {
 			@Override

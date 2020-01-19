@@ -234,6 +234,7 @@ public abstract class Game extends JFrame implements WindowListener {
 	 */
 	public void exit() {
 		onWindowClosing();
+		currentScene.dispose();
 		running = false;
 		setVisible(false);
 		super.dispose();

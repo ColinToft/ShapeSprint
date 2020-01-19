@@ -13,6 +13,7 @@ import xyz.colintoft.cgraphics.components.DrawableRoundedRectangle;
 import xyz.colintoft.cgraphics.components.DrawableShape;
 import xyz.colintoft.cgraphics.components.DrawableText;
 import xyz.colintoft.cgraphics.components.Panel;
+import xyz.colintoft.cgraphics.components.Sprite;
 import xyz.colintoft.shapesprint.ShapeSprint;
 
 /**
@@ -34,6 +35,25 @@ public class MainMenu extends Scene {
 	private DrawableProgressBar practiceProgressBar1, practiceProgressBar2;
 	private DrawableOutlinedText practicePercentageText1, practicePercentageText2;
 	
+	private Panel helpScreen;
+	private String tutorialText[] = 
+		{"In Shape Sprint, the goal is to avoid oncoming",
+		 "obstacles in order to complete a level.     ",
+		 "Triangles will kill you but squares are safe",
+		 "to jump on! Click on a level to begin!    "};
+	
+	private String credits[] = 
+		{"Music:                         ",
+		"Dimensional Vortex - Owen Crowe (A_D1nGu5)",
+		"Spatial Plane - Owen Crowe (A_D1nGu5)",
+		"Temporal Nebula - Owen Crowe (A_D1nGu5)",
+		"Practice Mode Song - Colin Toft      ",
+		"",
+		"Menu Song & original Geometry Dash  ",
+		"Game - RobTop Games                   "};
+	
+	private Panel creditsScreen;
+	
 	private Clip menuMusic;
 	
 	private boolean isSwitching = false;
@@ -44,6 +64,7 @@ public class MainMenu extends Scene {
 	
 	private final double panelWidth = 0.6;
 	private final double panelStartX = (1 - panelWidth) * 0.5;
+
 	
 	/** Method Name: MainMenu()
 	 * @Author Colin Toft
@@ -80,7 +101,7 @@ public class MainMenu extends Scene {
 	/** Method Name: init()
 	 * @Author Colin Toft
 	 * @Date December 21st, 2019
-	 * @Modified December 22nd, 24th, 26th & 27th, 2019
+	 * @Modified December 22nd, 24th, 26th & 27th, 2019, January 18th, 2020
 	 * @Description Overrides the Scene.init() method, loads the text, music, progress bars and panels in the scene
 	 * @Parameters N/A
 	 * @Returns N/A
@@ -181,20 +202,89 @@ public class MainMenu extends Scene {
 		add(leftTriangle);
 		add(rightTriangle);
 		
+		double buttonWidth = 0.1;
+		double buttonHeight = parentWidthFractionToParentHeightFraction(buttonWidth);
+		
+		Sprite helpButton = new Sprite(1 - buttonWidth, 1 - buttonHeight, buttonWidth, buttonHeight, "menuItems/helpButton.png") {
+			@Override
+			public void onMouseReleased(double x, double y, int button) {
+				helpScreen.show();
+			}
+		};
+		add(helpButton);
+		
+		Sprite creditsButton = new Sprite(0, 1 - buttonHeight, buttonWidth * 1.1, buttonHeight, "menuItems/creditsButton.png") {
+			@Override
+			public void onMouseReleased(double x, double y, int button) {
+				creditsScreen.show();
+			}
+		};
+		add(creditsButton);
+		
+		helpScreen = new Panel(0.03, 0.03, 0.94, 0.94);
+		DrawableRoundedRectangle helpRect = new DrawableRoundedRectangle(0, 0, 1, 1, 0.07, 0.125, Color.BLACK);
+		DrawableOutlinedText helpTitleText = new DrawableOutlinedText(helpRect.getCenterX(), 0.15, "Help", titleFont.deriveFont(200f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		helpTitleText.setMaxHeight(helpRect.getHeight() * 0.15);
+		double textY = 0.35;
+		DrawableText[] helpText = new DrawableText[tutorialText.length];
+		for (int i = 0; i < tutorialText.length; i++) {
+			helpText[i] = new DrawableText(helpRect.getX() + helpRect.getWidth() * 0.05, textY, tutorialText[i], titleFont, Color.white, HorizontalAlign.LEFT, VerticalAlign.CENTER);
+			helpText[i].setMaxWidth(helpRect.getWidth() * 0.9);
+			textY += 0.07;
+		}		
+	
+		Sprite xButton = new Sprite(1 - buttonWidth, 0, buttonWidth, buttonHeight, "menuItems/xButton.png") {
+			@Override
+			public void onMouseReleased(double x, double y, int button) {
+				helpScreen.hide();
+				creditsScreen.hide();
+			}
+		};
+		
+		helpScreen.add(helpRect);
+		helpScreen.add(helpTitleText);
+		for (DrawableText t: helpText) {
+			helpScreen.add(t);
+		}
+		helpScreen.add(xButton);
+		
+		add(helpScreen);
+		helpScreen.hide();
+		
+		creditsScreen = new Panel(0.03, 0.03, 0.94, 0.94);
+		DrawableRoundedRectangle creditsRect = new DrawableRoundedRectangle(0, 0, 1, 1, 0.07, 0.125, Color.BLACK);
+		DrawableOutlinedText creditsTitleText = new DrawableOutlinedText(creditsRect.getCenterX(), 0.15, "Credits", titleFont.deriveFont(200f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		creditsTitleText.setMaxHeight(helpRect.getHeight() * 0.15);
+		textY = 0.35;
+		DrawableText[] creditsText = new DrawableText[credits.length];
+		for (int i = 0; i < credits.length; i++) {
+			creditsText[i] = new DrawableText(creditsRect.getX() + creditsRect.getWidth() * 0.05, textY, credits[i], titleFont, Color.white, HorizontalAlign.LEFT, VerticalAlign.CENTER);
+			creditsText[i].setMaxWidth(creditsRect.getWidth() * 0.9);
+			textY += 0.07;
+		}		
+	
+		creditsScreen.add(creditsRect);
+		creditsScreen.add(creditsTitleText);
+		for (DrawableText t: creditsText) {
+			creditsScreen.add(t);
+		}
+		creditsScreen.add(xButton);
+		
+		add(creditsScreen);
+		creditsScreen.hide();
+		
 		// TODO alignment of text being weird
 		// TODO rocket collision physics??
-		// TODO more instructions
 
 		// TODO finish levels
-		// TODO comments and method headers
-		// TODO comment CGraphics
+		// TODO comments including CGraphics
 		// TODO flow chart
+		// TODO resizing windows is weird
 		
 		// TODO dots & pads
-		// TODO song credits
+		// TODO upsideDown portals
 		// TODO editing checkpoints?
-		// TODO endless mode?
-		// TODO attemps and jump count when beating level
+		// TODO attempts and jump count when beating level
 
 		menuMusic = Util.getAudioClip(getClass(), "menuLoop.wav");
 		menuMusic.loop(Clip.LOOP_CONTINUOUSLY);

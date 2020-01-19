@@ -162,6 +162,10 @@ public class Level {
 				x = Integer.valueOf(values[0]);
 				y = Integer.valueOf(values[1]);
 				obstacles[x][y] = Obstacle.fromString(values[2]);
+				
+				if (obstacles[x][y] == null) {
+					System.out.println("Null obstacle at " + x + " " + y);
+				}
 			}
 		}
 	}
