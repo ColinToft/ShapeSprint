@@ -20,12 +20,17 @@ import xyz.colintoft.cgraphics.Util;
 import xyz.colintoft.cgraphics.components.Drawable;
 import xyz.colintoft.shapesprint.scenes.PlayLevel;
 
-// Dec 30
+/**
+***********************************************
+@Author Colin Toft
+@Date December 30th, 2019
+@Modified
+@Description A class that renders the level to the screen, including backgrounds, obstacles and the player, as well as playing the game music.
+***********************************************
+*/
 public class LevelView extends Drawable {
 
 	private Level level;
-	
-	private double ratio;
 	
 	private final double xSpeed = 10.386;
 	private final double levelHeight = 11; // Height of the level in blocks
@@ -42,7 +47,6 @@ public class LevelView extends Drawable {
 	
 	private final double playerRotationSpeed = xSpeed / (playerWidth * 0.5);
 	private double playerRotation = 0;
-	private final double triangleCeilingRotation = -0.33;
 	
 	private double playerX = -15; // in blocks
 	private double playerY = 0; // in blocks (0 is ground level)
@@ -73,9 +77,12 @@ public class LevelView extends Drawable {
 	private double checkpointX = playerX;
 	private double checkpointY = playerY;
 	private double checkpointYSpeed = ySpeed;
+	private boolean checkpointTriangleMode = false;
+	private int checkpointDeathCount = 0;
 	private double prevCheckpointX = checkpointX;
 	private double prevCheckpointY = checkpointY;
 	private double prevCheckpointYSpeed = checkpointYSpeed;
+	private boolean prevCheckpointTriangleMode = checkpointTriangleMode;
 	
 	private boolean triangleMode = false;
 	
@@ -88,7 +95,22 @@ public class LevelView extends Drawable {
 	private Clip music, practiceMusic;
 	private Clip deathSound, winSound;
 	
-	// Dec 30 mod 9
+	/** Method Name: LevelView()
+	 * @Author Colin Toft
+	 * @Date December 30th, 2019
+	 * @Modified Jauary 9th, 2020
+	 * @Description Creates a new LevelView object
+	 * @Parameters
+	 *      - double x: the x coordinate of this object (as a percentage of the parent panel's width)
+	 *      - double y: the y coordinate of this object (as a percentage of the parent panel's height)
+	 *      - double width: the width of this object (as a percentage of the parent panel's width)
+	 *      - double height: the height of this object (as a percentage of the parent panel's height)
+	 *      - Level level: the level to play
+	 * @Returns N/A
+	 * Data Type: Drawable, Color, Boolean, Level, Clip
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public LevelView(double x, double y, double width, double height, Level level) {
 		super(x, y, width, height);
 		setBackground(new Color(0, 0, 0, 0));
@@ -103,19 +125,35 @@ public class LevelView extends Drawable {
 		winSound = Util.getAudioClip(getClass(), "levelCompleteSound.wav");
 	}
 	
-	// Dec 30
+	/** Method Name: LevelView()
+	 * @Author Colin Toft
+	 * @Date December 30th, 2019
+	 * @Modified N/A
+	 * @Description Creates a new LevelView object with the same dimensions as the parent panel
+	 * @Parameters
+	 *      - Level level: the level to play
+	 * @Returns N/A
+	 * Data Type: Drawable, Color, Boolean, Level, Clip
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public LevelView(Level level) {
 		this(0, 0, 1, 1, level);
 	}
 	
-	// Dec 30
-	public void start() {
-		ratio = (double) parentPanel.pixelWidth() / parentPanel.pixelHeight();
-	}
-	
-	// 30
+	/** Method Name: generateImage()
+	 * @Author Colin Toft
+	 * @Date December 30th, 2019
+	 * @Modified January 9th & 16th, 2020
+	 * @Description Overrides Drawable.generateImage(): loads the images needed to display the level (background, ground, ceiling, obstacles and checkpoints)
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: BufferedImage, Graphics, Color, int, Hashmap, Obstacle
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	@Override
-	public void generateImage() {				
+	public void generateImage() {
 		// Load Background Image
 		BufferedImage originalBackground = Util.loadImageFromFile(getClass(), "backgrounds/background1classic.png");
 		backgroundImage = Util.scaleImage(originalBackground, pixelWidth(), pixelWidth());
@@ -182,7 +220,17 @@ public class LevelView extends Drawable {
 		super.generateImage();
 	}
 	
-	// 30 mod 8, 9, 13, 14, 15
+	/** Method Name: draw()
+	 * @Author Colin Toft
+	 * @Date December 30th, 2019
+	 * @Modified January 8th, 9th, 13th, 14th & 15th, 2020
+	 * @Description Overrides Drawable.draw(): draws the level and player to the screen
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: BufferedImage, Graphics, int, boolean, BasicStroke, Color, double, AffineTransform, Obstacle
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	@Override
 	public void draw(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
@@ -205,14 +253,14 @@ public class LevelView extends Drawable {
 		    
 		    g2d.setStroke(new BasicStroke(2f));
 		    g2d.setColor(Color.WHITE);
-		    g2d.drawLine(0, (int)(pixelHeight() * (1 - groundHeight)), pixelWidth(), (int)(pixelHeight() * (1 - groundHeight)));
+		    g2d.drawLine(0, (int)(pixelHeight() * (0.5 / levelHeight), pixelWidth(), (int)(pixelHeight() * (0.5 / levelHeight));
 	    }
 	    
 	    g2d.drawImage(groundImage, groundX, (int)(pixelHeight() * (1 - groundHeight)), null);
 	    
 	    g2d.setStroke(new BasicStroke(2f));
 	    g2d.setColor(Color.WHITE);
-	    g2d.drawLine(0, (int)(pixelHeight() * (1 - groundHeight)), pixelWidth(), (int)(pixelHeight() * (1 - groundHeight)));
+	    g2d.drawLine(0, (int)(pixelHeight() * (1 - groundHeight)) + 2, pixelWidth(), (int)(pixelHeight() * (1 - groundHeight)) + 2);
 	    
 	    //g2d.fillRect(0, 0, pixelWidth(), (int)(pixelHeight() * (1 - groundHeight)));
 	    
@@ -282,7 +330,18 @@ public class LevelView extends Drawable {
 	    }
 	}
 	
-	// 30 mod 7, 9, 10, 13, 14, 15, 17
+	/** Method Name: update()
+	 * @Author Colin Toft
+	 * @Date December 30th, 2019
+	 * @Modified January 7th, 9th, 10th, 13th, 14th, 15th & 17th, 2020
+	 * @Description Overrides Drawable.update(): updates the level, including updating player position, handling music and calculating physics
+	 * @Parameters
+	 *      - double dt: The time in seconds since the last time update was called
+	 * @Returns N/A
+	 * Data Type: boolean, double, int, Clip
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	@Override
 	public void update(double dt) {
 		if (!triangleMode) {
@@ -321,7 +380,7 @@ public class LevelView extends Drawable {
 		
 		double maxY = getMaxY();
 		boolean circleHitCeiling = false;
-		if (playerY >= maxY - playerWidth && ySpeed >= 0) {	
+		if (playerY >= maxY - playerWidth && ySpeed >= 0) {
 			if (triangleMode) {
 				ySpeed = 0;
 				playerY = maxY - playerWidth;
@@ -339,9 +398,9 @@ public class LevelView extends Drawable {
 				}
 			}
 			if (playerY == 0) {
-				playerRotation = Math.max(playerRotation - playerRotationSpeed * dt, 0);
+				playerRotation = Math.max(playerRotation - playerRotationSpeed * 0.5 * dt, 0);
 			} else if (playerY == maxY - playerWidth) {
-				playerRotation = Math.min(playerRotation + playerRotationSpeed * dt, 0);
+				playerRotation = Math.min(playerRotation + playerRotationSpeed * 0.5 * dt, 0);
 			} else {
 				playerRotation = Math.atan2(-ySpeed, xSpeed);
 			}
@@ -369,7 +428,7 @@ public class LevelView extends Drawable {
 		
 		updateMode();
 		
-		if (practiceMode && !hasDied && !hasBeatLevel && justLanded && playerX - checkpointX > 15) {
+		if (practiceMode && !hasDied && !hasBeatLevel && (justLanded || triangleMode) && playerX - checkpointX > 15) {
 			createCheckpoint();
 		}
 		
@@ -404,17 +463,56 @@ public class LevelView extends Drawable {
 		}
 	}
 	
-	// 9
+	/** Method Name: createCheckpoint()
+	 * @Author Colin Toft
+	 * @Date January 9th, 2020
+	 * @Modified N/A
+	 * @Description Creates a checkpoint at the current player location.
+	 * @Returns N/A
+	 * Data Type: double, boolean, int
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	private void createCheckpoint() {
 		prevCheckpointX = checkpointX;
 		prevCheckpointY = checkpointY;
 		prevCheckpointYSpeed = checkpointYSpeed;
+		prevCheckpointTriangleMode = triangleMode;
 		checkpointX = playerX;
 		checkpointY = playerY;
 		checkpointYSpeed = ySpeed;
+		checkpointTriangleMode = triangleMode;
+		checkpointDeathCount = 0;
 	}
 	
-	// 7
+	/** Method Name: deleteCheckpoint()
+	 * @Author Colin Toft
+	 * @Date January 17th, 2020
+	 * @Modified N/A
+	 * @Description Deletes the most recent checkpoint.
+	 * @Returns N/A
+	 * Data Type: double, boolean, int
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
+	private void deleteCheckpoint() {
+		checkpointX = prevCheckpointX;
+		checkpointY = prevCheckpointY;
+		checkpointYSpeed = prevCheckpointYSpeed;
+		checkpointTriangleMode = prevCheckpointTriangleMode;
+		checkpointDeathCount = 0;
+	}
+	
+	/** Method Name: getMinY()
+	 * @Author Colin Toft
+	 * @Date January 7th, 2020
+	 * @Modified N/A
+	 * @Description Finds the y coordinate of the ground beneath the player (highest solid obstacle underneath the player)
+	 * @Returns The y coordinate of the ground beneath the player
+	 * Data Type: double, Obstacle, boolean
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	private double getMinY() {
 		double circleRadius = playerWidth * 0.5;
 		double playerCenterX = playerX + circleRadius;
@@ -444,7 +542,16 @@ public class LevelView extends Drawable {
 		return minY;
 	}
 	
-	// 16
+	/** Method Name: getMaxY()
+	 * @Author Colin Toft
+	 * @Date January 16th, 2020
+	 * @Modified N/A
+	 * @Description Finds the y coordinate of the ceiling above the player (lowest solid obstacle above the player)
+	 * @Returns The y coordinate of the ceiling above the player
+	 * Data Type: double, Obstacle, boolean
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	private double getMaxY() {
 		double circleRadius = playerWidth * 0.5;
 		double playerCenterX = playerX + circleRadius;
@@ -474,7 +581,16 @@ public class LevelView extends Drawable {
 		return maxY;
 	}
 	
-	// 7
+	/** Method Name: shouldDie()
+	 * @Author Colin Toft
+	 * @Date January 7th, 2020
+	 * @Modified N/A
+	 * @Description Determines if a player is touching a triangle or is colliding with the side of a solid object
+	 * @Returns Whether or not the player should die based on these conditions
+	 * Data Type: Area, int, GeneralPath, Obstacle
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	private boolean shouldDie() {
 		Area playerArea = new Area(new Ellipse2D.Double(playerX, playerY, playerWidth, playerWidth));
 				
@@ -486,6 +602,18 @@ public class LevelView extends Drawable {
 						triangleShape.moveTo(obstacleX, obstacleY);
 						triangleShape.lineTo(obstacleX + 0.5, obstacleY + 1);
 						triangleShape.lineTo(obstacleX + 1, obstacleY);
+						triangleShape.closePath();
+						Area triangleArea = new Area(triangleShape);
+						triangleArea.intersect(playerArea);
+						
+						if (!triangleArea.isEmpty()) {
+							return true;
+						}
+					} else if (level.obstacles[obstacleX][obstacleY] == Obstacle.TRIANGLE_UPSIDE_DOWN) {
+						GeneralPath triangleShape = new GeneralPath();
+						triangleShape.moveTo(obstacleX, obstacleY + 1);
+						triangleShape.lineTo(obstacleX + 0.5, obstacleY);
+						triangleShape.lineTo(obstacleX + 1, obstacleY + 1);
 						triangleShape.closePath();
 						Area triangleArea = new Area(triangleShape);
 						triangleArea.intersect(playerArea);
@@ -516,7 +644,16 @@ public class LevelView extends Drawable {
 		return false;
 	}
 	
-	// 15 mod 16
+	/** Method Name: updateMode()
+	 * @Author Colin Toft
+	 * @Date January 15th, 2020
+	 * @Modified January 16th, 2020
+	 * @Description Determines if a player is travelling through a portal and changes their mode appropriately
+	 * @Returns N/A
+	 * Data Type: int, Obstacle, boolean
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	private void updateMode() {
 		int xCoord = (int) playerX;
 		int bottomY = (int) playerY;
@@ -542,42 +679,116 @@ public class LevelView extends Drawable {
 		}
 	}
 	
-	// 30 mod 14, 15
+	/** Method Name: getBlockSize()
+	 * @Author Colin Toft
+	 * @Date December 30th, 2019
+	 * @Modified January 14th & 15th, 2020
+	 * @Description Calculates the width of one block/obstacle in pixels
+	 * @Returns The size of one block in pixels
+	 * Data Type: int, double
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public double getBlockSize() {
 		return pixelHeight() / levelHeight;
 	}
 	
-	// 31
+	/** Method Name: blockXToPixelX()
+	 * @Author Colin Toft
+	 * @Date December 31st, 2019
+	 * @Modified N/A
+	 * @Description Takes an x value in blocks and converts it to an x value in pixels
+	 * @Returns The x value in pixels of the original x coordinate
+	 * Data Type: int, double
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public int blockXToPixelX(double blockX) {
 		return (int) Math.round((blockX - playerX) * getBlockSize() + (playerScreenX * pixelWidth()));
 	}
 	
-	// 31
+	/** Method Name: blockYToPixelY()
+	 * @Author Colin Toft
+	 * @Date December 31st, 2019
+	 * @Modified N/A
+	 * @Description Takes an y value in blocks and converts it to a y value in pixels
+	 * @Returns The y value in pixels of the original y coordinate
+	 * Data Type: int, double
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public int blockYToPixelY(double blockY) {
 		return (int) Math.round((1 - groundHeight) * pixelHeight() - blockY * getBlockSize());
 	}
 	
-	// 31
+	/** Method Name: pixelXToBlockX()
+	 * @Author Colin Toft
+	 * @Date December 31st, 2019
+	 * @Modified N/A
+	 * @Description Takes an x value in pixels and converts it to an x value in blocks
+	 * @Returns The x value in blocks of the original x coordinate
+	 * Data Type: int, double
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public double pixelXToBlockX(int pixelX) {
 		return (pixelX - (playerScreenX * pixelWidth())) / getBlockSize() + playerX;
 	}
 	
-	// 31
+	/** Method Name: pixelYToBlockY()
+	 * @Author Colin Toft
+	 * @Date December 31st, 2019
+	 * @Modified N/A
+	 * @Description Takes a y value in pixels and converts it to a y value in blocks
+	 * @Returns The y value in blocks of the original y coordinate
+	 * Data Type: int, double
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public double pixelYToBlockY(int pixelY) {
 		return (pixelY - (1 - groundHeight) * pixelHeight()) / -getBlockSize();
 	}
 	
-	// 7
+	/** Method Name: screenXToBlockX()
+	 * @Author Colin Toft
+	 * @Date January 7th, 2019
+	 * @Modified N/A
+	 * @Description Takes an x value in screen coordinates (fraction of the screen width) and converts it to an x value in blocks
+	 * @Returns The x value in blocks of the original x coordinate
+	 * Data Type: int, double
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public double screenXToBlockX(double screenX) {
 		return pixelXToBlockX((int) Math.round(screenX * pixelWidth()));
 	}
 	
-	// 7
+	/** Method Name: screenYToBlockY()
+	 * @Author Colin Toft
+	 * @Date January 7th, 2019
+	 * @Modified N/A
+	 * @Description Takes a y value in screen coordinates (fraction of the screen height) and converts it to a y value in blocks
+	 * @Returns The y value in blocks of the original y coordinate
+	 * Data Type: int, double
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public double screenYToBlockY(double screenY) {
 		return pixelYToBlockY((int) Math.round(screenY * pixelHeight()));
 	}
 	
-	// 30 mod 31
+	/** Method Name: keyPressed()
+	 * @Author Colin Toft
+	 * @Date December 30th, 2019
+	 * @Modified December 31st, 2019
+	 * @Description Overrides Scene.keyPressed() and handles key presses while playing a level (pressing space to jump)
+	 * @Parameters
+	 *      - KeyEvent e: the event containing data about the key press event
+	 * @Returns N/A
+	 * Data Type: KeyEvent, boolean
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
@@ -585,7 +796,18 @@ public class LevelView extends Drawable {
 		}
 	}
 	
-	// 31
+	/** Method Name: keyReleased()
+	 * @Author Colin Toft
+	 * @Date December 31st, 2019
+	 * @Modified N/A
+	 * @Description Overrides Scene.keyReleased() and handles key releases while playing a level (releasing space to stop jumping)
+	 * @Parameters
+	 *      - KeyEvent e: the event containing data about the key press event
+	 * @Returns N/A
+	 * Data Type: KeyEvent, boolean
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	@Override
 	public void keyReleased(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
@@ -594,40 +816,96 @@ public class LevelView extends Drawable {
 		}
 	}
 	
-	// 30
+	/** Method Name: onMousePressed()
+	 * @Author Colin Toft
+	 * @Date December 30th, 2019
+	 * @Modified N/A
+	 * @Description Overrides Scene.onMousePressed() and handles mouse presses while playing a level (clicking to jump)
+	 * @Parameters
+	 *      - double x: the x coordinate of the mouse (as a fraction of the parent panel's width)
+	 *      - double y: the y coordinate of the mouse (as a fraction of the parent panel's height)
+	 *      - int button: the button on the mouse that was used
+	 * @Returns N/A
+	 * Data Type: double, int, boolean
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	@Override
 	public void onMousePressed(double x, double y, int button) {
 		jumping = true;
 	}
 	
+	/** Method Name: onMouseReleased()
+	 * @Author Colin Toft
+	 * @Date December 30th, 2019
+	 * @Modified N/A
+	 * @Description Overrides Scene.onMouseReleased() and handles mouse releases while playing a level (releasing the mouse to stop jumping)
+	 * @Parameters
+	 *      - double x: the x coordinate of the mouse (as a fraction of the parent panel's width)
+	 *      - double y: the y coordinate of the mouse (as a fraction of the parent panel's height)
+	 *      - int button: the button on the mouse that was used
+	 * @Returns N/A
+	 * Data Type: double, int, boolean
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	@Override
 	public void onMouseReleased(double x, double y, int button) {
 		jumping = false;
 		holding = false;
 	}
 	
-	// 30 mod 10, 13
+	/** Method Name: jump()
+	 * @Author Colin Toft
+	 * @Date December 30th, 2019
+	 * @Modified January 10th & 13th, 2020
+	 * @Description Makes the player jump upwards
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: double, boolean
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	private void jump() {
 		ySpeed = jumpYSpeed;
 		hasJumped = true;
 	}
 	
-	// 7 mod 9, 13, 14, 15
+	/** Method Name: startNextAttempt()
+	 * @Author Colin Toft
+	 * @Date January 7th, 2020
+	 * @Modified January 9th, 13th, 14th & 15th
+	 * @Description Restarts the player from the beginning of the level
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: PlayLevel, double, boolean, int, Clip
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public void startNextAttempt() {
 		((PlayLevel) parentPanel).restartLevel();
 		
 		playerRotation = 0;
 		
 		if (practiceMode) {
-			System.out.println("Restarting player from checkpointX " + checkpointX);
+			if (playerX - checkpointX < 7) {
+				checkpointDeathCount++;
+			}
+			
+			if (checkpointDeathCount >= 3 && prevCheckpointX != checkpointX) {
+				deleteCheckpoint();
+			}
+			
 			playerX = checkpointX;
 			playerY = checkpointY;
 			ySpeed = checkpointYSpeed;
-			groundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (playerY * getBlockSize() / pixelHeight()));;
+			triangleMode = checkpointTriangleMode;
+			groundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (playerY * getBlockSize() / pixelHeight()));
+			
 		} else {
 			stopMusic();
 
-			playerX = -10; 
+			playerX = -10;
 			playerY = 0;
 			ySpeed = 0;
 			
@@ -639,6 +917,7 @@ public class LevelView extends Drawable {
 			prevCheckpointYSpeed = checkpointYSpeed;
 			
 			groundHeight = baseGroundHeight;
+			triangleMode = false;
 		}
 		
 		lastGroundY = playerY;
@@ -648,18 +927,36 @@ public class LevelView extends Drawable {
 		hasDied = false;
 		hasBeatLevel = false;
 		
-		triangleMode = false;
 	}
 	
-	// 14
+	/** Method Name: restartLevel()
+	 * @Author Colin Toft
+	 * @Date January 14th, 2020
+	 * @Modified N/A
+	 * @Description Restarts the player from the beginning of the level and from their first attempt
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: boolean, int
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public void restartLevel() {
 		practiceMode = false;
 		startNextAttempt();
 		playerX = -15; // in blocks
 	}
 
-	// 7 mod 14
-	// Scroll speed in screen widths per second
+	/** Method Name: getScrollSpeed()
+	 * @Author Colin Toft
+	 * @Date January 7th, 2020
+	 * @Modified January 14th
+	 * @Description Calculates the level scrolling speed
+	 * @Parameters N/A
+	 * @Returns Scroll speed in screen widths per second
+	 * Data Type: boolean, int, double
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public double getScrollSpeed() {
 		if (!hasDied) {
 			return xSpeed / (pixelWidth() / getBlockSize());
@@ -668,26 +965,65 @@ public class LevelView extends Drawable {
 		}
 	}
 
-	// 8
+	/** Method Name: getPlayerProgress()
+	 * @Author Colin Toft
+	 * @Date January 8th, 2020
+	 * @Modified N/A
+	 * @Description Calculates the player's current progress in the level
+	 * @Parameters N/A
+	 * @Returns The players progress in the level on a scale from 0 to 1
+	 * Data Type: boolean, int
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public double getPlayerProgress() {
 		return Util.constrain(playerX / level.width, 0, 1);
 	}
 
-	// 8
+	/** Method Name: exitingToMenu()
+	 * @Author Colin Toft
+	 * @Date January 8th, 2020
+	 * @Modified January 17th, 2020
+	 * @Description Called when the scene is about to exit back to the main menu, stops the currently playing music
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: N/A
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public void exitingToMenu() {
 		stopMusic();
-		level.updateNormalProgress(getPlayerProgress());
 	}
 	
+	/** Method Name: onPause()
+	 * @Author Colin Toft
+	 * @Date January 8th, 2020
+	 * @Modified N/A
+	 * @Description Overrides Scene.onPause(): stops the music when the level is paused
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: N/A
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	@Override
-	// 8
 	public void onPause() {
 		super.onPause();
 		stopMusic();
 	}
 	
+	/** Method Name: onResume()
+	 * @Author Colin Toft
+	 * @Date January 8th, 2020
+	 * @Modified N/A
+	 * @Description Overrides Scene.onResume(): resumes the music when the level is unpaused
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: N/A
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	@Override
-	// 8
 	public void onResume() {
 		super.onResume();
 		if (playerX >= 0 && !playingMusic) {
@@ -695,7 +1031,17 @@ public class LevelView extends Drawable {
 		}
 	}
 
-	// 9
+	/** Method Name: changeMode()
+	 * @Author Colin Toft
+	 * @Date January 9th, 2020
+	 * @Modified N/A
+	 * @Description Toggles the mode between practice mode and normal mode
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: N/A
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public void changeMode() {
 		practiceMode = !practiceMode;
 		stopMusic();

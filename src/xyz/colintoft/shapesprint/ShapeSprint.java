@@ -18,7 +18,7 @@ import xyz.colintoft.shapesprint.scenes.MainMenu;
 @Author Colin Toft
 @Date December 21st, 2019
 @Modified December 22nd, 2019
-@Description 
+@Description A simple clone of the game Geometry Dash, created with Java and the CGraphics library I have previously created.
 ***********************************************
 */
 @SuppressWarnings("serial")
@@ -35,6 +35,22 @@ public class ShapeSprint extends Game {
 	
 	public static final String saveFile = "/saveGame.txt";
 	
+	public static void main(String[] args) {
+		game = new ShapeSprint();
+		game.run();
+	}
+	
+	/** Method Name: init()
+	 * @Author Colin Toft
+	 * @Date December 21st, 2019
+	 * @Modified N/A
+	 * @Description Initializes the window, creates the levels and loads the previous user progress.
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: N/A
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	@Override
 	public void init() {
 		
@@ -54,13 +70,18 @@ public class ShapeSprint extends Game {
 		setFullscreen(false);
 		setScene(new MainMenu());
 	}
-	
-	public static void main(String[] args) {
-		game = new ShapeSprint();
-		game.run();
-	}
 
-	// 8 mod 17
+	/** Method Name: saveProgress()
+	 * @Author Colin Toft
+	 * @Date January 8th, 2019
+	 * @Modified January 17th, 2019
+	 * @Description Saves the user's progress in the game to a file.
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: N/A
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public void saveProgress() {
 		try {
 			PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter("assets" + saveFile))); //create a filewriter to output to the file
@@ -78,7 +99,17 @@ public class ShapeSprint extends Game {
 		}
 	}
 	
-	// 8
+	/** Method Name: loadProgress()
+	 * @Author Colin Toft
+	 * @Date January 8th, 2019
+	 * @Modified January 17th, 2019
+	 * @Description Loads the user's progress in the game from the save file.
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: N/A
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public void loadProgress() {
 		if (Util.fileExists(getClass(), saveFile)) {
 			int i = 0;
@@ -101,12 +132,32 @@ public class ShapeSprint extends Game {
 		}
 	}
 	
-	// 10
+	/** Method Name: isFirstTime()
+	 * @Author Colin Toft
+	 * @Date January 10th, 2019
+	 * @Modified N/A
+	 * @Description Returns whether or not this is the user's first time playing the game.
+	 * @Parameters N/A
+	 * @Returns True if this is the user's first time playing, otherwise false
+	 * Data Type: boolean
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public boolean isFirstTime() {
 		return firstTime;
 	}
 	
-	// 17
+	/** Method Name: onWindowClosing()
+	 * @Author Colin Toft
+	 * @Date January 17th, 2019
+	 * @Modified N/A
+	 * @Description Overrides the Game.onWindowClosing() method to save the user's progress whenever the window is closed.
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: N/A
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	@Override
 	public void onWindowClosing() {
 		saveProgress();

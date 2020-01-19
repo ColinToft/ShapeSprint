@@ -1,10 +1,13 @@
 package xyz.colintoft.shapesprint;
 
-import java.awt.image.BufferedImage;
-
-import xyz.colintoft.cgraphics.Util;
-
-// 30 mod 7, 15
+/**
+***********************************************
+@Author Colin Toft
+@Date December 30th, 2019
+@Modified December 31st 2019, January 7th, 15th & 16th 2020
+@Description Represents one of the objects in a level.
+***********************************************
+*/
 public enum Obstacle {
 	SQUARE,
 	SQUARE_TOP_1, SQUARE_BOTTOM_1, SQUARE_LEFT_1, SQUARE_RIGHT_1,
@@ -18,7 +21,18 @@ public enum Obstacle {
 	CIRCLE_PORTAL_BOTTOM, CIRCLE_PORTAL_TOP,
 	TRIANGLE_PORTAL_BOTTOM, TRIANGLE_PORTAL_TOP;
 
-	// 31 mod 15
+	/** Method Name: fromString()
+	 * @Author Colin Toft
+	 * @Date December 31st, 2019
+	 * @Modified January 15th, 2020
+	 * @Description Converts the String abbreviation of an obstacle (found in a level file) to an Obstacle.
+	 * @Parameters
+	 *      - String string: the string specifying the type of obstacle
+	 * @Returns An Obstacle that corresponds to the string argument given
+	 * Data Type: String, Obstacle
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public static Obstacle fromString(String string) {
 		switch (string) {
 		case "S": return SQUARE;
@@ -54,7 +68,17 @@ public enum Obstacle {
 		}
 	}
 	
-	// 31 mod 15, 16
+	/** Method Name: getImageFilename()
+	 * @Author Colin Toft
+	 * @Date December 31st, 2019
+	 * @Modified January 15th & 16th, 2020
+	 * @Description Returns the filename of the image of this Obstacle
+	 * @Parameters N/A
+	 * @Returns The filename of the image of this Obstacle
+	 * Data Type: String, Obstacle
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public String getImageFilename() {
 		switch (this) {
 		case SQUARE:
@@ -101,7 +125,7 @@ public enum Obstacle {
 		case TRIANGLE:
 			return "obstacles/BlackTriangle.png";
 		case TRIANGLE_UPSIDE_DOWN:
-			return "obstacles/BlackTriangleUpsideDown.png"; 
+			return "obstacles/BlackTriangleUpsideDown.png";
 			
 		case CIRCLE_PORTAL_BOTTOM:
 			return "obstacles/CubePortalBottom.png";
@@ -117,22 +141,62 @@ public enum Obstacle {
 		}
 	}
 	
-	// 7 mod 16
+    /** Method Name: killsPlayer()
+	 * @Author Colin Toft
+	 * @Date January 7th, 2020
+	 * @Modified January 15th, 2020
+	 * @Description Returns whether this Obstacle kills a player on contact
+	 * @Parameters N/A
+	 * @Returns Whether this Obstacle kills a player on contact
+	 * Data Type: boolean, Obstacle
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public boolean killsPlayer() {
 		return this == TRIANGLE || this == TRIANGLE_UPSIDE_DOWN;
 	}
 
-	// 7 mod 15, 16
+	/** Method Name: isSolid()
+	 * @Author Colin Toft
+	 * @Date January 7th, 2020
+	 * @Modified January 15th, 16th & 17th, 2020
+	 * @Description Returns whether this Obstacle is solid (player cannot pass through it)
+	 * @Parameters N/A
+	 * @Returns Whether this Obstacle is solid
+	 * Data Type: boolean, Obstacle
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public boolean isSolid() {
-		return !(this.killsPlayer() || this == CIRCLE_PORTAL_BOTTOM || this == CIRCLE_PORTAL_TOP || this == TRIANGLE_PORTAL_BOTTOM || this == TRIANGLE_PORTAL_TOP);
+		return !(killsPlayer() || isCirclePortal() || isTrianglePortal());
 	}
 
-	// 15
+	/** Method Name: isCirclePortal()
+	 * @Author Colin Toft
+	 * @Date January 15th, 2020
+	 * @Modified N/A
+	 * @Description Returns whether this Obstacle is a circle portal
+	 * @Parameters N/A
+	 * @Returns True if this Obstacle is a circle portal, otherwise false
+	 * Data Type: boolean, Obstacle
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public boolean isCirclePortal() {
 		return this == CIRCLE_PORTAL_BOTTOM || this == CIRCLE_PORTAL_TOP;
 	}
 	
-	// 15
+    /** Method Name: isTrianglePortal()
+	 * @Author Colin Toft
+	 * @Date January 15th, 2020
+	 * @Modified N/A
+	 * @Description Returns whether this Obstacle is a triangle portal
+	 * @Parameters N/A
+	 * @Returns True if this Obstacle is a triangle portal, otherwise false
+	 * Data Type: boolean, Obstacle
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
 	public boolean isTrianglePortal() {
 		return this == TRIANGLE_PORTAL_BOTTOM || this == TRIANGLE_PORTAL_TOP;
 	}

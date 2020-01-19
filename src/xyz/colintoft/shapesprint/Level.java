@@ -66,7 +66,7 @@ public class Level {
 	
 	/** Method Name: updateNormalProgress()
 	 * @Author Colin Toft
-	 * @Date January 8th, 2019
+	 * @Date January 8th, 2020
 	 * @Modified N/A
 	 * @Description Updates the progress in normal mode for this level and saves it if necessary
 	 * @Parameters
@@ -101,7 +101,7 @@ public class Level {
 	
 	/** Method Name: updatePracticeProgress()
 	 * @Author Colin Toft
-	 * @Date January 8th, 2019
+	 * @Date January 8th, 2020
 	 * @Modified N/A
 	 * @Description Updates the progress in practice mode for this level and saves it if necessary
 	 * @Parameters

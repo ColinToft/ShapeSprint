@@ -22,7 +22,14 @@ import xyz.colintoft.shapesprint.Level;
 import xyz.colintoft.shapesprint.LevelView;
 import xyz.colintoft.shapesprint.ShapeSprint;
 
-// Dec 27
+/**
+***********************************************
+@Author Colin Toft
+@Date December 27th, 2019
+@Modified
+@Description The scene where the user can play a level. Includes the level view, pause menu, win screen, and help messages.
+***********************************************
+*/
 public class PlayLevel extends Scene {
 	
 	private Level level;
@@ -58,15 +65,36 @@ public class PlayLevel extends Scene {
 	private DrawableOutlinedText levelCompleteText;
 	
 	private Sprite changeModeButton;
-	
-	// Dec 27 mod 30
+
+	/** Method Name: PlayLevel()
+	 * @Author Colin Toft
+	 * @Date December 27th, 2019
+	 * @Modified December 30th, 2019
+	 * @Description Creates a new PlayLevel object
+	 * @Parameters
+	 *      - Level level: The Level object storing the level that will be played
+	 * @Returns N/A
+	 * Data Type: PlayLevel, Level
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public PlayLevel(Level level) {
 		super();
 		setBackground(new Color(0, 0, 0, 0));
 		this.level = level;
 	}
 	
-	// Dec 27 mod 30, 7, 8, 9, 10, 14
+	/** Method Name: init()
+	 * @Author Colin Toft
+	 * @Date December 27th, 2019
+	 * @Modified December 30th, 2019, January 7th, 8th, 9th, 10th, 14th & 17th, 2020
+	 * @Description Overrides Scene.init() and loads the text, images and menus necessary for this Scene
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: Scene, LevelView, DrawableOutlinedText, DrawableProgressBar, DrawableRoundedRectangle, Sprite, Panel
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public void init() {
 		level.load();
 		
@@ -192,8 +220,19 @@ public class PlayLevel extends Scene {
 		winScreen.hide();
 	}
 	
+	/** Method Name: update()
+	 * @Author Colin Toft
+	 * @Date January 7th, 2020
+	 * @Modified January 8th & 16th, 2020
+	 * @Description Overrides Scene.update() and updates the level progress bar, attempt counter, and help text
+	 * @Parameters
+	 *      - double dt: The time that has elapsed since the last time update() was called
+	 * @Returns N/A
+	 * Data Type: Scene, LevelView, ShapeSprint, DrawableOutlinedText, DrawableProgressBar
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	@Override
-	// 7 mod 8, 16
 	public void update(double dt) {
 		super.update(dt);
 		attemptText.moveLeft(dt * levelView.getScrollSpeed());
@@ -205,7 +244,7 @@ public class PlayLevel extends Scene {
 		if (levelView.hasJumped && helpText.getText().equals(jumpHelpMessage) || ss.hasUsedTriangleMode && helpText.getText().equals(triangleHelpMessage)) {
 			needsJumpHelp = false;
 			helpText.hide();
-		} 
+		}
 		
 		if (ss.hasPausedGame) {
 			pauseMenuText.hide();
@@ -217,7 +256,18 @@ public class PlayLevel extends Scene {
 		}
 	}
 	
-	// Dec 30 mod 8, 14
+	/** Method Name: keyPressed()
+	 * @Author Colin Toft
+	 * @Date December 30th, 2019
+	 * @Modified January 8th & 14th, 2020
+	 * @Description Overrides Scene.keyPressed() and handles key presses while playing a level, mainly showing/hiding the pause menu and win screen
+	 * @Parameters
+	 *      - KeyEvent e: the event containing data about the key press event
+	 * @Returns N/A
+	 * Data Type: ShapeSprint, LevelView, Panel, DrawableOutlinedText
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public void keyPressed(KeyEvent e) {
 		ShapeSprint ss = (ShapeSprint) game;
 		
@@ -255,7 +305,17 @@ public class PlayLevel extends Scene {
 		}
 	}
 
-	// 7 mod 8, 9
+	/** Method Name: restartLevel()
+	 * @Author Colin Toft
+	 * @Date January 7th, 2020
+	 * @Modified January 8th & 9th, 2020
+	 * @Description Resets the position of the components when the player restarts the level
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: DrawableOutlinedText, DrawableProgressBar
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public void restartLevel() {
 		attemptNumber++;
 		attemptText.setText("Attempt " + attemptNumber);
@@ -274,7 +334,17 @@ public class PlayLevel extends Scene {
 		practicePercentageText.setText(Util.toPercentageString(level.practiceProgress));
 	}
 	
-	// 8 mod 9, 17
+	/** Method Name: changeMode()
+	 * @Author Colin Toft
+	 * @Date January 8th, 2020
+	 * @Modified January 9th & 17th, 2020
+	 * @Description Changes the mode from normal mode to practice mode or vice versa
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: Panel, LevelView, ShapeSprint
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public void changeMode() {
 		pauseMenu.hide();
 		resumeGame();
@@ -282,7 +352,17 @@ public class PlayLevel extends Scene {
 		((ShapeSprint) game).hasUsedPracticeMode = true;
 	}
 	
-	// 10
+	/** Method Name: saveLevelProgress()
+	 * @Author Colin Toft
+	 * @Date January 10th, 2020
+	 * @Modified N/A
+	 * @Description Stores the current progress in the level to the Level object
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: LevelView, Level
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	private void saveLevelProgress() {
 		if (levelView.isPracticeMode()) {
 			level.updatePracticeProgress(levelView.getPlayerProgress());
@@ -291,12 +371,26 @@ public class PlayLevel extends Scene {
 		}
 	}
 	
-	// 8
+	/** Method Name: exitToMenu()
+	 * @Author Colin Toft
+	 * @Date January 8th, 2020
+	 * @Modified N/A
+	 * @Description Exits the PlayLevel Scene and returns to the main menu
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: ShapeSprint, LevelView, Level, Game, MainMenu
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public void exitToMenu() {
+		ShapeSprint ss = (ShapeSprint) game;
+
 		saveLevelProgress();
+		ss.saveProgress();
 		
 		levelView.exitingToMenu();
-		ShapeSprint ss = ((ShapeSprint) game);
+		
+		
 		for (int i = 0; i < ss.levels.length; i++) {
 			if (ss.levels[i].name.equals(level.name)) {
 				game.setScene(new MainMenu(i));
@@ -306,7 +400,17 @@ public class PlayLevel extends Scene {
 		game.setScene(new MainMenu());
 	}
 
-	// 14
+	/** Method Name: showWinScreen()
+	 * @Author Colin Toft
+	 * @Date January 14th, 2020
+	 * @Modified N/A
+	 * @Description Shows the win screen (when the user successfully completes a level)
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: LevelView, DrawableOutlinedText, Panel
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public void showWinScreen() {
 		if (levelView.isPracticeMode()) {
 			levelCompleteText.setText("Practice Complete!");
@@ -314,5 +418,23 @@ public class PlayLevel extends Scene {
 			levelCompleteText.setText("Level Complete!");
 		}
 		winScreen.show();
+	}
+	
+	/** Method Name: dispose()
+	 * @Author Colin Toft
+	 * @Date January 17th, 2020
+	 * @Modified N/A
+	 * @Description Overrides the Scene.dispose() method which is called when a Scene is about to be closed, saves the current progress in the game.
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: ShapeSprint
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
+	@Override
+	public void dispose() {
+		super.dispose();
+		saveLevelProgress();
+		((ShapeSprint) game).saveProgress();
 	}
 }

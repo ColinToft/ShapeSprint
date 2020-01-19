@@ -214,9 +214,13 @@ public class Drawable implements KeyListener, MouseListener {
 	protected void generateImage() {
 		currentImage = Util.getEmptyImage(pixelWidth(), pixelHeight());
 		Graphics2D g = currentImage.createGraphics();
-		g.setColor(backgroundColor);
-		g.fillRect(0, 0, currentImage.getWidth(), currentImage.getHeight());
-		draw(g);
+		if (!dynamic) {
+    		if (backgroundColor.getAlpha() > 0) {
+        		g.setColor(backgroundColor);
+        		g.fillRect(0, 0, currentImage.getWidth(), currentImage.getHeight());
+    		}
+    		draw(g);
+		}
 	}
 	
 	public int pixelX() {
@@ -303,13 +307,13 @@ public class Drawable implements KeyListener, MouseListener {
 	}
 	
 	/** This method is called whenever this drawable is clicked.
-	 * @param x The x coordinate of the click based on the width of this drawable (0 is the left of this object, 1 is the right) 
+	 * @param x The x coordinate of the click based on the width of this drawable (0 is the left of this object, 1 is the right)
 	 * @param y The y coordinate of the click based on the height of this drawable (0 is the top of this object, 1 is the bottom)
 	 * @param button The button pressed, as returned from {@link MouseEvent#getButton()} */
 	public void onMousePressed(double x, double y, int button) {}
 	
-	/** This method is called whenever a click on this drawable is released. 
-	 * @param x The x coordinate of the click based on the width of this drawable (0 is the left of this object, 1 is the right) 
+	/** This method is called whenever a click on this drawable is released.
+	 * @param x The x coordinate of the click based on the width of this drawable (0 is the left of this object, 1 is the right)
 	 * @param y The y coordinate of the click based on the height of this drawable (0 is the top of this object, 1 is the bottom)
 	 * @param button The button pressed, as returned from {@link MouseEvent#getButton()} */
 	public void onMouseReleased(double x, double y, int button) {}

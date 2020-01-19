@@ -19,8 +19,8 @@ import xyz.colintoft.shapesprint.ShapeSprint;
 ***********************************************
 @Author Colin Toft
 @Date December 21st, 2019
-@Modified December 22nd, 2019
-@Description 
+@Modified December 22nd
+@Description The main menu scene that allows the user to select a level to play.
 ***********************************************
 */
 public class MainMenu extends Scene {
@@ -45,17 +45,49 @@ public class MainMenu extends Scene {
 	private final double panelWidth = 0.6;
 	private final double panelStartX = (1 - panelWidth) * 0.5;
 	
+	/** Method Name: MainMenu()
+	 * @Author Colin Toft
+	 * @Date December 21st, 2019
+	 * @Modified N/A
+	 * @Description Creates a new MainMenu object
+	 * @Parameters
+	 *      - int currentLevel: The level that should be shown when the menu first appears
+	 * @Returns N/A
+	 * Data Type: MainMenu, int
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public MainMenu(int currentLevel) {
 		super();
 		this.currentLevel = currentLevel;
 	}
 	
+	/** Method Name: PlayLevel()
+	 * @Author Colin Toft
+	 * @Date December 21st, 2019
+	 * @Modified N/A
+	 * @Description Creates a new MainMenu object
+	 * @Parameters
+	 * @Returns N/A
+	 * Data Type: MainMenu, int
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public MainMenu() {
 		this(0);
 	}
 	
-	// Dec 21
-	// Mod 22, 24, 26, 27
+	/** Method Name: init()
+	 * @Author Colin Toft
+	 * @Date December 21st, 2019
+	 * @Modified December 22nd, 24th, 26th & 27th, 2019
+	 * @Description Overrides the Scene.init() method, loads the text, music, progress bars and panels in the scene
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: ShapeSprint, Font, Color, Panel, DrawableRoundedRectangle, DrawableOutlinedText, DrawableProgressBar, DrawableShape, Clip
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public void init() {
 		ShapeSprint ss = (ShapeSprint) game;
 		Font titleFont = Util.loadFontFromFile(getClass(), "Pusab.ttf", 100);
@@ -149,13 +181,13 @@ public class MainMenu extends Scene {
 		add(leftTriangle);
 		add(rightTriangle);
 		
+		// TODO alignment of text being weird
 		// TODO rocket collision physics??
-		// TODO offsets affect click
 		// TODO more instructions
-		
-		// TODO collision with upside down triangle
+
 		// TODO finish levels
 		// TODO comments and method headers
+		// TODO comment CGraphics
 		// TODO flow chart
 		
 		// TODO dots & pads
@@ -168,15 +200,34 @@ public class MainMenu extends Scene {
 		menuMusic.loop(Clip.LOOP_CONTINUOUSLY);
 	}
 	
-	@Override
-	// 14
+	/** Method Name: dispose()
+	 * @Author Colin Toft
+	 * @Date January 14th, 2020
+	 * @Modified N/A
+	 * @Description Overrides the Scene.dispose() method which is called when a Scene is about to be closed, stops the menu music.
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: Clip
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public void dispose() {
 		super.dispose();
 		menuMusic.stop();
 	}
 	
-	// Dec 21
-	// Mod 22, 24
+	/** Method Name: update()
+	 * @Author Colin Toft
+	 * @Date December 21st, 2019
+	 * @Modified December 22nd & 24th, 2019
+	 * @Description Overrides Scene.update() and updates the switching of the current displayed level
+	 * @Parameters
+	 *      - double dt: The time that has elapsed since the last time update() was called
+	 * @Returns N/A
+	 * Data Type: boolean, double, Panel
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	public void update(double dt) {
 		if (isSwitching) {
 			if (Math.abs(panel1.getX() - panelStartX) < 0.001 && Math.abs(velocity) < 0.001) {
@@ -207,8 +258,18 @@ public class MainMenu extends Scene {
 		}
 	}
 	
-	// Dec 22
-	// Mod 26
+	/** Method Name: keyPressed()
+	 * @Author Colin Toft
+	 * @Date December 22nd, 2019
+	 * @Modified December 26th, 2020
+	 * @Description Overrides Scene.keyPressed() and handles key presses during the menu
+	 * @Parameters
+	 *      - KeyEvent e: the event containing data about the key press event
+	 * @Returns N/A
+	 * Data Type: KeyEvent, int, Game, Direction
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
@@ -221,7 +282,18 @@ public class MainMenu extends Scene {
 		}
 	}
 	
-	// Dec 26
+	/** Method Name: switchLevel()
+	 * @Author Colin Toft
+	 * @Date December 26th, 2019
+	 * @Modified N/A
+	 * @Description Begins switching the currently displayed level
+	 * @Parameters
+	 *      - Direction direction: The direction to switch in (view the level to the left or right)
+	 * @Returns N/A
+	 * Data Type: Direction, ShapeSprint, int, Panel, DrawableOutlinedText, DrawableProgressBar
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	private void switchLevel(Direction direction) {
 		ShapeSprint ss = (ShapeSprint) game;
 
@@ -250,6 +322,18 @@ public class MainMenu extends Scene {
 		switchDirection = direction;
 	}
 	
+	/** Method Name: startLevel()
+	 * @Author Colin Toft
+	 * @Date December 26th, 2019
+	 * @Modified N/A
+	 * @Description Start playing the specified level
+	 * @Parameters
+	 *      - int level: The index of the level that should be played
+	 * @Returns N/A
+	 * Data Type: Clip, ShapeSprint, PlayLevel, Level
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
 	private void startLevel(int level) {
 		menuMusic.stop();
 		Clip startLevel = Util.getAudioClip(getClass(), "startLevel.wav");
