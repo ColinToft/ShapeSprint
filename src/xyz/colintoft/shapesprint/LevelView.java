@@ -10,6 +10,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.Ellipse2D.Double;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
@@ -36,8 +37,8 @@ public class LevelView extends Drawable {
 	private final double levelHeight = 11; // Height of the level in blocks
 	private final double baseGroundHeight = 0.3; // The starting height of the ground (as a fraction of the screen height)
 	private double groundHeight = baseGroundHeight; // Fraction of the height of the screen that the ground takes up
-	private final double groundHeightMoveSpeed = 0.5; // The speed at which the ground height will move up and down
-	private final double groundHeightThreshold = 0.55; // If the player is above this coordinate (fraction of screen height)
+	private final double groundHeightMoveSpeed = 0.04; // The speed at which the ground height will move up and down
+	private final double groundHeightThreshold = 0.45; // If the player is above this coordinate (fraction of screen height)
 	private final double playerScreenX = 0.34; // The x coordinate where the player is drawn (as a fraction of the screen width)
 	private final int levelEndOffset = 8; // How many blocks the end of the level appears after the last obstacle
 	private final double backgroundSpeed = 0.125; // The speed of the background compared to the speed of the ground
@@ -69,6 +70,7 @@ public class LevelView extends Drawable {
 	private final double gravity = 0.876 * xSpeed * xSpeed; // The rate at which gravity affects the y speed (taken from a forum about geometry dash physics)
 	private final double minYSpeed = -2.6 * xSpeed; // The minimum y speed, or fastest rate at which the player can fall (taken from a forum about geometry dash physics)
 	private final double jumpYSpeed = 2 * xSpeed; // The value that the y speed is set to when the player jumps (taken from a forum about geometry dash physics)
+	private final double yellowPadYSpeed = 2.77 * xSpeed;
 	private final double triangleMaxYSpeed = 1.4 * xSpeed; // The maximum y speed that a player can reach when in triangle mode (found with trial and error)
 	private final double triangleMinYSpeed = -1 * xSpeed; // The minimum y speed that a player can reach when in triangle mode (found with trial and error)
 	private final double triangleYSpeedIncrease = 0.4 * xSpeed * xSpeed; // The rate at which y speed increases when the player holds down with the mouse or space bar (found with trial and error)
@@ -222,7 +224,7 @@ public class LevelView extends Drawable {
 		// Loop through each obstacle type and put its corresponding image in the hashmap
 		for (Obstacle type: Obstacle.values()) {
 			image = Util.loadImageFromFile(getClass(), type.getImageFilename());
-			image = Util.scaleImage(image, (int)getBlockSize() + 1, (int)getBlockSize() + 1);
+			image = Util.scaleImage(image, (getBlockSize() + 1) / image.getWidth());
 			images.put(type, image);
 		}
 		
@@ -325,7 +327,8 @@ public class LevelView extends Drawable {
     			o = level.obstacles[obstacleX][obstacleY]; // Find the obstacle at those coordinates
     			if (o != null) {
     				// If there is an obstacle there, draw it
-    				g2d.drawImage(images.get(o), blockXToPixelX(obstacleX), blockYToPixelY(obstacleY + 1), null);
+    				BufferedImage image = images.get(o);
+    				g2d.drawImage(image, blockXToPixelX(obstacleX), blockYToPixelY(obstacleY) - image.getHeight(), null);
     			}
 	    	}
 	    }
@@ -444,11 +447,13 @@ public class LevelView extends Drawable {
 			targetGroundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (Math.min(lastGroundY, playerY) * getBlockSize() / pixelHeight()));
 		}
 		
+		double groundHeightTolerance = 0.1; // It is acceptable if the ground height is within this amount of its target value
+		
 		// Move the ground height towards the target ground height if necessary
-		if (targetGroundHeight < groundHeight && !hasBeatLevel && !hasDied) {
-			groundHeight = Math.max(targetGroundHeight, groundHeight - groundHeightMoveSpeed * dt);
-		} else if (targetGroundHeight > groundHeight && !hasBeatLevel && !hasDied) {
-			groundHeight = Math.min(targetGroundHeight, groundHeight + groundHeightMoveSpeed * dt);
+		if (targetGroundHeight < groundHeight - groundHeightTolerance && !hasBeatLevel && !hasDied) {
+			groundHeight = Math.max(targetGroundHeight, groundHeight - groundHeightMoveSpeed * Math.max(ySpeed, xSpeed) * dt);
+		} else if (targetGroundHeight > groundHeight + groundHeightTolerance && !hasBeatLevel && !hasDied) {
+			groundHeight = Math.min(targetGroundHeight, groundHeight + groundHeightMoveSpeed * Math.max(ySpeed, xSpeed) * dt);
 		}
 
 		if (!hasDied && (shouldDie() || circleHitCeiling)) {
@@ -463,6 +468,11 @@ public class LevelView extends Drawable {
 		}
 		
 		updateMode(); // Updates the players mode to triangle mode or circle mode if they are traveling through a portal
+		
+		if (isTouchingYellowPad()) {
+			ySpeed = yellowPadYSpeed;
+			lastGroundY = playerY;
+		}
 		
 		if (practiceMode && !hasDied && !hasBeatLevel && (justLanded || triangleMode) && playerX - checkpointX > 15) {
 			// If the user is in practice mode, create a checkpoint if they have just landed and are far enough away from the last checkpoint
@@ -679,6 +689,37 @@ public class LevelView extends Drawable {
 						}
 					} catch (ArrayIndexOutOfBoundsException e) {}
 				}
+			}
+		}
+		
+		return false;
+	}
+	
+	/** Method Name: isTouchingYellowPad()
+	 * @Author Colin Toft
+	 * @Date January 19th, 2020
+	 * @Modified N/A
+	 * @Description Determines if a player is touching a yellow pad
+	 * @Returns True the player is currently touching a yellow pad, otherwise false
+	 * Data Type: Area, int, Ellipse2D, Rectangle2D, Obstacle
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
+	private boolean isTouchingYellowPad() {
+		Area playerArea = new Area(new Ellipse2D.Double(playerX, playerY, playerWidth, playerWidth));
+				
+		for (int obstacleX = (int) playerX; obstacleX <= (int) playerX + 1; obstacleX++) {
+			for (int obstacleY = (int)(playerY + playerWidth); obstacleY >= 0; obstacleY--) {
+				try {
+					if (level.obstacles[obstacleX][obstacleY] == Obstacle.YELLOW_PAD) {
+						Area padArea = new Area(new Rectangle2D.Double(obstacleX, obstacleY, 1, 0.25));
+						padArea.intersect(playerArea);
+						
+						if (!padArea.isEmpty()) {
+							return true;
+						}
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {}
 			}
 		}
 		

@@ -19,6 +19,7 @@ public enum Obstacle {
 	SQUARE_CENTER_TOP_LEFT_LINE_BOTTOM, SQUARE_CENTER_TOP_RIGHT_LINE_BOTTOM,
 	SQUARE_CENTER_BOTTOM_LEFT_LINE_TOP, SQUARE_CENTER_BOTTOM_RIGHT_LINE_TOP,
 	TRIANGLE, TRIANGLE_UPSIDE_DOWN,
+	YELLOW_PAD, YELLOW_RING,
 	CIRCLE_PORTAL_BOTTOM, CIRCLE_PORTAL_TOP,
 	TRIANGLE_PORTAL_BOTTOM, TRIANGLE_PORTAL_TOP;
 
@@ -64,6 +65,9 @@ public enum Obstacle {
 		
 		case "T": return TRIANGLE;
 		case "TU": return TRIANGLE_UPSIDE_DOWN;
+		
+		case "YP": return YELLOW_PAD;
+		case "YR": return YELLOW_RING;
 		
 		case "CPB": return CIRCLE_PORTAL_BOTTOM;
 		case "CPT": return CIRCLE_PORTAL_TOP;
@@ -142,6 +146,11 @@ public enum Obstacle {
 		case TRIANGLE_UPSIDE_DOWN:
 			return "obstacles/BlackTriangleUpsideDown.png";
 			
+		case YELLOW_PAD:
+			return "obstacles/yellowPad.png";
+		case YELLOW_RING:
+			return "obstacles/yellowOrb.png";
+			
 		case CIRCLE_PORTAL_BOTTOM:
 			return "obstacles/CubePortalBottom.png";
 		case CIRCLE_PORTAL_TOP:
@@ -175,7 +184,7 @@ public enum Obstacle {
 	/** Method Name: isSolid()
 	 * @Author Colin Toft
 	 * @Date January 7th, 2020
-	 * @Modified January 15th, 16th & 17th, 2020
+	 * @Modified January 15th, 16th, 17th & 19th, 2020
 	 * @Description Returns whether this Obstacle is solid (player can land on it)
 	 * @Parameters N/A
 	 * @Returns Whether this Obstacle is solid
@@ -185,7 +194,7 @@ public enum Obstacle {
 	 */
 	public boolean isSolid() {
 		// All blocks are solid (the player can land on them) except for portals and triangles
-		return !(killsPlayer() || isCirclePortal() || isTrianglePortal());
+		return !(killsPlayer() || isCirclePortal() || isTrianglePortal() || this == YELLOW_PAD || this == YELLOW_RING);
 	}
 
 	/** Method Name: isCirclePortal()
