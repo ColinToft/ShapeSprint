@@ -194,8 +194,8 @@ public abstract class Game extends JFrame implements WindowListener {
 		while (running) {
 			double now = System.nanoTime() / 1000000000.0;
             if (now - lastDrawTime > 1 / this.drawFPS && !loadingScene) {
+            	lastDrawTime = now;
 				drawScene();
-				lastDrawTime = now;
             } else if (loadingScene) {
             	try {
 	            	BufferStrategy strategy = getBufferStrategy();
@@ -211,8 +211,10 @@ public abstract class Game extends JFrame implements WindowListener {
             
             now = System.nanoTime() / 1000000000.0;
             if (now - lastUpdateTime > 1 / this.updateFPS && !paused && !loadingScene) {
-            	updateScene(now - lastUpdateTime);
-				lastUpdateTime = now;
+            	double dt = now - lastUpdateTime;
+            	lastUpdateTime = now;
+            	updateScene(dt);
+				
             } 
 		}
 	}

@@ -32,9 +32,10 @@ public enum Obstacle {
 	 * @Returns An Obstacle that corresponds to the string argument given
 	 * Data Type: String, Obstacle
 	 * Dependencies: N/A
-	 * Throws/Exceptions: N/A
+	 * Throws/Exceptions: Returns null if the string is not a valid abbreviation for an Obstacle type
 	 */
 	public static Obstacle fromString(String string) {
+		// Return the correct obstacle type based on the given string
 		switch (string) {
 		case "S": return SQUARE;
 		case "ST1": return SQUARE_TOP_1;
@@ -85,6 +86,7 @@ public enum Obstacle {
 	 * Throws/Exceptions: N/A
 	 */
 	public String getImageFilename() {
+		// Return the correct image file name based on the given obstacle type
 		switch (this) {
 		case SQUARE:
 			return "obstacles/BlackSquare.png";
@@ -166,6 +168,7 @@ public enum Obstacle {
 	 * Throws/Exceptions: N/A
 	 */
 	public boolean killsPlayer() {
+		// Return true if this obstacle is a triangle
 		return this == TRIANGLE || this == TRIANGLE_UPSIDE_DOWN;
 	}
 
@@ -173,7 +176,7 @@ public enum Obstacle {
 	 * @Author Colin Toft
 	 * @Date January 7th, 2020
 	 * @Modified January 15th, 16th & 17th, 2020
-	 * @Description Returns whether this Obstacle is solid (player cannot pass through it)
+	 * @Description Returns whether this Obstacle is solid (player can land on it)
 	 * @Parameters N/A
 	 * @Returns Whether this Obstacle is solid
 	 * Data Type: boolean, Obstacle
@@ -181,6 +184,7 @@ public enum Obstacle {
 	 * Throws/Exceptions: N/A
 	 */
 	public boolean isSolid() {
+		// All blocks are solid (the player can land on them) except for portals and triangles
 		return !(killsPlayer() || isCirclePortal() || isTrianglePortal());
 	}
 
@@ -196,6 +200,7 @@ public enum Obstacle {
 	 * Throws/Exceptions: N/A
 	 */
 	public boolean isCirclePortal() {
+		// Return true if this Obstacle is a circle portal
 		return this == CIRCLE_PORTAL_BOTTOM || this == CIRCLE_PORTAL_TOP;
 	}
 	
@@ -211,6 +216,7 @@ public enum Obstacle {
 	 * Throws/Exceptions: N/A
 	 */
 	public boolean isTrianglePortal() {
+		// Return true if this Obstacle is a triangle portal
 		return this == TRIANGLE_PORTAL_BOTTOM || this == TRIANGLE_PORTAL_TOP;
 	}
 }

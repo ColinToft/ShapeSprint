@@ -14,15 +14,15 @@ import xyz.colintoft.cgraphics.Util;
 */
 public class Level {
 	
-	public String name;
-	public Color backgroundColor;
-	public String filename;
-	public String musicFile;
-	public double normalProgress = 0;
-	public double practiceProgress = 0;
+	public String name; // The name of the level (displayed to the user)
+	public Color backgroundColor; // The background color of the level
+	public String filename; // The filename where the level data is stored
+	public String musicFile; // The filename where the music for the level is stored
+	public double normalProgress = 0; // The user's highest progress for this level in normal mode (from 0 to 1, where 1 means they have completed the level)
+	public double practiceProgress = 0; // The user's highest progress for this level in practice mode (from 0 to 1, where 1 means they have completed the level)
 	
-	public Obstacle[][] obstacles;
-	public int width, height;
+	public Obstacle[][] obstacles; // A 2D array of obstacles that make up the level
+	public int width, height; // The width and height of this level in blocks
 	
 	/** Method Name: Level()
 	 * @Author Colin Toft
@@ -40,10 +40,12 @@ public class Level {
 	 * Throws/Exceptions: N/A
 	 */
 	public Level(String name, Color backgroundColor, String filename, String musicFile) {
+		// Store the given information
 		this.name = name;
 		this.backgroundColor = backgroundColor;
 		this.filename = filename;
 		this.musicFile = musicFile;
+		// Intialize the level progress to 0 in both modes
 		normalProgress = 0f;
 		practiceProgress = 0f;
 	}
@@ -77,9 +79,10 @@ public class Level {
 	 * Throws/Exceptions: N/A
 	 */
 	public void updateNormalProgress(double value) {
+		// Only replace the normal progress value if the user has beaten their previous high score
 		if (value > normalProgress) {
 			normalProgress = value;
-			ShapeSprint.game.saveProgress();
+			ShapeSprint.game.saveProgress(); // Save the user's progress to the save file
 		}
 	}
 	
@@ -112,9 +115,10 @@ public class Level {
 	 * Throws/Exceptions: N/A
 	 */
 	public void updatePracticeProgress(double value) {
+		// Only replace the practice progress value if the user has beaten their previous high score
 		if (value > practiceProgress) {
 			practiceProgress = value;
-			ShapeSprint.game.saveProgress();
+			ShapeSprint.game.saveProgress(); // Save the user's progress to the save file
 		}
 	}
 	
@@ -130,6 +134,7 @@ public class Level {
 	 * Throws/Exceptions: N/A
 	 */
 	public void load() {
+		// Get a list of each line in the file (each obstacle is on its own line)
 		String[] lines = Util.readLinesFromFile(getClass(), "/levels/" + filename);
 		
 		// First find the necessary width and height based on the largest x and y values
@@ -137,8 +142,9 @@ public class Level {
 		height = 0;
 		int x, y;
 		String[] values;
+		// Loop through the list and look at the x and y values of each obstacle. If it is outside the current width or height, make that dimension larger
 		for (String line: lines) {
-			if (line.length() > 0 && Character.isDigit(line.charAt(0))) {
+			if (line.length() > 0 && Character.isDigit(line.charAt(0))) { // Make sure the line is valid
 				values = line.split(" ");
 				x = Integer.valueOf(values[0]);
 				y = Integer.valueOf(values[1]);
@@ -154,15 +160,18 @@ public class Level {
 		width++;
 		height++;
 		
+		// Create the obstacles array with the width and height of this level
 		obstacles = new Obstacle[width][height];
 		
+		// Now, read the coordinates and type of each obstacle and store it in the 2D array for the level
 		for (String line: lines) {
-			if (line.length() > 0 && Character.isDigit(line.charAt(0))) {
+			if (line.length() > 0 && Character.isDigit(line.charAt(0))) { // Make sure the line is valid
 				values = line.split(" ");
 				x = Integer.valueOf(values[0]);
 				y = Integer.valueOf(values[1]);
 				obstacles[x][y] = Obstacle.fromString(values[2]);
 				
+				// TODO delete this
 				if (obstacles[x][y] == null) {
 					System.out.println("Null obstacle at " + x + " " + y);
 				}

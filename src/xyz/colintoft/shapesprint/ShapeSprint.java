@@ -24,18 +24,19 @@ import xyz.colintoft.shapesprint.scenes.MainMenu;
 @SuppressWarnings("serial")
 public class ShapeSprint extends Game {
 	
-	public static ShapeSprint game;
+	public static ShapeSprint game; // The main game object
 	
-	public Level[] levels;
+	public Level[] levels; // A list of Level objects that the user can choose to play
 
-	private boolean firstTime;
-	public boolean hasUsedTriangleMode;
-	public boolean hasPausedGame;
-	public boolean hasUsedPracticeMode;
+	private boolean firstTime; // True is this is the user's first time playing the game
+	public boolean hasUsedTriangleMode; // True if the user has used triangle mode before
+	public boolean hasPausedGame; // True if the user has paused the game before
+	public boolean hasUsedPracticeMode; // True if the user has used practice mode before
 	
-	public static final String saveFile = "/saveGame.txt";
+	public static final String saveFile = "/saveGame.txt"; // The file where the user's data should be saved to
 	
 	public static void main(String[] args) {
+		// Run the game
 		game = new ShapeSprint();
 		game.run();
 	}
@@ -53,16 +54,17 @@ public class ShapeSprint extends Game {
 	 */
 	@Override
 	public void init() {
-		
+		// Initialize the list levels
 		levels = new Level[] {
 			new Level("Dimensional Vortex" , Color.BLUE, "dimensionalvortex.txt", "DimensionalVortex.wav"),
 			new Level("Spatial Plane", Color.MAGENTA, "spatialplane.txt", "SpatialPlane.wav"),
-			new Level("Temporal Nebula", new Color(255, 230, 0), "temporalnebula.txt", "TemporalNebula.wav"),
-			new Level("Endless", Color.GREEN, "dimensionalvortex.txt", "Bouncing.wav")
+			new Level("Temporal Nebula", new Color(255, 230, 0), "temporalnebula.txt", "TemporalNebula.wav")
 		};
 		
+		// Load the previous user progress
 		loadProgress();
 		
+		// Set up the window and open the main menu
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		setFrame("Shape Sprint", (int) dim.getWidth(), (int) dim.getHeight());
 		setSize(640, 480);
@@ -84,11 +86,14 @@ public class ShapeSprint extends Game {
 	 */
 	public void saveProgress() {
 		try {
-			PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter("assets" + saveFile))); //create a filewriter to output to the file
+			// Open the save file
+			PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter("assets" + saveFile))); // Create a PrintWriter to output to the file
+			// Write the progress in each level to the file
 			for (Level level: levels) {
 				writer.println(level.normalProgress);
 				writer.println(level.practiceProgress);
 			}
+			// Write whether the user has used triangle mode, practice mode and the pause menu so the game knows not to show the help messages for these again
 			writer.println(hasUsedTriangleMode);
 			writer.println(hasPausedGame);
 			writer.println(hasUsedPracticeMode);
@@ -111,11 +116,12 @@ public class ShapeSprint extends Game {
 	 * Throws/Exceptions: N/A
 	 */
 	public void loadProgress() {
-		if (Util.fileExists(getClass(), saveFile)) {
+		if (Util.fileExists(getClass(), saveFile)) { // First make sure the save file exists
 			int i = 0;
-			String[] lines = Util.readLinesFromFile(getClass(), saveFile);
-			firstTime = true;
+			String[] lines = Util.readLinesFromFile(getClass(), saveFile); // Read the information from the file into an array of String
+			firstTime = true; // Start by assuming it is their first time, if they have made any progress in a level this value will later be set to false
 			for (Level level: levels) {
+				// Read the progress from the file and store it in the corresponding Level object
 				level.setNormalProgress(Double.valueOf(lines[i++]));
 				level.setPracticeProgress(Double.valueOf(lines[i++]));
 				
@@ -124,10 +130,13 @@ public class ShapeSprint extends Game {
 					firstTime = false;
 				}
 			}
+			
+			// Read the boolean values from the end of the file
 			hasUsedTriangleMode = Boolean.valueOf(lines[i++]);
 			hasPausedGame = Boolean.valueOf(lines[i++]);
 			hasUsedPracticeMode = Boolean.valueOf(lines[i++]);
 		} else {
+			// The file does not exist, so this must be the user's first time playing
 			firstTime = true;
 		}
 	}
@@ -160,6 +169,7 @@ public class ShapeSprint extends Game {
 	 */
 	@Override
 	public void onWindowClosing() {
+		// Save the user's progress before the window closes
 		saveProgress();
 	}
 

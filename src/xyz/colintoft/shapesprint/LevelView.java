@@ -30,70 +30,73 @@ import xyz.colintoft.shapesprint.scenes.PlayLevel;
 */
 public class LevelView extends Drawable {
 
-	private Level level;
+	private Level level; // The level that is being played
 	
-	private final double xSpeed = 10.386;
+	private final double xSpeed = 10.386; // The constant speed at which the player moves to the right, in blocks per second (taken from a forum about geometry dash physics: http://gdforum.freeforums.net/thread/48749/p1kachu-presents-physics-geometry-dash)
 	private final double levelHeight = 11; // Height of the level in blocks
-	private final double baseGroundHeight = 0.3;
+	private final double baseGroundHeight = 0.3; // The starting height of the ground (as a fraction of the screen height)
 	private double groundHeight = baseGroundHeight; // Fraction of the height of the screen that the ground takes up
-	private final double groundHeightMoveSpeed = 0.5;
-	private final double groundHeightThreshold = 0.55;
-	private final double playerScreenX = 0.34; // Fraction of the width
-	private final int levelEndOffset = 8;
-	private final double backgroundSpeed = 0.125;
+	private final double groundHeightMoveSpeed = 0.5; // The speed at which the ground height will move up and down
+	private final double groundHeightThreshold = 0.55; // If the player is above this coordinate (fraction of screen height)
+	private final double playerScreenX = 0.34; // The x coordinate where the player is drawn (as a fraction of the screen width)
+	private final int levelEndOffset = 8; // How many blocks the end of the level appears after the last obstacle
+	private final double backgroundSpeed = 0.125; // The speed of the background compared to the speed of the ground
 	
-	private final double playerWidth = 1;
-	private int groundTileWidth;
+	private final double playerWidth = 1; // The width of the player in blocks
+	private int groundTileWidth; // The width of one ground tile in pixels
 	
-	private final double playerRotationSpeed = xSpeed / (playerWidth * 0.5);
-	private double playerRotation = 0;
+	private final double playerRotationSpeed = xSpeed / (playerWidth * 0.5); // The speed that the player rotates at in radians/s
+	private double playerRotation = 0; // The current player rotation
 	
-	private double playerX = -15; // in blocks
-	private double playerY = 0; // in blocks (0 is ground level)
+	private double playerX = -15; // The player's x coordinate in blocks (0 is the start of the level)
+	private double playerY = 0; // The player's y coordinate in blocks (0 is ground level)
+	private double lastGroundY = 0; // The y coordinate of the last time the player was on the ground (in blocks)
 	
-	private boolean hasDied = false;
-	private double deathTimer = 0;
-	public boolean hasBeatLevel = false;
-	private double winTimer = 0;
-	private double winAnimationLength = 1;
+	private boolean hasDied = false; // Whether or not the player has died
+	private double deathTimer = 0; // A timer that counts up in seconds after the player has died
+	public boolean hasBeatLevel = false; // Whether or not the player has beat the level
+	private double winTimer = 0; // A timer that counts up in seconds after the player has beat the level
+	private double winAnimationLength = 1; // The length of the level completion animation in seconds
 	
-	private boolean jumping = false;
-	private boolean holding = false;
-	public boolean hasJumped = false;
-	private boolean hasUsedTriangleMode = false;
-	private double lastGroundY = 0;
+	private boolean jumping = false; // Whether the user is currently jumping (pressing space or clicking)
+	private boolean holding = false; // Whether the user is holding down the mouse
+	public boolean hasJumped = false; // Whether the user has jumped so far
+	private boolean hasUsedTriangleMode = false; // Whether or not the user has used triangle mode so far
 		
-	private boolean playingMusic = false;
+	private boolean playingMusic = false; // Whether music is currently playing
 	
-	private double ySpeed = 0;
-	private final double gravity = 0.876 * xSpeed * xSpeed;
-	private final double minYSpeed = -2.6 * xSpeed;
-	private final double jumpYSpeed = 2 * xSpeed;
-	private final double triangleMaxYSpeed = 1.4 * xSpeed;
-	private final double triangleMinYSpeed = -1 * xSpeed;
-	private final double triangleYSpeedIncrease = 0.4 * xSpeed * xSpeed;
+	private double ySpeed = 0; // The current y speed of the player in blocks per second
+	private final double gravity = 0.876 * xSpeed * xSpeed; // The rate at which gravity affects the y speed (taken from a forum about geometry dash physics)
+	private final double minYSpeed = -2.6 * xSpeed; // The minimum y speed, or fastest rate at which the player can fall (taken from a forum about geometry dash physics)
+	private final double jumpYSpeed = 2 * xSpeed; // The value that the y speed is set to when the player jumps (taken from a forum about geometry dash physics)
+	private final double triangleMaxYSpeed = 1.4 * xSpeed; // The maximum y speed that a player can reach when in triangle mode (found with trial and error)
+	private final double triangleMinYSpeed = -1 * xSpeed; // The minimum y speed that a player can reach when in triangle mode (found with trial and error)
+	private final double triangleYSpeedIncrease = 0.4 * xSpeed * xSpeed; // The rate at which y speed increases when the player holds down with the mouse or space bar (found with trial and error)
 	
-	private boolean practiceMode = false;
-	private double checkpointX = playerX;
-	private double checkpointY = playerY;
-	private double checkpointYSpeed = ySpeed;
-	private boolean checkpointTriangleMode = false;
-	private int checkpointDeathCount = 0;
-	private double prevCheckpointX = checkpointX;
-	private double prevCheckpointY = checkpointY;
-	private double prevCheckpointYSpeed = checkpointYSpeed;
-	private boolean prevCheckpointTriangleMode = checkpointTriangleMode;
+	private boolean practiceMode = false; // Whether the player is currently in practice mode
+	private double checkpointX = playerX; // The x coordinate of the most recent practice mode checkpoint, in blocks
+	private double checkpointY = playerY; // The y coordinate of the most recent practice mode checkpoint, in blocks
+	private double checkpointYSpeed = ySpeed; // The y speed of the player at the most recent practice mode checkpoint, in blocks per second
+	private boolean checkpointTriangleMode = false; // Whether the player was in triangle mode at the most recent checkpoint
+	private int checkpointDeathCount = 0; // How many times the player has died close to the most recent checkpoint
+	private double prevCheckpointX = checkpointX; // The x coordinate of the previous practice mode checkpoint, in blocks
+	private double prevCheckpointY = checkpointY; // The y coordinate of the previous practice mode checkpoint, in blocks
+	private double prevCheckpointYSpeed = checkpointYSpeed; // The y speed of the player at the previous practice mode checkpoint, in blocks per second
+	private boolean prevCheckpointTriangleMode = checkpointTriangleMode; // Whether the player was in triangle mode at the previous checkpoint
 	
-	private boolean triangleMode = false;
+	private boolean triangleMode = false; // Whether the player is currently in triangle mode
 	
-	private BufferedImage playerCircleImage, playerTriangleImage;
-	private BufferedImage backgroundImage, groundImage, ceilingImage, checkpointImage;
-	private double triangleImagePadding = 0.5 * playerWidth;
+	private BufferedImage playerCircleImage, playerTriangleImage; // Player images
+	private BufferedImage backgroundImage, groundImage, ceilingImage; // Images for the background of the level
+	private BufferedImage checkpointImage; // Image for the practice mode checkpoints
+	private double triangleImagePadding = 0.5 * playerWidth; // How much padding to put around the triangle image (needed so that rotation doesn't cut off the image)
 		
-	HashMap<Obstacle, BufferedImage> images;
+	HashMap<Obstacle, BufferedImage> images; // A Hashmap that matches an Obstacle type to its corresponding image
 	
-	private Clip music, practiceMusic;
-	private Clip deathSound, winSound;
+	private Clip music; // The music for this level
+	private Clip practiceMusic; // The practice mode music
+	private Clip deathSound; // The sound that plays when the player is killed
+	private Clip winSound; // The sound that plays when the player completes the level
 	
 	/** Method Name: LevelView()
 	 * @Author Colin Toft
@@ -113,9 +116,10 @@ public class LevelView extends Drawable {
 	 */
 	public LevelView(double x, double y, double width, double height, Level level) {
 		super(x, y, width, height);
-		setBackground(new Color(0, 0, 0, 0));
-		setDynamic(true);
+		setBackground(new Color(0, 0, 0, 0)); // Use a transparent background
+		setDynamic(true); // Means this Drawable needs to be constantly redrawn
 		
+		// Store the level object
 		this.level = level;
 		
 		// Load Music
@@ -138,6 +142,7 @@ public class LevelView extends Drawable {
 	 * Throws/Exceptions: N/A
 	 */
 	public LevelView(Level level) {
+		// Create a level view object using the parent's dimensions
 		this(0, 0, 1, 1, level);
 	}
 	
@@ -158,6 +163,7 @@ public class LevelView extends Drawable {
 		BufferedImage originalBackground = Util.loadImageFromFile(getClass(), "backgrounds/background1classic.png");
 		backgroundImage = Util.scaleImage(originalBackground, pixelWidth(), pixelWidth());
 		
+		// Lay the background color over the background image
 		Graphics g = backgroundImage.createGraphics();
 		Color bgColor = new Color(level.backgroundColor.getRed(), level.backgroundColor.getGreen(), level.backgroundColor.getBlue(), 205);
 	    g.setColor(bgColor);
@@ -168,12 +174,14 @@ public class LevelView extends Drawable {
 		groundTileWidth = (int)(pixelHeight() * groundHeight);
 		BufferedImage groundTile = Util.loadImageFromFile(getClass(), "backgrounds/ground1.png");
 		
+		// Draw the ground tile image multiple times to fill up the ground image
 		groundImage = Util.getEmptyImage((pixelWidth() / groundTileWidth + 2) * groundTileWidth, groundTileWidth);
 		g = groundImage.createGraphics();
 		for (int i = 0; i < groundImage.getWidth(); i += groundTileWidth) {
 			g.drawImage(groundTile, i, 0, groundTileWidth, groundTileWidth, null);
 		}
 		
+		// Lay the ground Color over the ground image, then a mostly transparent layer of black to make it slightly darker
 		g.setColor(bgColor);
 	    g.fillRect(0, 0, groundImage.getWidth(), groundImage.getHeight());
 	    g.setColor(new Color(0, 0, 0, 50));
@@ -183,23 +191,27 @@ public class LevelView extends Drawable {
 		// Load Ceiling Image
 		BufferedImage ceilingTile = Util.loadImageFromFile(getClass(), "backgrounds/ceiling1.png");
 		
+		// Draw the ceiling tile image multiple times to fill up the ceiling image
 		ceilingImage = Util.getEmptyImage((pixelWidth() / groundTileWidth + 2) * groundTileWidth, groundTileWidth);
 		g = ceilingImage.createGraphics();
 		for (int i = 0; i < ceilingImage.getWidth(); i += groundTileWidth) {
 			g.drawImage(ceilingTile, i, 0, groundTileWidth, groundTileWidth, null);
 		}
 		
+		// Lay the ground Color over the ceiling image, then a mostly transparent layer of black to make it slightly darker
 		g.setColor(bgColor);
 	    g.fillRect(0, 0, ceilingImage.getWidth(), ceilingImage.getHeight());
 	    g.setColor(new Color(0, 0, 0, 50));
 	    g.fillRect(0, 0, ceilingImage.getWidth(), ceilingImage.getHeight());
 	    g.dispose();
 	    
-	    // Load Player Image
+	    // Load player circle image
 		BufferedImage originalPlayerImage = Util.loadImageFromFile(getClass(), "players/PlayerCircle.png");
 		playerCircleImage = Util.scaleImage(originalPlayerImage, (int)(getBlockSize() * playerWidth), (int)(getBlockSize() * playerWidth), false);
 		
+		// Load player triangle image
 		originalPlayerImage = Util.loadImageFromFile(getClass(), "players/PlayerTriangle.png");
+		// Use a larger image in order to add padding around the triangle image
 		playerTriangleImage = Util.getEmptyImage((int)(getBlockSize() * (1.5 * playerWidth + triangleImagePadding * 2)), (int)(getBlockSize() * (1 * playerWidth + triangleImagePadding * 2)));
 		g = playerTriangleImage.createGraphics();
 		g.drawImage(originalPlayerImage, (int)(getBlockSize() * triangleImagePadding), (int)(getBlockSize() * triangleImagePadding), (int)(getBlockSize() * 1.5 * playerWidth), (int)(getBlockSize() * playerWidth), null);
@@ -207,6 +219,7 @@ public class LevelView extends Drawable {
 		// Load Obstacle Images
 		images = new HashMap<Obstacle, BufferedImage>();
 		BufferedImage image;
+		// Loop through each obstacle type and put its corresponding image in the hashmap
 		for (Obstacle type: Obstacle.values()) {
 			image = Util.loadImageFromFile(getClass(), type.getImageFilename());
 			image = Util.scaleImage(image, (int)getBlockSize() + 1, (int)getBlockSize() + 1);
@@ -233,40 +246,42 @@ public class LevelView extends Drawable {
 	 */
 	@Override
 	public void draw(Graphics g) {
-		Graphics2D g2d = (Graphics2D) g;
+		Graphics2D g2d = (Graphics2D) g; // Convert the Graphics object to Graphics2D in order to use extra commands
 	    
-		int backgroundX = (int)(-getBlockSize() * (playerX * backgroundSpeed % (backgroundImage.getWidth() / getBlockSize())));
+		// First draw the background image
+		int backgroundX = (int)(-getBlockSize() * (playerX * backgroundSpeed % (backgroundImage.getWidth() / getBlockSize()))); // Calculate the correct position using the player's x coordinate
 		if (backgroundX > 0) {
 			backgroundX -= backgroundImage.getWidth();
 	    }
+		// Since the background loops it needs to be drawn twice, one next to the other
 	    g2d.drawImage(backgroundImage, backgroundX, pixelHeight() - backgroundImage.getHeight(), null);
 	    g2d.drawImage(backgroundImage, backgroundX + backgroundImage.getWidth(), pixelHeight() - backgroundImage.getHeight(), null);
 	    
 	    // Draw the ground
-	    int groundX = (int)(-getBlockSize() * (playerX % (groundTileWidth / getBlockSize())));
+	    int groundX = (int)(-getBlockSize() * (playerX % (groundTileWidth / getBlockSize()))); // Calculate the correct position using the player's x coordinate
 	    if (groundX > 0) {
 	    	groundX -= groundTileWidth;
 	    }
 	    
-	    if (triangleMode) {
-		    g2d.drawImage(ceilingImage, groundX, (int)(pixelHeight() * (0.5 / levelHeight) - ceilingImage.getHeight()), null);
-		    
-		    g2d.setStroke(new BasicStroke(2f));
-		    g2d.setColor(Color.WHITE);
-		    g2d.drawLine(0, (int)(pixelHeight() * (0.5 / levelHeight)), pixelWidth(), (int)(pixelHeight() * (0.5 / levelHeight)));
-	    }
-	    
 	    g2d.drawImage(groundImage, groundX, (int)(pixelHeight() * (1 - groundHeight)), null);
 	    
+	    // Draw a white line across the top of the ground
 	    g2d.setStroke(new BasicStroke(2f));
 	    g2d.setColor(Color.WHITE);
 	    g2d.drawLine(0, (int)(pixelHeight() * (1 - groundHeight)) + 2, pixelWidth(), (int)(pixelHeight() * (1 - groundHeight)) + 2);
 	    
-	    //g2d.fillRect(0, 0, pixelWidth(), (int)(pixelHeight() * (1 - groundHeight)));
+	    // Draw the ceiling in the same way if the player is in triangle mode
+	    if (triangleMode) {
+		    g2d.drawImage(ceilingImage, groundX, (int)(pixelHeight() * (0.5 / levelHeight) - ceilingImage.getHeight()), null);
+		    // Draw a white line at the bottom of the ceiling
+		    g2d.drawLine(0, (int)(pixelHeight() * (0.5 / levelHeight)), pixelWidth(), (int)(pixelHeight() * (0.5 / levelHeight)));
+	    }
 	    
+	    // Draw the player
 	    if (!hasDied) {
 	    	int playerImageX, playerImageY;
 	    	if (hasBeatLevel) {
+	    		// If the player has beat the level, animate their x, y and rotation based on the winTimer
 	    		int beginX = blockXToPixelX(level.width);
 	    		int endX = blockXToPixelX(level.width + levelEndOffset);
 	    		double endProgress = Math.pow(winTimer / winAnimationLength, 2.5);
@@ -274,37 +289,42 @@ public class LevelView extends Drawable {
 			    playerImageX = (int)(beginX + (endX - beginX) * endProgress);
 				playerImageY = blockYToPixelY(playerY + playerWidth + -7 * (endProgress) * (endProgress - 1.6));
 	    	} else {
+	    		// Calculate the pixel coordinates where the player should be drawn
 	    		playerImageX = (int)(pixelWidth() * playerScreenX);
 	    		playerImageY = blockYToPixelY(playerY + playerWidth);
 	    	}
 			
+	    	// Rotate the player's image and then draw its to the screen
 	    	if (!hasBeatLevel || playerImageX < blockXToPixelX(level.width + levelEndOffset + playerWidth)) {
+	    		// Create the AffineTransform objects needed to do the rotation
 				AffineTransform backup = g2d.getTransform();
 				AffineTransform rotate;
 				if (triangleMode) {
+					// Rotate the player while accounting for the padding on the triangle image, then draw it the at the previously calculated coordinates
 					rotate = AffineTransform.getRotateInstance(playerRotation, playerTriangleImage.getWidth() / 2.0, playerTriangleImage.getHeight() / 2.0);
 				    AffineTransformOp op = new AffineTransformOp(rotate, AffineTransformOp.TYPE_BILINEAR);
 					int padding = (int)(triangleImagePadding * getBlockSize());
 			    	g2d.drawImage(op.filter(playerTriangleImage, null), playerImageX - padding, playerImageY - padding, null);
 				} else {
+					// Rotate the player then draw it the at the previously calculated coordinates
 					rotate = AffineTransform.getRotateInstance(playerRotation, playerCircleImage.getWidth() / 2.0, playerCircleImage.getHeight() / 2.0);
 				    AffineTransformOp op = new AffineTransformOp(rotate, AffineTransformOp.TYPE_BILINEAR);
 			    	g2d.drawImage(op.filter(playerCircleImage, null), playerImageX, playerImageY, null);
 				}
 			   
+				// Restore the previous transform so the other images will not appear rotated as well
 			    g2d.setTransform(backup);
 	    	}
 	    }
 	    
 	    // Draw obstacles
 	    Obstacle o;
-	    for (int obstacleX = (int) screenXToBlockX(0); obstacleX < Math.min((int) screenXToBlockX(1) + 1, level.width); obstacleX++) {
-	    	if (obstacleX < 0) {
-	    		continue;
-	    	}
-	    	for (int obstacleY = 0; obstacleY < Math.min((int) screenYToBlockY(0) + 1, level.height); obstacleY++) {
-    			o = level.obstacles[obstacleX][obstacleY];
+	    // Loop through the x and y coordinates that are currently in view
+	    for (int obstacleX = Math.max(0, (int) screenXToBlockX(0)); obstacleX < Math.min((int) screenXToBlockX(1) + 1, level.width); obstacleX++) {
+	    	for (int obstacleY = Math.max(0, (int) screenYToBlockY(1)); obstacleY < Math.min((int) screenYToBlockY(0) + 1, level.height); obstacleY++) {
+    			o = level.obstacles[obstacleX][obstacleY]; // Find the obstacle at those coordinates
     			if (o != null) {
+    				// If there is an obstacle there, draw it
     				g2d.drawImage(images.get(o), blockXToPixelX(obstacleX), blockYToPixelY(obstacleY + 1), null);
     			}
 	    	}
@@ -312,14 +332,16 @@ public class LevelView extends Drawable {
 	    
 	    // Draw the end of the level
 	    if (screenXToBlockX(1) > level.width + levelEndOffset) {
+	    	// Draw a large black wall
 	    	g2d.setColor(Color.BLACK);
 	    	g2d.fillRect(blockXToPixelX(level.width + levelEndOffset), 0, pixelWidth() - blockXToPixelX(level.width + levelEndOffset), (int)(pixelHeight() * Math.min(1, 1 - groundHeight)));
+	    	// Draw a white line on the left of the wall
 	    	g2d.setColor(Color.WHITE);
 	    	g2d.fillRect(blockXToPixelX(level.width + levelEndOffset), 0, (int)(pixelWidth() * 0.005), (int)(pixelHeight() * Math.min(1, 1 - groundHeight)));
 	    }
 	    
 	    if (practiceMode) {
-	    	// Draw checkpoints
+	    	// Draw checkpoints if the game is currently in practice mode
 	    	if (checkpointX > 0) {
 	    		g2d.drawImage(checkpointImage, blockXToPixelX(checkpointX) + (int)(getBlockSize() - checkpointImage.getWidth()) / 2, blockYToPixelY(checkpointY + 1) + (int)(getBlockSize() - checkpointImage.getHeight()) / 2, null);
 	    	}
@@ -345,71 +367,84 @@ public class LevelView extends Drawable {
 	@Override
 	public void update(double dt) {
 		if (!triangleMode) {
+			// If the player is in circle mode, rotate them to simulate rolling along the ground
 			playerRotation += playerRotationSpeed * dt;
 			playerRotation %= 2 * Math.PI;
 		}
 		
 		if (!hasDied && !hasBeatLevel) {
+			// Move the player to the right
 			playerX += xSpeed * dt;
 		}
 		
-		double minY = getMinY();
+		double minY = getMinY(); // Find the y coordinate of the ground or obstacle beneath the player
 		boolean justLanded = false;
 		
-		if (playerY > minY || ySpeed != 0) {
+		if (playerY > minY || ySpeed != 0) { // If the player is in the air
 			if (!triangleMode) {
+				// If the player is in circle mode, simulate gravity by lowering their ySpeed
 				ySpeed = Math.max(ySpeed - gravity * dt, minYSpeed);
 			} else if (!jumping) {
+				// If the player is in triangle mode but not holding the mouse or space bar, their y speed is also lowered
 				ySpeed = Math.max(ySpeed - triangleYSpeedIncrease * dt, triangleMode ? triangleMinYSpeed : minYSpeed);
 			}
 			
+			// Adjust the player's y coordinate based on their y speed
 			playerY += ySpeed * dt;
 		}
 				
-		if (playerY <= minY + 0.03 && ySpeed <= 0) {
-			justLanded = ySpeed < 0;
+		if (playerY <= minY && ySpeed <= 0) { // If the player is on the ground
+			justLanded = ySpeed < 0; // If the y speed is smaller than 0, the player is falling and must have just landed on the ground
 			
+			// The player is on the ground, so set y speed to 0 and the y coordinate to the exact y coordinate of the ground
 			ySpeed = 0;
 			playerY = minY;
-			lastGroundY = playerY;
-			if (jumping && !triangleMode && !hasDied && !hasBeatLevel) {
+			lastGroundY = playerY; // Store the y coordinate of the last time the player was on the ground
+			
+			if (jumping && !triangleMode) {
+				// If the player is jumping (holding down the mouse or space bar), call the jump method
 				jump();
-				holding = true;
+				holding = true; // The player is now holding the mouse/space bar
 			}
 		}
 		
-		double maxY = getMaxY();
-		boolean circleHitCeiling = false;
-		if (playerY >= maxY - playerWidth && ySpeed >= 0) {
+		double maxY = getMaxY(); // Find the y coordinate of the ground or obstacle beneath the player
+		boolean circleHitCeiling = false; // True if the player is in circle mode and has gone above the max y coordinate (ran into an obstacle above them)
+		if (playerY >= maxY - playerWidth && ySpeed >= 0) { // If the player is moving upwards and is running into an obstacle above them
 			if (triangleMode) {
+				// If the player hits a ceiling in triangle mode, set their y speed to 0 and make their y coordinate equal to the exact position beneath the obstacle
 				ySpeed = 0;
 				playerY = maxY - playerWidth;
 			} else {
-				circleHitCeiling = true;
+				circleHitCeiling = true; // The player is in circle mode and hit a ceiling, meaning they should be killed
 			}
 		}
 		
-		double targetGroundHeight;
+		double targetGroundHeight; // The height that the ground should be drawn at (in screen coordinates) based on the player's y coordinate
 		if (triangleMode) {
 			if (jumping) {
+				// If the player is holding the mouse/space bar in triangle mode, increase their y speed
 				ySpeed = Math.min(triangleMaxYSpeed, ySpeed + triangleYSpeedIncrease * dt);
 				if (!hasUsedTriangleMode) {
-					((ShapeSprint) getGame()).hasUsedTriangleMode = true;
+					hasUsedTriangleMode = true;
+					((ShapeSprint) getGame()).hasUsedTriangleMode = true; // Remember that the player has used triangle mode to avoid showing them help messages for it in the future
 				}
 			}
 			if (playerY == 0) {
-				playerRotation = Math.max(playerRotation - playerRotationSpeed * 0.5 * dt, 0);
+				playerRotation = Math.max(playerRotation - playerRotationSpeed * 0.5 * dt, 0); // If the player is on the ground, gradually move their rotation to 0
 			} else if (playerY == maxY - playerWidth) {
-				playerRotation = Math.min(playerRotation + playerRotationSpeed * 0.5 * dt, 0);
+				playerRotation = Math.min(playerRotation + playerRotationSpeed * 0.5 * dt, 0); // If the player is on the ceiling, gradually move their rotation to 0
 			} else {
-				playerRotation = Math.atan2(-ySpeed, xSpeed);
+				playerRotation = Math.atan2(-ySpeed, xSpeed); // If the player is in the air, set their rotation according to their speed to make them point in that direction
 			}
 			
-			targetGroundHeight = 0.5 / levelHeight;
+			targetGroundHeight = 0.5 / levelHeight; // In triangle mode the ground height always stays the same
 		} else {
-			targetGroundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (lastGroundY * getBlockSize() / pixelHeight()));
+			// If the player is in circle mode, calculate the ground height based on the player's y coordinate
+			targetGroundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (Math.min(lastGroundY, playerY) * getBlockSize() / pixelHeight()));
 		}
 		
+		// Move the ground height towards the target ground height if necessary
 		if (targetGroundHeight < groundHeight && !hasBeatLevel && !hasDied) {
 			groundHeight = Math.max(targetGroundHeight, groundHeight - groundHeightMoveSpeed * dt);
 		} else if (targetGroundHeight > groundHeight && !hasBeatLevel && !hasDied) {
@@ -417,6 +452,7 @@ public class LevelView extends Drawable {
 		}
 
 		if (!hasDied && (shouldDie() || circleHitCeiling)) {
+			// If the player has been killed, start the death sound and death timer
 			hasDied = true;
 			deathTimer = 0;
 			if (!practiceMode) {
@@ -426,13 +462,15 @@ public class LevelView extends Drawable {
 			deathSound.start();
 		}
 		
-		updateMode();
+		updateMode(); // Updates the players mode to triangle mode or circle mode if they are traveling through a portal
 		
 		if (practiceMode && !hasDied && !hasBeatLevel && (justLanded || triangleMode) && playerX - checkpointX > 15) {
+			// If the user is in practice mode, create a checkpoint if they have just landed and are far enough away from the last checkpoint
 			createCheckpoint();
 		}
 		
 		if (hasDied) {
+			jumping = false;
 			deathTimer += dt;
 			if (deathTimer > 1) {
 				deathSound.stop();
@@ -443,6 +481,7 @@ public class LevelView extends Drawable {
 		
 		if (playerX > level.width && !hasBeatLevel) {
 			hasBeatLevel = true;
+			jumping = false;
 			winTimer = 0;
 			if (practiceMode) {
 				stopMusic();
@@ -782,7 +821,7 @@ public class LevelView extends Drawable {
 	/** Method Name: keyPressed()
 	 * @Author Colin Toft
 	 * @Date December 30th, 2019
-	 * @Modified December 31st, 2019
+	 * @Modified December 31st, 2019, January 19th, 2020
 	 * @Description Overrides Scene.keyPressed() and handles key presses while playing a level (pressing space to jump)
 	 * @Parameters
 	 *      - KeyEvent e: the event containing data about the key press event
@@ -793,7 +832,7 @@ public class LevelView extends Drawable {
 	 */
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+		if (e.getKeyCode() == KeyEvent.VK_SPACE && !hasBeatLevel && !hasDied) {
 			jumping = true;
 		}
 	}
@@ -821,7 +860,7 @@ public class LevelView extends Drawable {
 	/** Method Name: onMousePressed()
 	 * @Author Colin Toft
 	 * @Date December 30th, 2019
-	 * @Modified N/A
+	 * @Modified January 19th, 2020
 	 * @Description Overrides Scene.onMousePressed() and handles mouse presses while playing a level (clicking to jump)
 	 * @Parameters
 	 *      - double x: the x coordinate of the mouse (as a fraction of the parent panel's width)
@@ -834,7 +873,9 @@ public class LevelView extends Drawable {
 	 */
 	@Override
 	public void onMousePressed(double x, double y, int button) {
-		jumping = true;
+		if (!hasBeatLevel && !hasDied) {
+			jumping = true;
+		}
 	}
 	
 	/** Method Name: onMouseReleased()
