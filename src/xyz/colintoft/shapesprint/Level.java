@@ -177,5 +177,120 @@ public class Level {
 				}
 			}
 		}
+		
+		// Go through the squares and assign them to the right square type based on their neighbors
+		for (x = 0; x < width; x++) {
+			for (y = 0; y < height; y++) {
+				if (obstacles[x][y] != null && obstacles[x][y].isSolid()) { // First make sure there is a square in this location
+					boolean left, right, up, down, bottomLeft, bottomRight, topLeft, topRight; // The square's neighbors in all directions (true if there is a square in that location, otherwise false)
+					try {
+						left = obstacles[x - 1][y] != null && obstacles[x - 1][y].isSolid();
+					} catch (ArrayIndexOutOfBoundsException e) {
+						left = false;
+					}
+					
+					try {
+						right = obstacles[x + 1][y] != null && obstacles[x + 1][y].isSolid();
+					} catch (ArrayIndexOutOfBoundsException e) {
+						right = false;
+					}
+					
+					try {
+						up = obstacles[x][y + 1] != null && obstacles[x][y + 1].isSolid();
+					} catch (ArrayIndexOutOfBoundsException e) {
+						up = false;
+					}
+					
+					try {
+						down = obstacles[x][y - 1] != null && obstacles[x][y - 1].isSolid();
+					} catch (ArrayIndexOutOfBoundsException e) {
+						down = false;
+					}
+					
+					try {
+						bottomLeft = obstacles[x - 1][y - 1] != null && obstacles[x - 1][y - 1].isSolid();
+					} catch (ArrayIndexOutOfBoundsException e) {
+						bottomLeft = false;
+					}
+					
+					try {
+						bottomRight = obstacles[x + 1][y - 1] != null && obstacles[x + 1][y - 1].isSolid();
+					} catch (ArrayIndexOutOfBoundsException e) {
+						bottomRight = false;
+					}
+					
+					try {
+						topLeft = obstacles[x - 1][y + 1] != null && obstacles[x - 1][y + 1].isSolid();
+					} catch (ArrayIndexOutOfBoundsException e) {
+						topLeft = false;
+					}
+					
+					try {
+						topRight = obstacles[x + 1][y + 1] != null && obstacles[x + 1][y + 1].isSolid();
+					} catch (ArrayIndexOutOfBoundsException e) {
+						topRight = false;
+					}
+					
+					// Look at the squares neighbors to determine the correct shape
+					if (!left && !right && !up && !down) {
+						obstacles[x][y] = Obstacle.SQUARE;
+					} else if (left && right && !up && down) {
+						if (!bottomLeft) {
+							obstacles[x][y] = Obstacle.SQUARE_CENTER_BOTTOM_LEFT_LINE_TOP;
+						} else if (!bottomRight) {
+							obstacles[x][y] = Obstacle.SQUARE_CENTER_BOTTOM_RIGHT_LINE_TOP;
+						} else {
+							obstacles[x][y] = Obstacle.SQUARE_TOP_1;
+						}
+					} else if (left && right && up && !down) {
+						if (!topLeft && !topRight) {
+							obstacles[x][y] = Obstacle.SQUARE_CENTER_TOP_LEFT_TOP_RIGHT_LINE_BOTTOM;
+						} else if (!topLeft) {
+							obstacles[x][y] = Obstacle.SQUARE_CENTER_TOP_LEFT_LINE_BOTTOM;
+						} else if (!topRight) {
+							obstacles[x][y] = Obstacle.SQUARE_CENTER_TOP_RIGHT_LINE_BOTTOM;
+						} else {
+							obstacles[x][y] = Obstacle.SQUARE_BOTTOM_1;
+						}
+					} else if (!left && right && up && down) {
+						obstacles[x][y] = Obstacle.SQUARE_LEFT_1;
+					} else if (left && !right && up && down) {
+						obstacles[x][y] = Obstacle.SQUARE_RIGHT_1;
+					} else if (!left && right && !up && down) {
+						obstacles[x][y] = Obstacle.SQUARE_TOP_LEFT;
+					} else if (!left && right && up && !down) {
+						obstacles[x][y] = Obstacle.SQUARE_BOTTOM_LEFT;
+					} else if (left && !right && !up && down) {
+						obstacles[x][y] = Obstacle.SQUARE_TOP_RIGHT;
+					} else if (left && !right && up && !down) {
+						obstacles[x][y] = Obstacle.SQUARE_BOTTOM_RIGHT;
+					} else if (!left && !right && up && down) {
+						obstacles[x][y] = Obstacle.SQUARE_VERTICAL;
+					} else if (left && right && !up && !down) {
+						obstacles[x][y] = Obstacle.SQUARE_HORIZONTAL;
+					} else if (left && !right && !up && !down) {
+						obstacles[x][y] = Obstacle.SQUARE_RIGHT_3;
+					} else if (!left && right && !up && !down) {
+						obstacles[x][y] = Obstacle.SQUARE_LEFT_3;
+					} else if (!left && !right && up && !down) {
+						obstacles[x][y] = Obstacle.SQUARE_BOTTOM_3;
+					} else if (!left && !right && !up && down) {
+						obstacles[x][y] = Obstacle.SQUARE_TOP_3;
+					} else {
+						if (!bottomLeft) {
+							obstacles[x][y] = Obstacle.SQUARE_CENTER_BOTTOM_LEFT;
+						} else if (!bottomRight) {
+							obstacles[x][y] = Obstacle.SQUARE_CENTER_BOTTOM_RIGHT;
+						} else if (!topLeft) {
+							obstacles[x][y] = Obstacle.SQUARE_CENTER_TOP_LEFT;
+						} else if (!topRight) {
+							obstacles[x][y] = Obstacle.SQUARE_CENTER_TOP_RIGHT;
+						} else {
+							obstacles[x][y] = Obstacle.SQUARE_CENTER;
+						}
+					}
+				}
+			}
+		}
 	}
 }
