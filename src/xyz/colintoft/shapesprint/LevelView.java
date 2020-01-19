@@ -333,7 +333,7 @@ public class LevelView extends Drawable {
 	/** Method Name: update()
 	 * @Author Colin Toft
 	 * @Date December 30th, 2019
-	 * @Modified January 7th, 9th, 10th, 13th, 14th, 15th & 17th, 2020
+	 * @Modified January 7th, 9th, 10th, 13th, 14th, 15th, 17th & 19th, 2020
 	 * @Description Overrides Drawable.update(): updates the level, including updating player position, handling music and calculating physics
 	 * @Parameters
 	 *      - double dt: The time in seconds since the last time update was called
@@ -444,7 +444,9 @@ public class LevelView extends Drawable {
 		if (playerX > level.width && !hasBeatLevel) {
 			hasBeatLevel = true;
 			winTimer = 0;
-			stopMusic();
+			if (practiceMode) {
+				stopMusic();
+			}
 			winSound.setFramePosition(0);
 			winSound.start();
 		}
@@ -506,7 +508,7 @@ public class LevelView extends Drawable {
 	/** Method Name: getMinY()
 	 * @Author Colin Toft
 	 * @Date January 7th, 2020
-	 * @Modified N/A
+	 * @Modified January 19th, 2020
 	 * @Description Finds the y coordinate of the ground beneath the player (highest solid obstacle underneath the player)
 	 * @Returns The y coordinate of the ground beneath the player
 	 * Data Type: double, Obstacle, boolean
@@ -520,7 +522,7 @@ public class LevelView extends Drawable {
 		double minY = 0;
 		
 		for (int obstacleX = (int) playerX; obstacleX <= (int) playerX + 1; obstacleX++) {
-			for (int obstacleY = (int)(playerY + playerWidth); obstacleY >= 0; obstacleY--) {
+			for (int obstacleY = (int)(playerY + playerWidth - 0.00001); obstacleY >= 0; obstacleY--) {
 				try {
 					if (level.obstacles[obstacleX][obstacleY] != null && level.obstacles[obstacleX][obstacleY].isSolid()) {
 						double blockMinY;

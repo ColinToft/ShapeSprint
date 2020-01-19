@@ -112,6 +112,10 @@ public class Drawable implements KeyListener, MouseListener {
 	public void hide() {
 		visible = false;
 	}
+	
+	public boolean isVisible() {
+		return visible;
+	}
 
 	/**
 	 * Sets this drawable's current image to the specified filepath.

@@ -15,8 +15,9 @@ public enum Obstacle {
 	SQUARE_TOP_LEFT, SQUARE_TOP_RIGHT, SQUARE_BOTTOM_LEFT, SQUARE_BOTTOM_RIGHT,
 	SQUARE_VERTICAL, SQUARE_HORIZONTAL,
 	SQUARE_CENTER,
-	SQUARE_CENTER_TOP_LEFT, SQUARE_CENTER_TOP_RIGHT,
+	SQUARE_CENTER_TOP_LEFT, SQUARE_CENTER_TOP_RIGHT, SQUARE_CENTER_BOTTOM_LEFT, SQUARE_CENTER_BOTTOM_RIGHT,
 	SQUARE_CENTER_TOP_LEFT_LINE_BOTTOM, SQUARE_CENTER_TOP_RIGHT_LINE_BOTTOM,
+	SQUARE_CENTER_BOTTOM_LEFT_LINE_TOP, SQUARE_CENTER_BOTTOM_RIGHT_LINE_TOP,
 	TRIANGLE, TRIANGLE_UPSIDE_DOWN,
 	CIRCLE_PORTAL_BOTTOM, CIRCLE_PORTAL_TOP,
 	TRIANGLE_PORTAL_BOTTOM, TRIANGLE_PORTAL_TOP;
@@ -24,7 +25,7 @@ public enum Obstacle {
 	/** Method Name: fromString()
 	 * @Author Colin Toft
 	 * @Date December 31st, 2019
-	 * @Modified January 15th, 2020
+	 * @Modified January 15th & 19th, 2020
 	 * @Description Converts the String abbreviation of an obstacle (found in a level file) to an Obstacle.
 	 * @Parameters
 	 *      - String string: the string specifying the type of obstacle
@@ -53,8 +54,12 @@ public enum Obstacle {
 		case "SC": return SQUARE_CENTER;
 		case "SCTL": return SQUARE_CENTER_TOP_LEFT;
 		case "SCTR": return SQUARE_CENTER_TOP_RIGHT;
+		case "SCBL": return SQUARE_CENTER_BOTTOM_LEFT;
+		case "SCBR": return SQUARE_CENTER_BOTTOM_RIGHT;
 		case "SCTLB": return SQUARE_CENTER_TOP_LEFT_LINE_BOTTOM;
 		case "SCTRB": return SQUARE_CENTER_TOP_RIGHT_LINE_BOTTOM;
+		case "SCBLT": return SQUARE_CENTER_BOTTOM_LEFT_LINE_TOP;
+		case "SCBRT": return SQUARE_CENTER_BOTTOM_RIGHT_LINE_TOP;
 		
 		case "T": return TRIANGLE;
 		case "TU": return TRIANGLE_UPSIDE_DOWN;
@@ -71,7 +76,7 @@ public enum Obstacle {
 	/** Method Name: getImageFilename()
 	 * @Author Colin Toft
 	 * @Date December 31st, 2019
-	 * @Modified January 15th & 16th, 2020
+	 * @Modified January 15th, 16th & 19th, 2020
 	 * @Description Returns the filename of the image of this Obstacle
 	 * @Parameters N/A
 	 * @Returns The filename of the image of this Obstacle
@@ -117,10 +122,18 @@ public enum Obstacle {
 			return "obstacles/BlackSquareCenterTopLeft.png";
 		case SQUARE_CENTER_TOP_RIGHT:
 			return "obstacles/BlackSquareCenterTopRight.png";
+		case SQUARE_CENTER_BOTTOM_LEFT:
+			return "obstacles/BlackSquareCenterBottomLeft.png";
+		case SQUARE_CENTER_BOTTOM_RIGHT:
+			return "obstacles/BlackSquareCenterBottomRight.png";
 		case SQUARE_CENTER_TOP_LEFT_LINE_BOTTOM:
 			return "obstacles/BlackSquareCenterTopLeftLineBottom.png";
 		case SQUARE_CENTER_TOP_RIGHT_LINE_BOTTOM:
 			return "obstacles/BlackSquareCenterTopRightLineBottom.png";
+		case SQUARE_CENTER_BOTTOM_LEFT_LINE_TOP:
+			return "obstacles/BlackSquareCenterBottomLeftLineTop.png";
+		case SQUARE_CENTER_BOTTOM_RIGHT_LINE_TOP:
+			return "obstacles/BlackSquareCenterBottomRightLineTop.png";
 			
 		case TRIANGLE:
 			return "obstacles/BlackTriangle.png";

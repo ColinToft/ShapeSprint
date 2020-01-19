@@ -40,7 +40,9 @@ public class MainMenu extends Scene {
 		{"In Shape Sprint, the goal is to avoid oncoming",
 		 "obstacles in order to complete a level.     ",
 		 "Triangles will kill you but squares are safe",
-		 "to jump on! Click on a level to begin!    "};
+		 "to jump on! Levels are synchronized with the",
+		 "music so use it to help you time your jumps.",
+		 "Click on a level to start!           "};
 	
 	private String credits[] = 
 		{"Music:                         ",
@@ -279,6 +281,7 @@ public class MainMenu extends Scene {
 		// TODO finish levels
 		// TODO comments including CGraphics
 		// TODO flow chart
+		// TODO modified dates for classes
 		// TODO resizing windows is weird
 		
 		// TODO dots & pads
@@ -363,7 +366,12 @@ public class MainMenu extends Scene {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-			game.exit();
+			if (helpScreen.isVisible() || creditsScreen.isVisible()) {
+				helpScreen.hide();
+				creditsScreen.hide();
+			} else {
+				game.exit();
+			}
 		} else if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT) {
 			Direction direction = e.getKeyCode() == KeyEvent.VK_LEFT ? Direction.LEFT : Direction.RIGHT;
 			switchLevel(direction);
