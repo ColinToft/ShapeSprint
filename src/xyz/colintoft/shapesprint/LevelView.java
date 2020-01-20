@@ -694,6 +694,19 @@ public class LevelView extends Drawable {
 						if (!triangleArea.isEmpty()) {
 							return true; // The player intersects with the triangle's area
 						}
+					// If the obstacle is an left facing triangle, store its area and see if it intersects with the player
+					} else if (level.obstacles[obstacleX][obstacleY] == Obstacle.TRIANGLE_LEFT) {
+						GeneralPath triangleShape = new GeneralPath();
+						triangleShape.moveTo(obstacleX, obstacleY + 0.5);
+						triangleShape.lineTo(obstacleX + 1, obstacleY);
+						triangleShape.lineTo(obstacleX + 1, obstacleY + 1);
+						triangleShape.closePath();
+						Area triangleArea = new Area(triangleShape);
+						triangleArea.intersect(playerArea); // Calculate the intersection between the player and the triangle
+						
+						if (!triangleArea.isEmpty()) {
+							return true; // The player intersects with the triangle's area
+						}
 					}
 				} catch (ArrayIndexOutOfBoundsException e) {}
 			}
@@ -732,15 +745,16 @@ public class LevelView extends Drawable {
 	private boolean isTouchingYellowPad() {
 		Area playerArea = new Area(new Ellipse2D.Double(playerX, playerY, playerWidth, playerWidth)); // Calculate the player's area
 				
+		// Loop through all obstacles near the player
 		for (int obstacleX = (int) playerX; obstacleX <= (int) playerX + 1; obstacleX++) {
 			for (int obstacleY = (int)(playerY + playerWidth); obstacleY >= 0; obstacleY--) {
 				try {
 					if (level.obstacles[obstacleX][obstacleY] == Obstacle.YELLOW_PAD) {
-						Area padArea = new Area(new Rectangle2D.Double(obstacleX, obstacleY, 1, 0.25));
-						padArea.intersect(playerArea);
+						Area padArea = new Area(new Rectangle2D.Double(obstacleX, obstacleY, 1, 0.25)); // If the obstacle is a yellow pad, calculate its area
+						padArea.intersect(playerArea); // Determine if the pad and player intersect
 						
 						if (!padArea.isEmpty()) {
-							return true;
+							return true; // If there is an intersection, the player is touching the yellow pad
 						}
 					}
 				} catch (ArrayIndexOutOfBoundsException e) {}
@@ -761,25 +775,26 @@ public class LevelView extends Drawable {
 	 * Throws/Exceptions: N/A
 	 */
 	private void updateMode() {
-		int xCoord = (int) playerX;
-		int bottomY = (int) playerY;
-		int topY = bottomY + 1;
+		int xCoord = (int) playerX; // The x coordinate to check
+		int bottomY = (int) playerY; // The bottom y coordinate to check (the bottom of the player)
+		int topY = bottomY + 1; // The top y coordinate to check (the top of the player)
 		
-		Obstacle bottomObstacle, topObstacle;
+		Obstacle bottomObstacle, topObstacle; // The obstacles at the top and bottom y coordinates, respectively
 		try {
+			// Find the obstacles at the top and bottom coordinate
 			bottomObstacle = level.obstacles[xCoord][bottomY];
 			topObstacle = level.obstacles[xCoord][topY];
 		} catch (ArrayIndexOutOfBoundsException e) {
 			return;
 		}
 		
-		if (triangleMode) {
+		if (triangleMode) { // The player is in triangle mode, so look for a circle portal
 			if (bottomObstacle != null && bottomObstacle.isCirclePortal() || topObstacle != null && topObstacle.isCirclePortal()) {
-				triangleMode = false;
+				triangleMode = false; // The player is touching a circle portal, so begin circle mode
 			}
-		} else {
+		} else { // The player is in circle mode, so look for a triangle portal
 			if (bottomObstacle != null && bottomObstacle.isTrianglePortal() || topObstacle != null && topObstacle.isTrianglePortal()) {
-				triangleMode = true;
+				triangleMode = true; // The player is touching a triangle portal, so begin triangle mode
 				playerRotation = 0;
 			}
 		}
@@ -898,7 +913,7 @@ public class LevelView extends Drawable {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_SPACE && !hasBeatLevel && !hasDied) {
-			jumping = true;
+			jumping = true; // When the space key is pressed, start jumping
 		}
 	}
 	
@@ -917,7 +932,7 @@ public class LevelView extends Drawable {
 	@Override
 	public void keyReleased(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-			jumping = false;
+			jumping = false; // When the space key is released, stop jumping
 			holding = false;
 		}
 	}
@@ -939,7 +954,7 @@ public class LevelView extends Drawable {
 	@Override
 	public void onMousePressed(double x, double y, int button) {
 		if (!hasBeatLevel && !hasDied) {
-			jumping = true;
+			jumping = true; // When the mouse is clicked, start jumping
 		}
 	}
 	
@@ -959,7 +974,7 @@ public class LevelView extends Drawable {
 	 */
 	@Override
 	public void onMouseReleased(double x, double y, int button) {
-		jumping = false;
+		jumping = false; // When the mouse is released, stop jumping
 		holding = false;
 	}
 	
@@ -975,8 +990,8 @@ public class LevelView extends Drawable {
 	 * Throws/Exceptions: N/A
 	 */
 	private void jump() {
-		ySpeed = jumpYSpeed;
-		hasJumped = true;
+		ySpeed = jumpYSpeed; // Set the y speed to the jump y speed value to cause the player to move upwards
+		hasJumped = true; // Setting this to true will remove the jumping tutorial message
 	}
 	
 	/** Method Name: startNextAttempt()
@@ -996,18 +1011,23 @@ public class LevelView extends Drawable {
 		playerRotation = 0;
 		
 		if (practiceMode) {
+			// If the player just after a checkpoint, increase the checkpoint death count
 			if (playerX - checkpointX < 7) {
 				checkpointDeathCount++;
 			}
 			
+			// If the player keeps dying after the checkpoint, delete it
 			if (checkpointDeathCount >= 3 && prevCheckpointX != checkpointX) {
 				deleteCheckpoint();
 			}
 			
+			// Respawn from the previous checkpoint
 			playerX = checkpointX;
 			playerY = checkpointY;
 			ySpeed = checkpointYSpeed;
 			triangleMode = checkpointTriangleMode;
+			
+			// Set the starting ground height
 			if (triangleMode) {
 				groundHeight = 0.5 / levelHeight;
 			} else {
@@ -1017,10 +1037,12 @@ public class LevelView extends Drawable {
 		} else {
 			stopMusic();
 
+			// Begin with the player just to the left of the level
 			playerX = -10;
 			playerY = 0;
 			ySpeed = 0;
 			
+			// Delete any checkpoints
 			checkpointX = playerX;
 			checkpointY = playerY;
 			checkpointYSpeed = ySpeed;
@@ -1054,6 +1076,7 @@ public class LevelView extends Drawable {
 	 */
 	public void restartLevel() {
 		practiceMode = false;
+		winTimer = 0;
 		startNextAttempt();
 		playerX = -15; // in blocks
 	}

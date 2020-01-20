@@ -201,11 +201,11 @@ public class PlayLevel extends Scene {
 		Sprite playAgainButton = new Sprite(0.5 * (1 - buttonWidth * 1.5), (1 - progressBarBottom - buttonHeight * 1.5) / 2 + progressBarBottom, buttonWidth * 1.5, buttonHeight * 1.5, "menuItems/playAgain.png") {
 			@Override
 			public void onMouseReleased(double x, double y, int button) {
-				resumeGame();
 				attemptNumber = 0;
 				levelView.restartLevel();
 				levelView.hasBeatLevel = false;
 				winScreen.hide();
+				resumeGame();
 			}
 		};
 		
@@ -300,11 +300,11 @@ public class PlayLevel extends Scene {
 			}
 		} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 			if (levelView.hasBeatLevel) {
-				resumeGame();
 				attemptNumber = 0;
 				levelView.restartLevel();
 				levelView.hasBeatLevel = false;
 				winScreen.hide();
+				resumeGame();
 			}
 		}
 	}

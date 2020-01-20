@@ -18,7 +18,7 @@ public enum Obstacle {
 	SQUARE_CENTER_TOP_LEFT, SQUARE_CENTER_TOP_RIGHT, SQUARE_CENTER_BOTTOM_LEFT, SQUARE_CENTER_BOTTOM_RIGHT,
 	SQUARE_CENTER_TOP_LEFT_LINE_BOTTOM, SQUARE_CENTER_TOP_RIGHT_LINE_BOTTOM, SQUARE_CENTER_TOP_LEFT_TOP_RIGHT_LINE_BOTTOM,
 	SQUARE_CENTER_BOTTOM_LEFT_LINE_TOP, SQUARE_CENTER_BOTTOM_RIGHT_LINE_TOP,
-	TRIANGLE, TRIANGLE_UPSIDE_DOWN,
+	TRIANGLE, TRIANGLE_UPSIDE_DOWN, TRIANGLE_LEFT,
 	YELLOW_PAD, YELLOW_RING,
 	CIRCLE_PORTAL_BOTTOM, CIRCLE_PORTAL_TOP,
 	TRIANGLE_PORTAL_BOTTOM, TRIANGLE_PORTAL_TOP;
@@ -42,6 +42,7 @@ public enum Obstacle {
 		
 		case "T": return TRIANGLE;
 		case "TU": return TRIANGLE_UPSIDE_DOWN;
+		case "TL": return TRIANGLE_LEFT;
 		
 		case "YP": return YELLOW_PAD;
 		case "YR": return YELLOW_RING;
@@ -124,6 +125,8 @@ public enum Obstacle {
 			return "obstacles/BlackTriangle.png";
 		case TRIANGLE_UPSIDE_DOWN:
 			return "obstacles/BlackTriangleUpsideDown.png";
+		case TRIANGLE_LEFT:
+			return "obstacles/BlackTriangleLeft.png";
 			
 		case YELLOW_PAD:
 			return "obstacles/yellowPad.png";
@@ -157,7 +160,7 @@ public enum Obstacle {
 	 */
 	public boolean killsPlayer() {
 		// Return true if this obstacle is a triangle
-		return this == TRIANGLE || this == TRIANGLE_UPSIDE_DOWN;
+		return this == TRIANGLE || this == TRIANGLE_UPSIDE_DOWN || this == TRIANGLE_LEFT;
 	}
 
 	/** Method Name: isSolid()
