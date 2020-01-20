@@ -183,6 +183,8 @@ public class Level {
 			for (y = 0; y < height; y++) {
 				if (obstacles[x][y] != null && obstacles[x][y].isSolid()) { // First make sure there is a square in this location
 					boolean left, right, up, down, bottomLeft, bottomRight, topLeft, topRight; // The square's neighbors in all directions (true if there is a square in that location, otherwise false)
+					
+					// Look at each block around the obstacle and store if there is a square in that direction or not
 					try {
 						left = obstacles[x - 1][y] != null && obstacles[x - 1][y].isSolid();
 					} catch (ArrayIndexOutOfBoundsException e) {

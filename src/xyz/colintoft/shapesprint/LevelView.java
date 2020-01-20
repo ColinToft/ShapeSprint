@@ -61,7 +61,7 @@ public class LevelView extends Drawable {
 	
 	private boolean jumping = false; // Whether the user is currently jumping (pressing space or clicking)
 	private boolean holding = false; // Whether the user is holding down the mouse
-	public boolean hasJumped = false; // Whether the user has jumped so far
+	public int jumpCount = 0; // How many times the user has jumped
 	private boolean hasUsedTriangleMode = false; // Whether or not the user has used triangle mode so far
 		
 	private boolean playingMusic = false; // Whether music is currently playing
@@ -991,7 +991,7 @@ public class LevelView extends Drawable {
 	 */
 	private void jump() {
 		ySpeed = jumpYSpeed; // Set the y speed to the jump y speed value to cause the player to move upwards
-		hasJumped = true; // Setting this to true will remove the jumping tutorial message
+		jumpCount++; // Setting this to true will remove the jumping tutorial message
 	}
 	
 	/** Method Name: startNextAttempt()
@@ -1050,12 +1050,13 @@ public class LevelView extends Drawable {
 			prevCheckpointY = checkpointY;
 			prevCheckpointYSpeed = checkpointYSpeed;
 			
-			groundHeight = baseGroundHeight;
-			triangleMode = false;
+			groundHeight = baseGroundHeight; // Set the starting ground height
+			triangleMode = false; // The level always starts in circle mode, not triangle mode
 		}
 		
-		lastGroundY = playerY;
+		lastGroundY = playerY; // Reset the lastGroundY
 
+		// Reset other variables
 		jumping = false;
 		holding = false;
 		hasDied = false;
@@ -1075,10 +1076,10 @@ public class LevelView extends Drawable {
 	 * Throws/Exceptions: N/A
 	 */
 	public void restartLevel() {
-		practiceMode = false;
+		practiceMode = false; // Begin the level in normal mode for the 1st attempt
 		winTimer = 0;
-		startNextAttempt();
-		playerX = -15; // in blocks
+		startNextAttempt(); // Call the normal procedure to start an attempt
+		playerX = -15; // Player starts a little further to the left than normal on the 1st attempt
 	}
 
 	/** Method Name: getScrollSpeed()
@@ -1096,7 +1097,7 @@ public class LevelView extends Drawable {
 		if (!hasDied) {
 			return xSpeed / (pixelWidth() / getBlockSize());
 		} else {
-			return 0;
+			return 0; // The level does not scroll after the player dies
 		}
 	}
 
@@ -1161,6 +1162,7 @@ public class LevelView extends Drawable {
 	@Override
 	public void onResume() {
 		super.onResume();
+		// Resume the music if necessary
 		if (playerX >= 0 && !playingMusic && (!hasDied || practiceMode)) {
 			resumeMusic();
 		}
@@ -1178,12 +1180,13 @@ public class LevelView extends Drawable {
 	 * Throws/Exceptions: N/A
 	 */
 	public void changeMode() {
-		practiceMode = !practiceMode;
+		practiceMode = !practiceMode; // Toggle between practice mode and normal mode
 		stopMusic();
 		if (!practiceMode) {
+			// If the player is switching into normal mode, they need to start the level from the beginning
 			startNextAttempt();
 		} else if (playerX >= 0) {
-			startMusic();
+			startMusic(); // If the player is switching into practice mode, start the practice mode music
 		}
 	}
 	
@@ -1221,7 +1224,7 @@ public class LevelView extends Drawable {
 	 * @Author Colin Toft
 	 * @Date January 9th, 2020
 	 * @Modified N/A
-	 * @Description Starts the music (level music if playing in normal mode, otherwise practice music)
+	 * @Description Starts the music from the beginning (level music if playing in normal mode, otherwise practice music)
 	 * @Parameters N/A
 	 * @Returns N/A
 	 * Data Type: boolean, Clip
@@ -1230,6 +1233,7 @@ public class LevelView extends Drawable {
 	 */
 	public void startMusic() {
 		playingMusic = true;
+		// Choose the appropriate music depending on the mode and start playing it from the beginning
 		if (practiceMode) {
 			practiceMusic.setFramePosition(0);
 			practiceMusic.loop(Clip.LOOP_CONTINUOUSLY);
@@ -1252,8 +1256,9 @@ public class LevelView extends Drawable {
 	 */
 	public void resumeMusic() {
 		playingMusic = true;
+		// Choose the appropriate music depending on the mode and start playing it
 		if (practiceMode) {
-			practiceMusic.start();
+			practiceMusic.loop(Clip.LOOP_CONTINUOUSLY);
 		} else {
 			music.start();
 		}
@@ -1271,6 +1276,7 @@ public class LevelView extends Drawable {
 	 * Throws/Exceptions: N/A
 	 */
 	public void stopMusic() {
+		// Stop all music and sounds
 		music.stop();
 		practiceMusic.stop();
 		winSound.stop();

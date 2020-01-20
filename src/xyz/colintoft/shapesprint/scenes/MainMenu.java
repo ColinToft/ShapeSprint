@@ -26,16 +26,32 @@ import xyz.colintoft.shapesprint.ShapeSprint;
 */
 public class MainMenu extends Scene {
 	
+	// TODO alignment of text being weird
+	// TODO rocket collision physics??
+	// TODO different backgrounds for each level
+
+	// TODO finish levels
+	// TODO Comment CGraphics
+	// TODO *flow chart
+	// TODO *modified dates for classes
+	// TODO resizing windows is weird
+	
+	// TODO rings
+	// TODO upsideDown portals
+	// TODO editing checkpoints?
+	// TODO attempts and jump count when beating level
+	
 	private int currentLevel; // The level that is being displayed
 
-	private Panel panel1, panel2;
-	private DrawableOutlinedText levelText1, levelText2;
-	private DrawableProgressBar normalProgressBar1, normalProgressBar2;
-	private DrawableOutlinedText normalPercentageText1, normalPercentageText2;
-	private DrawableProgressBar practiceProgressBar1, practiceProgressBar2;
-	private DrawableOutlinedText practicePercentageText1, practicePercentageText2;
+	private Panel panel1; // The panel that displays the currently selected level
+	private Panel panel2; // The panel that displays the previously selected level during animations
+	private DrawableOutlinedText levelText1, levelText2; // Text that shows the name of a level
+	private DrawableProgressBar normalProgressBar1, normalProgressBar2; // A progress bar that shows the user's progress on that level in normal mode
+	private DrawableOutlinedText normalPercentageText1, normalPercentageText2; // Text that shows the user's progress on that level in normal mode as a percentage
+	private DrawableProgressBar practiceProgressBar1, practiceProgressBar2; // A progress bar that shows the user's progress on that level in practice mode
+	private DrawableOutlinedText practicePercentageText1, practicePercentageText2; // Text that shows the user's progress on that level in practice mode as a percentage
 	
-	private Panel helpScreen;
+	private Panel helpScreen; // A help panel that shows some basic tutorial text
 	private String tutorialText[] = 
 		{"In Shape Sprint, the goal is to avoid oncoming",
 		 "obstacles in order to complete a level.     ",
@@ -44,6 +60,7 @@ public class MainMenu extends Scene {
 		 "music so use it to help you time your jumps.",
 		 "Click on a level to start!           "};
 	
+	private Panel creditsScreen; // A credits panel that credits the music artists and the original Geometry Dash creator
 	private String credits[] = 
 		{"Music:                         ",
 		"Dimensional Vortex - Owen Crowe (A_D1nGu5)",
@@ -53,19 +70,17 @@ public class MainMenu extends Scene {
 		"",
 		"Menu Song & original Geometry Dash  ",
 		"Game - RobTop Games                   "};
+		
+	private Clip menuMusic; // The menu music that loops while the user is in the menu
 	
-	private Panel creditsScreen;
+	private boolean isSwitching = false; // Whether the menu is currently switching between levels
+	private Direction switchDirection = Direction.NONE; // The direction that the menu is switching in
+	private double velocity = 0; // Current velocity of the panels while being switched
+	private double bounceFactor = 150; // How bouncy the animation is
+	private double bounceDecay = 0.8; // How quickly the bouncing dies down after the current level is switched
 	
-	private Clip menuMusic;
-	
-	private boolean isSwitching = false;
-	private Direction switchDirection = Direction.NONE;
-	private double velocity = 0;
-	private double bounceFactor = 150;
-	private double bounceDecay = 0.8;
-	
-	private final double panelWidth = 0.6;
-	private final double panelStartX = (1 - panelWidth) * 0.5;
+	private final double panelWidth = 0.6; // The width of a level panel as a fraction of the screen width
+	private final double panelStartX = (1 - panelWidth) * 0.5; // The starting x coordinate of a level panel as a fraction of the screen width
 
 	
 	/** Method Name: MainMenu()
@@ -82,7 +97,7 @@ public class MainMenu extends Scene {
 	 */
 	public MainMenu(int currentLevel) {
 		super();
-		this.currentLevel = currentLevel;
+		this.currentLevel = currentLevel; // Store the current level to display
 	}
 	
 	/** Method Name: PlayLevel()
@@ -97,7 +112,7 @@ public class MainMenu extends Scene {
 	 * Throws/Exceptions: N/A
 	 */
 	public MainMenu() {
-		this(0);
+		this(0); // Start by displaying the first level
 	}
 	
 	/** Method Name: init()
@@ -113,20 +128,23 @@ public class MainMenu extends Scene {
 	 */
 	public void init() {
 		ShapeSprint ss = (ShapeSprint) game;
-		Font titleFont = Util.loadFontFromFile(getClass(), "Pusab.ttf", 100);
+		Font titleFont = Util.loadFontFromFile(getClass(), "Pusab.ttf", 100); // Load the font
 		
-		setBackground(ss.levels[currentLevel].backgroundColor);
+		setBackground(ss.levels[currentLevel].backgroundColor); // Set the background color to the background color of the level being displayed
 		
+		// Create the first level panel
 		panel1 = new Panel(panelStartX, 0.15, panelWidth, 0.7);
-		DrawableRoundedRectangle rect = new DrawableRoundedRectangle(0, 0, 1, 0.4, 0.07, 0.125, new Color(0, 0, 0, 70)) {
+		// Add the rectangle and the text with the level's name
+		DrawableRoundedRectangle rect = new DrawableRoundedRectangle(0, 0, 1, 0.4, 0.07, 0.125, new Color(0, 0, 0, 70)) { // A rectangle around the name of the level
 			@Override
 			public void onMouseReleased(double x, double y, int button) {
-				startLevel(currentLevel);
+				startLevel(currentLevel); // When the level is clicked, start playing it
 			}
 		};
 		levelText1 = new DrawableOutlinedText(rect.getCenterX(), rect.getCenterY(), ss.levels[currentLevel].name, titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 		levelText1.setMaxWidth(rect.getWidth() * 0.9);
 		
+		// Add the normal mode progress bar and percentage text
 		normalProgressBar1 = new DrawableProgressBar(0, 0.6, 1, 0.1, 0.05, 0.16, Color.BLACK, 2f, Color.GREEN, new Color(0, 0, 0, 70));
 		normalProgressBar1.setValue(ss.levels[currentLevel].normalProgress);
 		DrawableOutlinedText normalModeText1 = new DrawableOutlinedText(0.5, normalProgressBar1.getY() - 0.01, "Normal Mode", titleFont.deriveFont(75f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.BOTTOM);
@@ -135,6 +153,7 @@ public class MainMenu extends Scene {
 				Util.toPercentageString(normalProgressBar1.getValue()), titleFont.deriveFont(60f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 		normalPercentageText1.setMaxHeight(normalProgressBar1.getHeight() * 0.7);
 		
+		// Add the practice mode progress bar and percentage text
 		practiceProgressBar1 = new DrawableProgressBar(0, 0.85, 1, 0.1, 0.05, 0.16, Color.BLACK, 2f, Color.CYAN, new Color(0, 0, 0, 70));
 		practiceProgressBar1.setValue(ss.levels[currentLevel].practiceProgress);
 		DrawableOutlinedText practiceModeText1 = new DrawableOutlinedText(0.5, practiceProgressBar1.getY() - 0.01, "Practice Mode", titleFont.deriveFont(75f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.BOTTOM);
@@ -143,6 +162,7 @@ public class MainMenu extends Scene {
 				Util.toPercentageString(practiceProgressBar1.getValue()), titleFont.deriveFont(60f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 		practicePercentageText1.setMaxHeight(practiceProgressBar1.getHeight() * 0.7);
 		
+		// Add all the components to the level's panel
 		panel1.add(rect);
 		panel1.add(levelText1);
 		panel1.add(normalProgressBar1);
@@ -154,6 +174,7 @@ public class MainMenu extends Scene {
 		
 		add(panel1);
 		
+		// Create the second level panel (the same as the first panel)
 		panel2 = new Panel(panelStartX + 1, 0.15, panelWidth, 0.7);
 		DrawableRoundedRectangle rect2 = new DrawableRoundedRectangle(0, 0, 1, 0.4, 0.07, 0.125, new Color(0, 0, 0, 70));
 		levelText2 = new DrawableOutlinedText(rect2.getCenterX(), rect2.getCenterY(), ss.levels[currentLevel + 1].name, titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
@@ -185,28 +206,31 @@ public class MainMenu extends Scene {
 		add(panel2);
 		
 				
-		// Triangles
+		// Load the triangles
 		double[] xCoords1 = {0.02, 0.06, 0.06};
 		double[] yCoords = {0.5, 0.4, 0.6};
 		double[] xCoords2 = {0.98, 0.94, 0.94};
 		DrawableShape leftTriangle = new DrawableShape(xCoords1, yCoords, Color.black, 3f, Color.white) {
 			@Override
 			public void onMouseReleased(double x, double y, int button) {
-				switchLevel(Direction.LEFT);
+				switchLevel(Direction.LEFT); // The left triangle switches to the level on the left
 			}
 		};
 		DrawableShape rightTriangle = new DrawableShape(xCoords2, yCoords, Color.black, 3f, Color.white) {
 			@Override
 			public void onMouseReleased(double x, double y, int button) {
-				switchLevel(Direction.RIGHT);
+				switchLevel(Direction.RIGHT); // The right triangle switches to the level on the right
 			}
 		};
+		// Add the triangles to the menu
 		add(leftTriangle);
 		add(rightTriangle);
 		
-		double buttonWidth = 0.1;
-		double buttonHeight = parentWidthFractionToParentHeightFraction(buttonWidth);
+		// Add the help button and credits button
+		double buttonWidth = 0.1; // The width of the help and credits buttons (as a fraction of the screen width)
+		double buttonHeight = parentWidthFractionToParentHeightFraction(buttonWidth); // The height of the help and credits buttons (as a fraction of the screen height)
 		
+		// Add the help button to the menu
 		Sprite helpButton = new Sprite(1 - buttonWidth, 1 - buttonHeight, buttonWidth, buttonHeight, "menuItems/helpButton.png") {
 			@Override
 			public void onMouseReleased(double x, double y, int button) {
@@ -215,6 +239,7 @@ public class MainMenu extends Scene {
 		};
 		add(helpButton);
 		
+		// Add the credits button to the menu
 		Sprite creditsButton = new Sprite(0, 1 - buttonHeight, buttonWidth * 1.1, buttonHeight, "menuItems/creditsButton.png") {
 			@Override
 			public void onMouseReleased(double x, double y, int button) {
@@ -223,18 +248,21 @@ public class MainMenu extends Scene {
 		};
 		add(creditsButton);
 		
+		// Add the help screen: text on top of a black rectangle with an x button to close the screen
 		helpScreen = new Panel(0.03, 0.03, 0.94, 0.94);
-		DrawableRoundedRectangle helpRect = new DrawableRoundedRectangle(0, 0, 1, 1, 0.07, 0.125, Color.BLACK);
-		DrawableOutlinedText helpTitleText = new DrawableOutlinedText(helpRect.getCenterX(), 0.15, "Help", titleFont.deriveFont(200f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		DrawableRoundedRectangle helpRect = new DrawableRoundedRectangle(0, 0, 1, 1, 0.07, 0.125, Color.BLACK); // The background rectangle
+		DrawableOutlinedText helpTitleText = new DrawableOutlinedText(helpRect.getCenterX(), 0.15, "Help", titleFont.deriveFont(200f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER); // Displays the title "help"
 		helpTitleText.setMaxHeight(helpRect.getHeight() * 0.15);
-		double textY = 0.35;
-		DrawableText[] helpText = new DrawableText[tutorialText.length];
+		double textY = 0.35; // The y coordinate of the text
+		DrawableText[] helpText = new DrawableText[tutorialText.length]; // Stores the DrawableText objects for the tutorial text
+		// Loop through each line of text and load it into a DrawableText object
 		for (int i = 0; i < tutorialText.length; i++) {
 			helpText[i] = new DrawableText(helpRect.getX() + helpRect.getWidth() * 0.05, textY, tutorialText[i], titleFont, Color.white, HorizontalAlign.LEFT, VerticalAlign.CENTER);
 			helpText[i].setMaxWidth(helpRect.getWidth() * 0.9);
-			textY += 0.07;
+			textY += 0.07; // Increase the y coordinate each time
 		}		
 	
+		// Used in the help and credits screens to close them
 		Sprite xButton = new Sprite(1 - buttonWidth, 0, buttonWidth, buttonHeight, "menuItems/xButton.png") {
 			@Override
 			public void onMouseReleased(double x, double y, int button) {
@@ -243,6 +271,7 @@ public class MainMenu extends Scene {
 			}
 		};
 		
+		// Add the components to the help screen and add the help screen to the main menu
 		helpScreen.add(helpRect);
 		helpScreen.add(helpTitleText);
 		for (DrawableText t: helpText) {
@@ -253,18 +282,21 @@ public class MainMenu extends Scene {
 		add(helpScreen);
 		helpScreen.hide();
 		
+		// Add the help screen: text on top of a black rectangle with an x button to close the screen
 		creditsScreen = new Panel(0.03, 0.03, 0.94, 0.94);
-		DrawableRoundedRectangle creditsRect = new DrawableRoundedRectangle(0, 0, 1, 1, 0.07, 0.125, Color.BLACK);
-		DrawableOutlinedText creditsTitleText = new DrawableOutlinedText(creditsRect.getCenterX(), 0.15, "Credits", titleFont.deriveFont(200f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		DrawableRoundedRectangle creditsRect = new DrawableRoundedRectangle(0, 0, 1, 1, 0.07, 0.125, Color.BLACK); // The background rectangle
+		DrawableOutlinedText creditsTitleText = new DrawableOutlinedText(creditsRect.getCenterX(), 0.15, "Credits", titleFont.deriveFont(200f), Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER); // Displays the title "credits"
 		creditsTitleText.setMaxHeight(helpRect.getHeight() * 0.15);
-		textY = 0.35;
-		DrawableText[] creditsText = new DrawableText[credits.length];
+		textY = 0.35; // The y coordinate of the text
+		DrawableText[] creditsText = new DrawableText[credits.length]; // Stores the DrawableText objects for the credits text
+		// Loop through each line of text and load it into a DrawableText object
 		for (int i = 0; i < credits.length; i++) {
 			creditsText[i] = new DrawableText(creditsRect.getX() + creditsRect.getWidth() * 0.05, textY, credits[i], titleFont, Color.white, HorizontalAlign.LEFT, VerticalAlign.CENTER);
 			creditsText[i].setMaxWidth(creditsRect.getWidth() * 0.9);
-			textY += 0.07;
+			textY += 0.07; // Increase the y coordinate each time
 		}		
 	
+		// Add the components to the credits screen and add the credits screen to the main menu
 		creditsScreen.add(creditsRect);
 		creditsScreen.add(creditsTitleText);
 		for (DrawableText t: creditsText) {
@@ -274,21 +306,8 @@ public class MainMenu extends Scene {
 		
 		add(creditsScreen);
 		creditsScreen.hide();
-		
-		// TODO alignment of text being weird
-		// TODO rocket collision physics??
 
-		// TODO finish levels
-		// TODO comments including CGraphics
-		// TODO flow chart
-		// TODO modified dates for classes
-		// TODO resizing windows is weird
-		
-		// TODO dots & pads
-		// TODO upsideDown portals
-		// TODO editing checkpoints?
-		// TODO attempts and jump count when beating level
-
+		// Start playing the menu music
 		menuMusic = Util.getAudioClip(getClass(), "menuLoop.wav");
 		menuMusic.loop(Clip.LOOP_CONTINUOUSLY);
 	}
