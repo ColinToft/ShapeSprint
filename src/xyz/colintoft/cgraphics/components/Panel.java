@@ -70,7 +70,7 @@ public class Panel extends Drawable {
 		}
 	
 		for (Drawable d: drawables) {
-			if (!d.visible) {
+			if (!d.isVisible()) {
 				continue;
 			}
 			if (d instanceof Panel) {
@@ -80,7 +80,14 @@ public class Panel extends Drawable {
 		    		g.drawImage(((Panel) d).getImage(), d.pixelX(leftInset), d.pixelY(topInset), d.pixelWidth(), d.pixelHeight(), null);
 		    	}
 		    } else {
-		    	g.drawImage(d.getImage(), d.pixelX(leftInset), d.pixelY(topInset), d.pixelWidth(), d.pixelHeight(), null);
+	    		if (Math.abs(d.getImage().getWidth(null) - d.pixelWidth()) <= 1 && Math.abs(d.getImage().getHeight(null) - d.pixelHeight()) <= 1) {
+	    			double start = System.nanoTime() / 1000000000.0;
+	    			g.drawImage(d.getImage(), d.pixelX(leftInset), d.pixelY(topInset), null);
+	    			double end = System.nanoTime() / 1000000000.0;
+	    			System.out.println("Drawing " + d + " took " + (end - start));
+	    		} else {
+	    			g.drawImage(d.getImage(), d.pixelX(leftInset), d.pixelY(topInset), d.pixelWidth(), d.pixelHeight(), null);
+	    		}
 		    }
 		}
 	}
@@ -164,12 +171,12 @@ public class Panel extends Drawable {
 	
 	@Override
 	public void onMousePressed(double x, double y, int button) {
-		if (visible) {
+		if (isVisible()) {
 			for (Drawable d: drawables) {
 				if (d.isPointInFrame(x, y)) {
 					double objectX = (x - d.x) / d.width;
 					double objectY = (y - d.y) / d.height;
-					if (d.visible) {
+					if (d.isVisible()) {
 						d.onMousePressed(objectX, objectY, button);
 					}
 				}
@@ -179,12 +186,12 @@ public class Panel extends Drawable {
 	
 	@Override
 	public void onMouseReleased(double x, double y, int button) {
-		if (visible) {
+		if (isVisible()) {
 			for (Drawable d: drawables) {
 				if (d.isPointInFrame(x, y)) {
 					double objectX = (x - d.x) / d.width;
 					double objectY = (y - d.y) / d.height;
-					if (d.visible) {
+					if (d.isVisible()) {
 						d.onMouseReleased(objectX, objectY, button);
 					}
 				}

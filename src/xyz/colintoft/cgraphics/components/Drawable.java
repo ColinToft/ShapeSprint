@@ -26,7 +26,7 @@ public class Drawable implements KeyListener, MouseListener {
 	/** Whether the image needs to be updated every frame. */
 	private boolean dynamic = true;
 	
-	protected boolean visible = true;
+	private boolean visible = true;
 	
 	public Drawable(double x, double y, double width, double height) {
 		this.x = x;
@@ -175,7 +175,34 @@ public class Drawable implements KeyListener, MouseListener {
 	/** Called after this Drawable is instantiated and added to a panel. */
 	public void start() {}
 	
+	/** Called every frame on dynamic drawables to render their image. The coordinates 0, 0 are at the top left,
+	 * and the bottom right coordinates can be found by using the pixelWidth() and pixelHeight() methods.
+	 * @see Drawable#setDynamic(boolean)
+	 * @see Drawable#pixelWidth()
+	 * @see Drawable#pixelHeight() */
 	public void draw(Graphics g) {}
+	
+	/** Used by the Drawable class to draw itself to a graphics object. It is recommended to override {@link Drawable#draw(Graphics)} instead to create custom graphics. */
+	public void drawImage(Graphics g) {
+		if (parentPanel == null) {
+			System.out.println("Drawable.getImage(): No panel defined, cannot create image.");
+			return;
+		}
+		
+		if (dynamic) {
+			if (backgroundColor.getAlpha() > 0) {
+				g.setColor(backgroundColor);
+				g.fillRect(0, 0, pixelWidth(), pixelHeight());
+			}
+			draw(g);
+		} else {
+			if (Math.abs(currentImage.getWidth(null) - pixelWidth()) <= 1 && Math.abs(currentImage.getHeight(null) - pixelHeight()) <= 1) {
+				g.drawImage(currentImage, 0, 0, null);
+			} else {
+				g.drawImage(currentImage, 0, 0, pixelWidth(), pixelHeight(), null);
+			}
+		}
+	}
 	
 	/**
 	 * Updates this drawable. By default, it is empty, but you can override this method to add logic to a Drawable that is updated many times per second.
@@ -228,17 +255,11 @@ public class Drawable implements KeyListener, MouseListener {
 	}
 	
 	public int pixelX() {
-		if (parentPanel == null) {
-			System.out.println("Drawable.pixelX(): No panel defined for object " + this + ", cannot calculate pixel X.");
-		}
-		return (int) Math.round(x * parentPanel.pixelWidth());
+		return pixelX(0);
 	}
 	
 	public int pixelY() {
-		if (parentPanel == null) {
-			System.out.println("Drawable.pixelY(): No panel defined for object " + this + ", cannot calculate pixel Y.");
-		}
-		return (int) Math.round(y * parentPanel.pixelHeight());
+		return pixelY(0);
 	}
 	
 	

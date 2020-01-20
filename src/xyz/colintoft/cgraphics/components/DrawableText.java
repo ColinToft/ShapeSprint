@@ -233,6 +233,9 @@ public class DrawableText extends Drawable {
 		}
 		
 		font = font.deriveFont((float) fontSize);
+		
+		this.width = pixelToParentWidthFraction(ig.getFontMetrics(font).stringWidth(text));
+		this.height = pixelToParentHeightFraction(ig.getFontMetrics(font).getHeight());
 	}
 	
 	protected void calculateCoordinates() {

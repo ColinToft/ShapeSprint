@@ -47,6 +47,7 @@ public abstract class Game extends JFrame implements WindowListener {
 	public Game() {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		setVisible(true);
 		init();
 	}
 	
@@ -63,6 +64,16 @@ public abstract class Game extends JFrame implements WindowListener {
             	buffersCreated = true;
         	} catch (IllegalStateException e) {}
         } while (!buffersCreated);
+        
+        try {
+        	BufferStrategy strategy = getBufferStrategy();
+    		Graphics g = (Graphics2D) strategy.getDrawGraphics();
+    		
+    		drawLoadingScreen(g);
+    		
+    		g.dispose();
+    		strategy.show();
+        } catch (IllegalStateException e) {}
     }
 	
 	private void drawScene() {
@@ -81,6 +92,11 @@ public abstract class Game extends JFrame implements WindowListener {
 				strategy.show();
 			} catch (IllegalStateException e) {}
 		}
+	}
+	
+	protected void drawLoadingScreen(Graphics g) {
+		g.setColor(Color.black);
+		g.fillRect(0, 0, getWidth(), getHeight());
 	}
 	
 	/**
@@ -121,13 +137,17 @@ public abstract class Game extends JFrame implements WindowListener {
 	 * to change the window's width and height in pixels.
 	 */
 	protected void setFullscreen(boolean fullscreen) {
-		this.fullscreen = fullscreen;
-		if (fullscreen) {
-			setExtendedState(MAXIMIZED_BOTH); 
-			setUndecorated(true);
-		} else {
-			setExtendedState(NORMAL);
-			setUndecorated(false);
+		if (fullscreen != this.fullscreen) {
+			setVisible(false);
+			this.fullscreen = fullscreen;
+			if (fullscreen) {
+				setExtendedState(MAXIMIZED_BOTH); 
+				setUndecorated(true);
+			} else {
+				setExtendedState(NORMAL);
+				setUndecorated(false);
+			}
+			setVisible(true);
 		}
 	}
 	
@@ -186,7 +206,6 @@ public abstract class Game extends JFrame implements WindowListener {
 	}
 	
 	public void run() {
-		setVisible(true);
 		start();
 		
 		running = true;
@@ -198,14 +217,13 @@ public abstract class Game extends JFrame implements WindowListener {
 				drawScene();
             } else if (loadingScene) {
             	try {
-	            	BufferStrategy strategy = getBufferStrategy();
-	    			Graphics g = (Graphics2D) strategy.getDrawGraphics();
-	    			
-	    			g.setColor(Color.black);
-	    			g.fillRect(0, 0, getWidth(), getHeight());
-	    			
-	    			g.dispose();
-	    			strategy.show();
+            		BufferStrategy strategy = getBufferStrategy();
+            		Graphics g = (Graphics2D) strategy.getDrawGraphics();
+            		
+            		drawLoadingScreen(g);
+            		
+            		g.dispose();
+            		strategy.show();
             	} catch (IllegalStateException e) {}
             }
             
@@ -214,6 +232,7 @@ public abstract class Game extends JFrame implements WindowListener {
             	double dt = now - lastUpdateTime;
             	lastUpdateTime = now;
             	updateScene(dt);
+            	System.out.println("Update took: " + 1 / (System.nanoTime() / 1000000000.0 - now));
 				
             } 
 		}
