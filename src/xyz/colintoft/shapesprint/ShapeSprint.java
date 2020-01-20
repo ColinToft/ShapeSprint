@@ -17,7 +17,7 @@ import xyz.colintoft.shapesprint.scenes.MainMenu;
 ***********************************************
 @Author Colin Toft
 @Date December 21st, 2019
-@Modified December 22nd, 2019
+@Modified December 22nd, 2019, January 8th, 10th & 17th, 2020
 @Description A simple clone of the game Geometry Dash, created with Java and the CGraphics library I have previously created.
 ***********************************************
 */

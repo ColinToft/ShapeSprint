@@ -20,7 +20,7 @@ import xyz.colintoft.shapesprint.ShapeSprint;
 ***********************************************
 @Author Colin Toft
 @Date December 21st, 2019
-@Modified December 22nd
+@Modified December 22nd, 24th, 26th & 27th, 2019, January 14th & 18th, 2020
 @Description The main menu scene that allows the user to select a level to play.
 ***********************************************
 */
@@ -33,7 +33,6 @@ public class MainMenu extends Scene {
 	// TODO finish levels
 	// TODO Comment CGraphics
 	// TODO *flow chart
-	// TODO *modified dates for classes
 	// TODO resizing windows is weird
 	
 	// TODO rings
@@ -234,7 +233,9 @@ public class MainMenu extends Scene {
 		Sprite helpButton = new Sprite(1 - buttonWidth, 1 - buttonHeight, buttonWidth, buttonHeight, "menuItems/helpButton.png") {
 			@Override
 			public void onMouseReleased(double x, double y, int button) {
-				helpScreen.show();
+				if (!creditsScreen.isVisible()) {
+					helpScreen.show();
+				}
 			}
 		};
 		add(helpButton);
@@ -243,7 +244,9 @@ public class MainMenu extends Scene {
 		Sprite creditsButton = new Sprite(0, 1 - buttonHeight, buttonWidth * 1.1, buttonHeight, "menuItems/creditsButton.png") {
 			@Override
 			public void onMouseReleased(double x, double y, int button) {
-				creditsScreen.show();
+				if (!helpScreen.isVisible()) {
+					creditsScreen.show();
+				}
 			}
 		};
 		add(creditsButton);
@@ -341,7 +344,9 @@ public class MainMenu extends Scene {
 	 * Throws/Exceptions: N/A
 	 */
 	public void update(double dt) {
+		// Update the switching animation if necessary
 		if (isSwitching) {
+			// If the panels are no longer moving, they are done switching so stop the animation
 			if (Math.abs(panel1.getX() - panelStartX) < 0.001 && Math.abs(velocity) < 0.001) {
 				isSwitching = false;
 				panel1.setX(panelStartX);
@@ -349,17 +354,21 @@ public class MainMenu extends Scene {
 			
 			switch (switchDirection) {
 			case LEFT:
+				// Adjust the velocity of the panels based on how far they are from the center
 				velocity += bounceFactor * (panelStartX - panel1.getX()) * dt;
-				velocity *= Math.pow(bounceDecay, 50 * dt);
+				velocity *= Math.pow(bounceDecay, 50 * dt); // Use the bounce decay variable to make the velocity closer to 0 
 				
+				// Move the panels
 				panel1.moveRight(velocity * dt);
 				panel2.moveRight(velocity * dt);
 				break;
 				
 			case RIGHT:
+				// Adjust the velocity of the panels based on how far they are from the center
 				velocity -= bounceFactor * (panelStartX - panel1.getX()) * dt;
-				velocity *= Math.pow(bounceDecay, 50 * dt);
+				velocity *= Math.pow(bounceDecay, 50 * dt); // Use the bounce decay variable to make the velocity closer to 0 
 				
+				// Move the panels
 				panel1.moveLeft(velocity * dt);
 				panel2.moveLeft(velocity * dt);
 				break;
@@ -385,15 +394,18 @@ public class MainMenu extends Scene {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+			// When the user presses escape, close the credits/help screen if they are showing, otherwise exit the game
 			if (helpScreen.isVisible() || creditsScreen.isVisible()) {
 				helpScreen.hide();
 				creditsScreen.hide();
 			} else {
 				game.exit();
 			}
+		// If the user presses an arrow key, switch the menu in that direction
 		} else if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT) {
 			Direction direction = e.getKeyCode() == KeyEvent.VK_LEFT ? Direction.LEFT : Direction.RIGHT;
 			switchLevel(direction);
+		// If they press enter, start the current level
 		} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 			startLevel(currentLevel);
 		}
@@ -414,12 +426,14 @@ public class MainMenu extends Scene {
 	private void switchLevel(Direction direction) {
 		ShapeSprint ss = (ShapeSprint) game;
 
+		// Update the current level based on the switch direction
 		if (direction == Direction.RIGHT) {
 			currentLevel = (currentLevel + 1) % ss.levels.length;
 		} else {
 			currentLevel = (currentLevel - 1 + ss.levels.length) % ss.levels.length;
 		}
 		
+		// Update the text and progress bars to reflect the new level that is being displayed
 		panel2.setX(panel1.getX()); // Make rect2 start where rect currently is (at the center of the screen), it will then move off to the left
 		levelText2.setText(levelText1.getText());
 		normalProgressBar2.setValue(normalProgressBar1.getValue());
@@ -427,6 +441,7 @@ public class MainMenu extends Scene {
 		practiceProgressBar2.setValue(practiceProgressBar1.getValue());
 		practicePercentageText2.setText(Util.toPercentageString(practiceProgressBar2.getValue()));
 		
+		// Update the text and progress bars to reflect the new level that is being displayed
 		panel1.moveRight(direction == Direction.RIGHT ? 1 : -1); // Make rect start one screen width to the side (the side depends on the direction), it will then slide onto the screen
 		levelText1.setText(ss.levels[currentLevel].name);
 		normalProgressBar1.setValue(ss.levels[currentLevel].normalProgress);
@@ -434,7 +449,8 @@ public class MainMenu extends Scene {
 		practiceProgressBar1.setValue(ss.levels[currentLevel].practiceProgress);
 		practicePercentageText1.setText(Util.toPercentageString(practiceProgressBar1.getValue()));
 		
-		setBackground(ss.levels[currentLevel].backgroundColor);
+		setBackground(ss.levels[currentLevel].backgroundColor); // Set the background color to the color of the new level
+		// Store information about switching levels
 		isSwitching = true;
 		switchDirection = direction;
 	}
@@ -452,12 +468,13 @@ public class MainMenu extends Scene {
 	 * Throws/Exceptions: N/A
 	 */
 	private void startLevel(int level) {
+		// Stop the menu music and play the start level sound effect
 		menuMusic.stop();
 		Clip startLevel = Util.getAudioClip(getClass(), "startLevel.wav");
 		startLevel.start();
 		
+		// Change the scene to the PlayLevel scene
 		ShapeSprint ss = (ShapeSprint) game;
-
 		ss.setScene(new PlayLevel(ss.levels[level]));
 	}
 	

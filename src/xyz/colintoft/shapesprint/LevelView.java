@@ -25,7 +25,7 @@ import xyz.colintoft.shapesprint.scenes.PlayLevel;
 ***********************************************
 @Author Colin Toft
 @Date December 30th, 2019
-@Modified
+@Modified December 31st, January 7th, 8th, 9th, 10th, 13th, 14th, 15th, 16th, 17th, 18th & 19th, 2020
 @Description A class that renders the level to the screen, including backgrounds, obstacles and the player, as well as playing the game music.
 ***********************************************
 */
@@ -378,7 +378,6 @@ public class LevelView extends Drawable {
 		if (!hasDied && !hasBeatLevel) {
 			// Move the player to the right
 			playerX += xSpeed * dt;
-			System.out.println(playerX);
 		}
 		
 		double minY = getMinY(); // Find the y coordinate of the ground or obstacle beneath the player

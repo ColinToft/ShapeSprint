@@ -26,7 +26,7 @@ import xyz.colintoft.shapesprint.ShapeSprint;
 ***********************************************
 @Author Colin Toft
 @Date December 27th, 2019
-@Modified
+@Modified December 30th, 2019, January 7th, 8th, 9th, 10th, 14th, 16th, 17th & 19th, 2020
 @Description The scene where the user can play a level. Includes the level view, pause menu, win screen, and help messages.
 ***********************************************
 */
@@ -213,7 +213,9 @@ public class PlayLevel extends Scene {
 		levelCompleteText = new DrawableOutlinedText(rect.getCenterX(), 0.15, "Level Complete!", titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER); // Text that displayes "Level Complete!"
 		levelCompleteText.setMaxWidth(rect.getWidth() * 0.9);
 		attemptCountText = new DrawableOutlinedText(rect.getCenterX(), 0.4, "Attempts: " + attemptNumber, titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER); // Shows the number of attempts used
+		attemptCountText.setMaxWidth(rect.getWidth() * 0.7);
 		jumpCountText = new DrawableOutlinedText(rect.getCenterX(), 0.55, "Jumps: " + levelView.jumpCount, titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER); // Shows the number of attempts used
+		jumpCountText.setMaxWidth(rect.getWidth() * 0.7);
 		
 		// A button that closes the win screen and restarts the level from the beginning
 		Sprite playAgainButton = new Sprite(0.5 * (1 - buttonWidth * 1.5), (1 - progressBarBottom - buttonHeight * 1.5) / 2 + progressBarBottom, buttonWidth * 1.5, buttonHeight * 1.5, "menuItems/playAgain.png") {
