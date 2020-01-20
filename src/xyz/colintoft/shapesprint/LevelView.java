@@ -378,6 +378,7 @@ public class LevelView extends Drawable {
 		if (!hasDied && !hasBeatLevel) {
 			// Move the player to the right
 			playerX += xSpeed * dt;
+			System.out.println(playerX);
 		}
 		
 		double minY = getMinY(); // Find the y coordinate of the ground or obstacle beneath the player
@@ -447,7 +448,7 @@ public class LevelView extends Drawable {
 			targetGroundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (Math.min(lastGroundY, playerY) * getBlockSize() / pixelHeight()));
 		}
 		
-		double groundHeightTolerance = 0.1; // It is acceptable if the ground height is within this amount of its target value
+		double groundHeightTolerance = triangleMode ? 0 : 0.1; // It is acceptable if the ground height is within this amount of its target value
 		
 		// Move the ground height towards the target ground height if necessary
 		if (targetGroundHeight < groundHeight - groundHeightTolerance && !hasBeatLevel && !hasDied) {
@@ -461,8 +462,10 @@ public class LevelView extends Drawable {
 			hasDied = true;
 			deathTimer = 0;
 			if (!practiceMode) {
+				// Stop the music, but not in practice mode since the music in practice mode should continuously loop
 				stopMusic();
 			}
+			// Play the death sound effect
 			deathSound.setFramePosition(0);
 			deathSound.start();
 		}
@@ -481,8 +484,10 @@ public class LevelView extends Drawable {
 		
 		if (hasDied) {
 			jumping = false;
+			// If the player has already died, increase the death timer
 			deathTimer += dt;
 			if (deathTimer > 1) {
+				// After the death timer has reached one second, start the next attempt
 				deathSound.stop();
 				startNextAttempt();
 			}
@@ -490,25 +495,29 @@ public class LevelView extends Drawable {
 		}
 		
 		if (playerX > level.width && !hasBeatLevel) {
+			// The player has reached the end of the level
 			hasBeatLevel = true;
 			jumping = false;
-			winTimer = 0;
-			if (practiceMode) {
+			winTimer = 0; // Start the win timer to time the ending animation
+			if (practiceMode) { // Only stop the music in practice mode, since in normal mode the music ends at the end of the level
 				stopMusic();
 			}
+			// Play the win sound
 			winSound.setFramePosition(0);
 			winSound.start();
 		}
 		
 		if (hasBeatLevel) {
+			// Increase the win timer
 			winTimer += dt;
 			if (winTimer > winAnimationLength + 0.7) {
+				// After the win animation is finished, show the win screen
 				((PlayLevel) parentPanel).showWinScreen();
 			}
 		}
 		
 		if (!playingMusic && playerX >= 0 && !hasDied && !hasBeatLevel) {
-			music.setFramePosition(0);
+			// If the music is not playing, start it
 			startMusic();
 			playerX = Math.max(checkpointX, 0);
 		}
@@ -525,10 +534,13 @@ public class LevelView extends Drawable {
 	 * Throws/Exceptions: N/A
 	 */
 	private void createCheckpoint() {
+		// Assign the values of the most recent checkpoint to the previous checkpoint
 		prevCheckpointX = checkpointX;
 		prevCheckpointY = checkpointY;
 		prevCheckpointYSpeed = checkpointYSpeed;
-		prevCheckpointTriangleMode = triangleMode;
+		prevCheckpointTriangleMode = checkpointTriangleMode;
+		
+		// Update the checkpoint to current player position
 		checkpointX = playerX;
 		checkpointY = playerY;
 		checkpointYSpeed = ySpeed;
@@ -565,23 +577,27 @@ public class LevelView extends Drawable {
 	 * Throws/Exceptions: N/A
 	 */
 	private double getMinY() {
-		double circleRadius = playerWidth * 0.5;
-		double playerCenterX = playerX + circleRadius;
+		double circleRadius = playerWidth * 0.5; // The radius of the player in blocks
+		double playerCenterX = playerX + circleRadius; // The x coordinate of the center of the player in blocks
 		
-		double minY = 0;
+		double minY = 0; // The y coordinate of the ground beneath the player
 		
+		// Loop through all obstacles the player could be touching
 		for (int obstacleX = (int) playerX; obstacleX <= (int) playerX + 1; obstacleX++) {
 			for (int obstacleY = (int)(playerY + playerWidth - 0.00001); obstacleY >= 0; obstacleY--) {
 				try {
-					if (level.obstacles[obstacleX][obstacleY] != null && level.obstacles[obstacleX][obstacleY].isSolid()) {
+					if (level.obstacles[obstacleX][obstacleY] != null && level.obstacles[obstacleX][obstacleY].isSolid()) { // If there is a solid obstacle at this location
 						double blockMinY;
 						if ((int)playerCenterX == obstacleX) {
+							// If the player's center is on this block, set the minY to the top of this obstacle
 							blockMinY = obstacleY + 1;
 						} else {
 							double cornerX = Math.round(playerX);
+							// Calculate the exact minimum y for the player using math to account for the players circular shape on a corner of a square block
 							blockMinY = obstacleY + 1 - Math.abs(Math.cos(Math.asin((cornerX - playerCenterX) / circleRadius))) * circleRadius;
 						}
 						if (minY < blockMinY) {
+							// If the new calculated minY for this block is higher (closer to the player) than the previous value, store it in the minY variable
 							minY = blockMinY;
 						}
 						break;
@@ -604,23 +620,26 @@ public class LevelView extends Drawable {
 	 * Throws/Exceptions: N/A
 	 */
 	private double getMaxY() {
-		double circleRadius = playerWidth * 0.5;
-		double playerCenterX = playerX + circleRadius;
+		double circleRadius = playerWidth * 0.5; // The radius of the player in blocks
+		double playerCenterX = playerX + circleRadius; // The x coordinate of the center of the player in blocks
 		
-		double maxY = triangleMode ? levelHeight - 1 : 1000000;
+		double maxY = triangleMode ? levelHeight - 1 : 1000000; // The y coordinate of the ceiling or obstacle above the player
 		
+		// Loop through all obstacles the player could be touching
 		for (int obstacleX = (int) playerX; obstacleX <= (int) playerX + 1; obstacleX++) {
 			for (int obstacleY = (int)(playerY + playerWidth); obstacleY < level.height; obstacleY++) {
 				try {
-					if (level.obstacles[obstacleX][obstacleY] != null && level.obstacles[obstacleX][obstacleY].isSolid()) {
+					if (level.obstacles[obstacleX][obstacleY] != null && level.obstacles[obstacleX][obstacleY].isSolid()) { // If there is a solid obstacle at this location
 						double blockMaxY;
-						if ((int)playerCenterX == obstacleX) {
+						if ((int)playerCenterX == obstacleX) { // If the player's center is on this block, set the maxY to the bottom of this obstacle
 							blockMaxY = obstacleY;
 						} else {
 							double cornerX = Math.round(playerX);
+							// Calculate the exact maximum y for the player using math to account for the players circular shape on a corner of a square block
 							blockMaxY = obstacleY + Math.abs(Math.cos(Math.asin((cornerX - playerCenterX) / circleRadius))) * circleRadius;
 						}
 						if (maxY > blockMaxY) {
+							// If the new calculated maxY for this block is lower (closer to the player) than the previous value, store it in the maxY variable
 							maxY = blockMaxY;
 						}
 						break;
@@ -643,11 +662,13 @@ public class LevelView extends Drawable {
 	 * Throws/Exceptions: N/A
 	 */
 	private boolean shouldDie() {
-		Area playerArea = new Area(new Ellipse2D.Double(playerX, playerY, playerWidth, playerWidth));
-				
+		Area playerArea = new Area(new Ellipse2D.Double(playerX, playerY, playerWidth, playerWidth)); // Store the player's area
+		
+		// Loop through all obstacles that the player could be touching
 		for (int obstacleX = (int) playerX; obstacleX <= (int) playerX + 1; obstacleX++) {
 			for (int obstacleY = (int)(playerY + playerWidth); obstacleY >= 0; obstacleY--) {
 				try {
+					// If the obstacle is a triangle, store its area and see if it intersects with the player
 					if (level.obstacles[obstacleX][obstacleY] == Obstacle.TRIANGLE) {
 						GeneralPath triangleShape = new GeneralPath();
 						triangleShape.moveTo(obstacleX, obstacleY);
@@ -655,11 +676,12 @@ public class LevelView extends Drawable {
 						triangleShape.lineTo(obstacleX + 1, obstacleY);
 						triangleShape.closePath();
 						Area triangleArea = new Area(triangleShape);
-						triangleArea.intersect(playerArea);
+						triangleArea.intersect(playerArea); // Calculate the intersection between the player and the triangle
 						
 						if (!triangleArea.isEmpty()) {
-							return true;
+							return true; // The player intersects with the triangle's area
 						}
+					// If the obstacle is an upside down triangle, store its area and see if it intersects with the player
 					} else if (level.obstacles[obstacleX][obstacleY] == Obstacle.TRIANGLE_UPSIDE_DOWN) {
 						GeneralPath triangleShape = new GeneralPath();
 						triangleShape.moveTo(obstacleX, obstacleY + 1);
@@ -667,10 +689,10 @@ public class LevelView extends Drawable {
 						triangleShape.lineTo(obstacleX + 1, obstacleY + 1);
 						triangleShape.closePath();
 						Area triangleArea = new Area(triangleShape);
-						triangleArea.intersect(playerArea);
+						triangleArea.intersect(playerArea); // Calculate the intersection between the player and the triangle
 						
 						if (!triangleArea.isEmpty()) {
-							return true;
+							return true; // The player intersects with the triangle's area
 						}
 					}
 				} catch (ArrayIndexOutOfBoundsException e) {}
@@ -679,11 +701,13 @@ public class LevelView extends Drawable {
 			if (obstacleX > playerX) { // Check on the right side of the player to see if they are about to run into a square
 				for (int obstacleY = (int)(playerY + playerWidth); obstacleY >= (int) playerY; obstacleY--) {
 					try {
-						if (level.obstacles[obstacleX][obstacleY] != null && level.obstacles[obstacleX][obstacleY].isSolid()) {
+						if (level.obstacles[obstacleX][obstacleY] != null && level.obstacles[obstacleX][obstacleY].isSolid()) { // If there is a solid obstacle at this location
+							// Calculate the area of the right side of the player
 							Area rightSidePlayerArea = new Area(new Rectangle2D.Double(playerX + playerWidth * 0.8, playerY, playerWidth * 0.2, playerWidth));
 							rightSidePlayerArea.intersect(playerArea);
 							
 							if (rightSidePlayerArea.intersects(new Rectangle2D.Double(obstacleX, obstacleY, 1, 1))) {
+								// The right side of the player intersects with this obstacle
 								return true;
 							}
 						}
@@ -706,7 +730,7 @@ public class LevelView extends Drawable {
 	 * Throws/Exceptions: N/A
 	 */
 	private boolean isTouchingYellowPad() {
-		Area playerArea = new Area(new Ellipse2D.Double(playerX, playerY, playerWidth, playerWidth));
+		Area playerArea = new Area(new Ellipse2D.Double(playerX, playerY, playerWidth, playerWidth)); // Calculate the player's area
 				
 		for (int obstacleX = (int) playerX; obstacleX <= (int) playerX + 1; obstacleX++) {
 			for (int obstacleY = (int)(playerY + playerWidth); obstacleY >= 0; obstacleY--) {
@@ -1103,7 +1127,7 @@ public class LevelView extends Drawable {
 	/** Method Name: onResume()
 	 * @Author Colin Toft
 	 * @Date January 8th, 2020
-	 * @Modified N/A
+	 * @Modified January 19th, 2020
 	 * @Description Overrides Scene.onResume(): resumes the music when the level is unpaused
 	 * @Parameters N/A
 	 * @Returns N/A
@@ -1114,8 +1138,8 @@ public class LevelView extends Drawable {
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (playerX >= 0 && !playingMusic) {
-			startMusic();
+		if (playerX >= 0 && !playingMusic && (!hasDied || practiceMode)) {
+			resumeMusic();
 		}
 	}
 
@@ -1187,6 +1211,7 @@ public class LevelView extends Drawable {
 			practiceMusic.setFramePosition(0);
 			practiceMusic.loop(Clip.LOOP_CONTINUOUSLY);
 		} else {
+			music.setFramePosition(0);
 			music.start();
 		}
 	}

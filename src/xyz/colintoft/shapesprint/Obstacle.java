@@ -39,29 +39,6 @@ public enum Obstacle {
 		// Return the correct obstacle type based on the given string
 		switch (string) {
 		case "S": return SQUARE;
-		case "ST1": return SQUARE_TOP_1;
-		case "SB1": return SQUARE_BOTTOM_1;
-		case "SL1": return SQUARE_LEFT_1;
-		case "SR1": return SQUARE_RIGHT_1;
-		case "ST3": return SQUARE_TOP_3;
-		case "SB3": return SQUARE_BOTTOM_3;
-		case "SL3": return SQUARE_LEFT_3;
-		case "SR3": return SQUARE_RIGHT_3;
-		case "STL": return SQUARE_TOP_LEFT;
-		case "STR": return SQUARE_TOP_RIGHT;
-		case "SBL": return SQUARE_BOTTOM_LEFT;
-		case "SBR": return SQUARE_BOTTOM_RIGHT;
-		case "SV": return SQUARE_VERTICAL;
-		case "SH": return SQUARE_HORIZONTAL;
-		case "SC": return SQUARE_CENTER;
-		case "SCTL": return SQUARE_CENTER_TOP_LEFT;
-		case "SCTR": return SQUARE_CENTER_TOP_RIGHT;
-		case "SCBL": return SQUARE_CENTER_BOTTOM_LEFT;
-		case "SCBR": return SQUARE_CENTER_BOTTOM_RIGHT;
-		case "SCTLB": return SQUARE_CENTER_TOP_LEFT_LINE_BOTTOM;
-		case "SCTRB": return SQUARE_CENTER_TOP_RIGHT_LINE_BOTTOM;
-		case "SCBLT": return SQUARE_CENTER_BOTTOM_LEFT_LINE_TOP;
-		case "SCBRT": return SQUARE_CENTER_BOTTOM_RIGHT_LINE_TOP;
 		
 		case "T": return TRIANGLE;
 		case "TU": return TRIANGLE_UPSIDE_DOWN;
