@@ -32,13 +32,11 @@ public class MainMenu extends Scene {
 
 	// TODO finish levels
 	// TODO Comment CGraphics
-	// TODO *flow chart
 	// TODO resizing windows is weird
 	
 	// TODO rings
 	// TODO upsideDown portals
 	// TODO editing checkpoints?
-	// TODO attempts and jump count when beating level
 	
 	private int currentLevel; // The level that is being displayed
 

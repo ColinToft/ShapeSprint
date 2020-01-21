@@ -108,6 +108,9 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 	
 	public void setDimensions(int width, int height) {
 		if (pixelWidth != width || pixelHeight != height) {
+			game.setResizingScene(true);
+			while (game.isDrawing() || game.isUpdating()) ;
+			
 			pixelWidth = width;
 			pixelHeight = height;
 			for (Drawable d: drawables) {
@@ -117,6 +120,8 @@ public class Scene extends Panel implements KeyListener, MouseListener, Componen
 					d.setParentPanel(this);
 				}
 			}
+			game.setPreferredSize(new Dimension(pixelWidth, pixelHeight));
+			game.setResizingScene(false);
 		}
 	}
 	

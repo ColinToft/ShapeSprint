@@ -45,7 +45,7 @@ public class PlayLevel extends Scene {
 	private final String triangleHelpMessage = "Hold the mouse or space bar to fly"; // Tip that helps the user learn to use triangle mode
 	private final String pauseMenuHelpMessage = "Press escape for more options"; // Tip that shows the user how to access the pause menu
 	
-	private DrawableOutlinedText pauseMenuText; // The text that displays the pause menu help message
+	private DrawableOutlinedText pauseMenuHelpText; // The text that displays the pause menu help message
 
 	private DrawableProgressBar progressBar; // A progress bar that shows the player's progress during the level
 	private final double progressBarWidth = 0.3; // The width of the above progress bar
@@ -121,17 +121,17 @@ public class PlayLevel extends Scene {
 		}
 		add(helpText);
 		
-		// Create and add the pause menu tip
-		pauseMenuText = new DrawableOutlinedText(0.9, 0.01, pauseMenuHelpMessage, titleFont.deriveFont(100f), Color.white, Color.black, 1f, HorizontalAlign.RIGHT, VerticalAlign.TOP);
-		pauseMenuText.setMaxWidth(0.5);
-		add(pauseMenuText);
-		
 		// Create and add the progress bar that tracks the user's progress during the level
 		progressBar = new DrawableProgressBar(0.5 * (1 - progressBarWidth), 0.02, progressBarWidth, progressBarHeight, progressBarHeight * 0.65, progressBarHeight, Color.WHITE, 2f, Color.red, new Color(0, 0, 0, 0));
 		add(progressBar);
 				
+		// Create and add the pause menu tip
+		pauseMenuHelpText = new DrawableOutlinedText(0.99, progressBar.getY() + progressBar.getHeight() + 0.005, pauseMenuHelpMessage, titleFont.deriveFont(100f), Color.white, Color.black, 1f, HorizontalAlign.RIGHT, VerticalAlign.TOP);
+		pauseMenuHelpText.setMaxWidth(0.5);
+		add(pauseMenuHelpText);
+		
 		// Create and add the percentage text that tracks the user's progress during the level
-		percentageText = new DrawableOutlinedText(progressBar.getX() + progressBar.getWidth(), progressBar.getCenterY(), "0%", titleFont.deriveFont(60f), Color.white, Color.black, 1f, HorizontalAlign.LEFT, VerticalAlign.CENTER);
+		percentageText = new DrawableOutlinedText(progressBar.getX() + progressBar.getWidth() + 0.005, progressBar.getCenterY(), "0%", titleFont.deriveFont(60f), Color.white, Color.black, 1f, HorizontalAlign.LEFT, VerticalAlign.CENTER);
 		percentageText.setMaxHeight(progressBarHeight);
 		add(percentageText);
 		
@@ -276,7 +276,7 @@ public class PlayLevel extends Scene {
 		
 		// Hide the pause menu tip if the user has already paused the game before
 		if (ss.hasPausedGame) {
-			pauseMenuText.hide();
+			pauseMenuHelpText.hide();
 		}
 	}
 	
@@ -311,7 +311,7 @@ public class PlayLevel extends Scene {
 					}
 					// Show the pause menu and hide the pause menu tip
 					pauseMenu.show();
-					pauseMenuText.hide();
+					pauseMenuHelpText.hide();
 					ss.hasPausedGame = true;
 					
 					// Show the practice mode tip if necessary
@@ -392,7 +392,7 @@ public class PlayLevel extends Scene {
 	/** Method Name: saveLevelProgress()
 	 * @Author Colin Toft
 	 * @Date January 10th, 2020
-	 * @Modified N/A
+	 * @Modified January 21st, 2020
 	 * @Description Stores the current progress in the level to the Level object
 	 * @Parameters N/A
 	 * @Returns N/A
@@ -406,6 +406,10 @@ public class PlayLevel extends Scene {
 			level.updatePracticeProgress(levelView.getPlayerProgress());
 		} else {
 			level.updateNormalProgress(levelView.getPlayerProgress());
+		}
+		
+		if (levelView.jumpCount > 0) {
+			((ShapeSprint) game).firstTime = false;
 		}
 	}
 	

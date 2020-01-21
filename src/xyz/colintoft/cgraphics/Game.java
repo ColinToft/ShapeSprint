@@ -39,11 +39,15 @@ public abstract class Game extends JFrame implements WindowListener {
 	private boolean running;
 	private boolean paused = false;
 	private volatile boolean loadingScene = true;
+	private volatile boolean resizingScene = false;
+	private volatile boolean updating = false;
+	private volatile boolean drawing = false;
 	
 	private boolean fullscreen = false;
+	private boolean changingFullscreen = false;
 	
 	private boolean buffersCreated = false;
-	
+
 	public Game() {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -138,7 +142,11 @@ public abstract class Game extends JFrame implements WindowListener {
 	 */
 	protected void setFullscreen(boolean fullscreen) {
 		if (fullscreen != this.fullscreen) {
-			setVisible(false);
+			changingFullscreen = true;
+			if (isDisplayable()) {
+				dispose();
+			}
+			changingFullscreen = false;
 			this.fullscreen = fullscreen;
 			if (fullscreen) {
 				setExtendedState(MAXIMIZED_BOTH); 
@@ -209,12 +217,16 @@ public abstract class Game extends JFrame implements WindowListener {
 		start();
 		
 		running = true;
+		drawing = false;
+		updating = false;
 		
 		while (running) {
 			double now = System.nanoTime() / 1000000000.0;
-            if (now - lastDrawTime > 1 / this.drawFPS && !loadingScene) {
+            if (now - lastDrawTime >= 1 / this.drawFPS && !loadingScene && !resizingScene) {
             	lastDrawTime = now;
+            	drawing = true;
 				drawScene();
+				drawing = false;
             } else if (loadingScene) {
             	try {
             		BufferStrategy strategy = getBufferStrategy();
@@ -228,12 +240,12 @@ public abstract class Game extends JFrame implements WindowListener {
             }
             
             now = System.nanoTime() / 1000000000.0;
-            if (now - lastUpdateTime > 1 / this.updateFPS && !paused && !loadingScene) {
+            if (now - lastUpdateTime >= 1 / this.updateFPS && !paused && !loadingScene && !resizingScene) {
             	double dt = now - lastUpdateTime;
             	lastUpdateTime = now;
+            	updating = true;
             	updateScene(dt);
-            	System.out.println("Update took: " + 1 / (System.nanoTime() / 1000000000.0 - now));
-				
+            	updating = false;
             } 
 		}
 	}
@@ -246,16 +258,28 @@ public abstract class Game extends JFrame implements WindowListener {
 		return fullscreen;
 	}
 	
-	public void onWindowClosing() {
-		
+	public boolean isDrawing() {
+		return drawing;
 	}
+	
+	public boolean isUpdating() {
+		return updating;
+	}
+	
+	public void setResizingScene(boolean b) {
+		resizingScene = b;
+	}
+	
+	public void onWindowClosing() {}
 	
 	/**
 	 * Exits the game. By default, this disposes the frame and calls {@link System#exit(int)} to stop the program.
 	 */
 	public void exit() {
 		onWindowClosing();
-		currentScene.dispose();
+		if (currentScene != null) {
+			currentScene.dispose();
+		}
 		running = false;
 		setVisible(false);
 		super.dispose();
@@ -265,7 +289,9 @@ public abstract class Game extends JFrame implements WindowListener {
 	@Override
 	public void dispose() {
 		super.dispose();
-		exit();
+		if (!changingFullscreen) {
+			exit();
+		}
 	}
 	
 	public void pauseGame() {

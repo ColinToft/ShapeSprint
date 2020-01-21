@@ -28,7 +28,7 @@ public class ShapeSprint extends Game {
 	
 	public Level[] levels; // A list of Level objects that the user can choose to play
 
-	private boolean firstTime; // True is this is the user's first time playing the game
+	public boolean firstTime; // True is this is the user's first time playing the game
 	public boolean hasUsedTriangleMode; // True if the user has used triangle mode before
 	public boolean hasPausedGame; // True if the user has paused the game before
 	public boolean hasUsedPracticeMode; // True if the user has used practice mode before
@@ -67,7 +67,7 @@ public class ShapeSprint extends Game {
 		// Set up the window and open the main menu
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		setFrame("Shape Sprint", (int) dim.getWidth(), (int) dim.getHeight());
-		//setSize(640, 480);
+		setSize(640, 480);
 		setFPS(400);
 		setFullscreen(false);
 		setScene(new MainMenu());
@@ -78,7 +78,7 @@ public class ShapeSprint extends Game {
 	 * @Date January 8th, 2019
 	 * @Modified January 17th, 2019
 	 * @Description Saves the user's progress in the game to a file.
-	 * @Parameters N/A
+	 * @Parameters N/A 
 	 * @Returns N/A
 	 * Data Type: N/A
 	 * Dependencies: N/A

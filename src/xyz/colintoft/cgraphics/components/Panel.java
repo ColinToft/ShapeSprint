@@ -2,7 +2,9 @@ package xyz.colintoft.cgraphics.components;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -63,10 +65,10 @@ public class Panel extends Drawable {
 	 * @param g The graphics object that is used to draw graphics to the screen.
 	 */
 	public void draw(Graphics g, int leftInset, int topInset, int rightInset, int bottomInset) {
-		
+		Graphics2D g2d = (Graphics2D) g;
 		if (backgroundColor.getAlpha() > 0) {
-			g.setColor(backgroundColor);
-			g.fillRect(leftInset, topInset, pixelWidth(), pixelHeight());
+			g2d.setColor(backgroundColor);
+			g2d.fillRect(leftInset, topInset, pixelWidth(), pixelHeight());
 		}
 	
 		for (Drawable d: drawables) {
@@ -74,20 +76,15 @@ public class Panel extends Drawable {
 				continue;
 			}
 			if (d instanceof Panel) {
+				g2d.setTransform(new AffineTransform());
 		    	if (((Panel) d).fillsParent()) {
-		    		((Panel) d).draw(g);
+		    		((Panel) d).draw(g2d);
 		    	} else {
-		    		g.drawImage(((Panel) d).getImage(), d.pixelX(leftInset), d.pixelY(topInset), d.pixelWidth(), d.pixelHeight(), null);
+		    		g2d.drawImage(((Panel) d).getImage(), d.pixelX(leftInset), d.pixelY(topInset), d.pixelWidth(), d.pixelHeight(), null);
 		    	}
 		    } else {
-	    		if (Math.abs(d.getImage().getWidth(null) - d.pixelWidth()) <= 1 && Math.abs(d.getImage().getHeight(null) - d.pixelHeight()) <= 1) {
-	    			double start = System.nanoTime() / 1000000000.0;
-	    			g.drawImage(d.getImage(), d.pixelX(leftInset), d.pixelY(topInset), null);
-	    			double end = System.nanoTime() / 1000000000.0;
-	    			System.out.println("Drawing " + d + " took " + (end - start));
-	    		} else {
-	    			g.drawImage(d.getImage(), d.pixelX(leftInset), d.pixelY(topInset), d.pixelWidth(), d.pixelHeight(), null);
-	    		}
+	    		g2d.setTransform(AffineTransform.getTranslateInstance(d.pixelX(leftInset), d.pixelY(topInset)));
+	    		d.drawImage(g2d);
 		    }
 		}
 	}
@@ -144,6 +141,7 @@ public class Panel extends Drawable {
 	/** This method will be automatically called whenever the window is rescaled. If overriding this method, make sure to call super.onRescale() inside this method. */
 	public void onRescale() {
 		// Set the panel of each drawable so they will regenerate their image
+		generateImage();
 		for (Drawable d: drawables) {
 			d.setParentPanel(this);
 		}
