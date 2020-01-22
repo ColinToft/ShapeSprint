@@ -25,7 +25,7 @@ import xyz.colintoft.shapesprint.scenes.PlayLevel;
 ***********************************************
 @Author Colin Toft
 @Date December 30th, 2019
-@Modified December 31st, January 7th, 8th, 9th, 10th, 13th, 14th, 15th, 16th, 17th, 18th & 19th, 2020
+@Modified December 31st, January 7th, 8th, 9th, 10th, 13th, 14th, 15th, 16th, 17th, 18th, 19th & 21st, 2020
 @Description A class that renders the level to the screen, including backgrounds, obstacles and the player, as well as playing the game music.
 ***********************************************
 */
@@ -358,7 +358,7 @@ public class LevelView extends Drawable {
 	/** Method Name: update()
 	 * @Author Colin Toft
 	 * @Date December 30th, 2019
-	 * @Modified January 7th, 9th, 10th, 13th, 14th, 15th, 17th & 19th, 2020
+	 * @Modified January 7th, 9th, 10th, 13th, 14th, 15th, 17th, 19th & 21st, 2020
 	 * @Description Overrides Drawable.update(): updates the level, including updating player position, handling music and calculating physics
 	 * @Parameters
 	 *      - double dt: The time in seconds since the last time update was called
@@ -409,6 +409,10 @@ public class LevelView extends Drawable {
 				jump();
 				holding = true; // The player is now holding the mouse/space bar
 			}
+		} else if (isTouchingYellowRing() && jumping && !holding) {
+			// The yellow ring has the same effect as the player jumping
+			jump();
+			holding = true;
 		}
 		
 		double maxY = getMaxY(); // Find the y coordinate of the ground or obstacle beneath the player
@@ -515,7 +519,7 @@ public class LevelView extends Drawable {
 			}
 		}
 		
-		if (!playingMusic && playerX >= 0 && !hasDied && !hasBeatLevel) {
+		if (!playingMusic && playerX >= 0 + (level.musicOffset * xSpeed) && !hasDied && !hasBeatLevel) {
 			// If the music is not playing, start it
 			startMusic();
 			playerX = Math.max(checkpointX, 0);
@@ -753,6 +757,38 @@ public class LevelView extends Drawable {
 						padArea.intersect(playerArea); // Determine if the pad and player intersect
 						
 						if (!padArea.isEmpty()) {
+							return true; // If there is an intersection, the player is touching the yellow pad
+						}
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {}
+			}
+		}
+		
+		return false;
+	}
+	
+	/** Method Name: isTouchingYellowRing()
+	 * @Author Colin Toft
+	 * @Date January 19th, 2020
+	 * @Modified N/A
+	 * @Description Determines if a player is touching a yellow ring
+	 * @Returns True the player is currently touching a yellow ring, otherwise false
+	 * Data Type: Area, int, Ellipse2D, Rectangle2D, Obstacle
+	 * Dependencies: N/A
+	 * Throws/Exceptions: N/A
+	 */
+	private boolean isTouchingYellowRing() {
+		Area playerArea = new Area(new Ellipse2D.Double(playerX, playerY, playerWidth, playerWidth)); // Calculate the player's area
+				
+		// Loop through all obstacles near the player
+		for (int obstacleX = (int) playerX; obstacleX <= (int) playerX + 1; obstacleX++) {
+			for (int obstacleY = (int)(playerY + playerWidth); obstacleY >= 0; obstacleY--) {
+				try {
+					if (level.obstacles[obstacleX][obstacleY] == Obstacle.YELLOW_RING) {
+						Area ringArea = new Area(new Ellipse2D.Double(obstacleX - 0.25, obstacleY - 0.25, 1.5, 1.5)); // If the obstacle is a yellow pad, calculate its area
+						ringArea.intersect(playerArea); // Determine if the pad and player intersect
+						
+						if (!ringArea.isEmpty()) {
 							return true; // If there is an intersection, the player is touching the yellow pad
 						}
 					}

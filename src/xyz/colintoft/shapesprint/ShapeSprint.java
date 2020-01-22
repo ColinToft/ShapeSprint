@@ -2,6 +2,8 @@ package xyz.colintoft.shapesprint;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -35,6 +37,8 @@ public class ShapeSprint extends Game {
 	
 	public static final String saveFile = "/saveGame.txt"; // The file where the user's data should be saved to
 	
+	public Font titleFont;
+	
 	public static void main(String[] args) {
 		// Run the game
 		game = new ShapeSprint();
@@ -54,11 +58,14 @@ public class ShapeSprint extends Game {
 	 */
 	@Override
 	public void init() {
+		// Load the font
+		titleFont = Util.loadFontFromFile(getClass(), "Pusab.ttf", 50);
+		
 		// Initialize the list levels
 		levels = new Level[] {
-			new Level("Dimensional Vortex" , Color.BLUE, "dimensionalvortex.txt", "DimensionalVortex.wav"),
-			new Level("Spatial Plane", Color.MAGENTA, "spatialplane.txt", "SpatialPlane.wav"),
-			new Level("Temporal Nebula", new Color(255, 230, 0), "temporalnebula.txt", "TemporalNebula.wav")
+			new Level("Dimensional Vortex" , Color.BLUE, "dimensionalvortex.txt", "DimensionalVortex.wav", 0),
+			new Level("Spatial Plane", Color.MAGENTA, "spatialplane.txt", "SpatialPlane.wav", -0.25),
+			new Level("Temporal Nebula", new Color(255, 210, 0), "temporalnebula.txt", "TemporalNebula.wav", 0)
 		};
 		
 		// Load the previous user progress
@@ -67,9 +74,9 @@ public class ShapeSprint extends Game {
 		// Set up the window and open the main menu
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		setFrame("Shape Sprint", (int) dim.getWidth(), (int) dim.getHeight());
-		setSize(640, 480);
+		//setSize(640, 480);
 		setFPS(400);
-		setFullscreen(false);
+		setFullscreen(true);
 		setScene(new MainMenu());
 	}
 
@@ -139,6 +146,28 @@ public class ShapeSprint extends Game {
 			// The file does not exist, so this must be the user's first time playing
 			firstTime = true;
 		}
+	}
+	
+	/** Method Name: drawLoadingScreen()
+	 * @Author Colin Toft
+	 * @Date January 21st, 2020
+	 * @Modified N/A
+	 * @Description Overrides Game.drawLoadingScreen(): shows a loading message
+	 * @Parameters N/A
+	 * @Returns N/A
+	 * Data Type: N/A
+	 * Dependencies: CGraphics library (by Colin)
+	 * Throws/Exceptions: N/A
+	 */
+	protected void drawLoadingScreen(Graphics g) {
+		g.setColor(Color.black);
+		g.fillRect(0, 0, getWidth(), getHeight());
+		g.setColor(Color.white);
+		if (titleFont != null) {
+			Font n = titleFont.deriveFont(getHeight() / 10f);
+			g.setFont(n);
+		}
+		g.drawString("Loading...", 15, getHeight() / 10 * 9);
 	}
 	
 	/** Method Name: isFirstTime()

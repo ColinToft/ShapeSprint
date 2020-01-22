@@ -174,7 +174,7 @@ public class MainMenu extends Scene {
 		// Create the second level panel (the same as the first panel)
 		panel2 = new Panel(panelStartX + 1, 0.15, panelWidth, 0.7);
 		DrawableRoundedRectangle rect2 = new DrawableRoundedRectangle(0, 0, 1, 0.4, 0.07, 0.125, new Color(0, 0, 0, 70));
-		levelText2 = new DrawableOutlinedText(rect2.getCenterX(), rect2.getCenterY(), ss.levels[currentLevel + 1].name, titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+		levelText2 = new DrawableOutlinedText(rect2.getCenterX(), rect2.getCenterY(), ss.levels[(currentLevel + 1) % ss.levels.length].name, titleFont, Color.white, Color.black, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 		levelText2.setMaxWidth(rect2.getWidth() * 0.9);
 		
 		normalProgressBar2 = new DrawableProgressBar(0, 0.6, 1, 0.1, 0.05, 0.16, Color.BLACK, 2f, Color.GREEN, new Color(0, 0, 0, 70));
@@ -316,7 +316,7 @@ public class MainMenu extends Scene {
 	/** Method Name: dispose()
 	 * @Author Colin Toft
 	 * @Date January 14th, 2020
-	 * @Modified N/A
+	 * @Modified January 21st, 2020
 	 * @Description Overrides the Scene.dispose() method which is called when a Scene is about to be closed, stops the menu music.
 	 * @Parameters N/A
 	 * @Returns N/A
@@ -326,7 +326,9 @@ public class MainMenu extends Scene {
 	 */
 	public void dispose() {
 		super.dispose();
-		menuMusic.stop();
+		if (menuMusic != null) {
+			menuMusic.stop();
+		}
 	}
 	
 	/** Method Name: update()

@@ -5,7 +5,6 @@ import java.awt.event.*;
 import java.awt.image.BufferStrategy;
 
 import javax.swing.*;
-
 import xyz.colintoft.cgraphics.components.Panel;
 
 /**
@@ -64,7 +63,7 @@ public abstract class Game extends JFrame implements WindowListener {
         
         do {
         	try {
-            	createBufferStrategy(2);
+            	createBufferStrategy(4);
             	buffersCreated = true;
         	} catch (IllegalStateException e) {}
         } while (!buffersCreated);
@@ -101,6 +100,8 @@ public abstract class Game extends JFrame implements WindowListener {
 	protected void drawLoadingScreen(Graphics g) {
 		g.setColor(Color.black);
 		g.fillRect(0, 0, getWidth(), getHeight());
+		g.setColor(Color.white);
+		g.drawString("Loading...", getWidth() / 2, getHeight() / 2);
 	}
 	
 	/**
@@ -220,8 +221,18 @@ public abstract class Game extends JFrame implements WindowListener {
 		drawing = false;
 		updating = false;
 		
+		double now;
 		while (running) {
-			double now = System.nanoTime() / 1000000000.0;
+			now = System.nanoTime() / 1000000000.0;
+            if (now - lastUpdateTime >= 1 / this.updateFPS && !paused && !loadingScene && !resizingScene) {
+            	double dt = now - lastUpdateTime;
+            	lastUpdateTime = now;
+            	updating = true;
+            	updateScene(dt);
+            	updating = false;
+            } 
+            
+			now = System.nanoTime() / 1000000000.0;
             if (now - lastDrawTime >= 1 / this.drawFPS && !loadingScene && !resizingScene) {
             	lastDrawTime = now;
             	drawing = true;
@@ -238,15 +249,6 @@ public abstract class Game extends JFrame implements WindowListener {
             		strategy.show();
             	} catch (IllegalStateException e) {}
             }
-            
-            now = System.nanoTime() / 1000000000.0;
-            if (now - lastUpdateTime >= 1 / this.updateFPS && !paused && !loadingScene && !resizingScene) {
-            	double dt = now - lastUpdateTime;
-            	lastUpdateTime = now;
-            	updating = true;
-            	updateScene(dt);
-            	updating = false;
-            } 
 		}
 	}
 	

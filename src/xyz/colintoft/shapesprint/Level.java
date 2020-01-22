@@ -8,7 +8,7 @@ import xyz.colintoft.cgraphics.Util;
 ***********************************************
 @Author Colin Toft
 @Date December 24th, 2019
-@Modified December 30th & 31st 2019, January 8th, 2020
+@Modified December 30th & 31st 2019, January 8th & 21st, 2020
 @Description A class that stores information for a level, including the obstacles, music, colours and save data.
 ***********************************************
 */
@@ -20,6 +20,7 @@ public class Level {
 	public String musicFile; // The filename where the music for the level is stored
 	public double normalProgress = 0; // The user's highest progress for this level in normal mode (from 0 to 1, where 1 means they have completed the level)
 	public double practiceProgress = 0; // The user's highest progress for this level in practice mode (from 0 to 1, where 1 means they have completed the level)
+	public double musicOffset; // The delay in seconds that happens before starting the music 
 	
 	public Obstacle[][] obstacles; // A 2D array of obstacles that make up the level
 	public int width, height; // The width and height of this level in blocks
@@ -27,24 +28,26 @@ public class Level {
 	/** Method Name: Level()
 	 * @Author Colin Toft
 	 * @Date December 24th, 2019
-	 * @Modified December 30th, 2019
+	 * @Modified December 30th, 2019, January 21st, 2020
 	 * @Description Creates a new Level object
 	 * @Parameters
 	 * 		- String name: the name of the level (that the user will see)
 	 * 		- Color backgroundColor: the background color for the level
 	 * 		- String filename: the name of the file containing the level's data
 	 * 		- String musicFile: the name of the file containing the song for the level
+	 * 		- double musicOffset: the delay in seconds that happens before starting the music
 	 * @Returns A new level object
 	 * Data Type: String, Color
 	 * Dependencies: N/A
 	 * Throws/Exceptions: N/A
 	 */
-	public Level(String name, Color backgroundColor, String filename, String musicFile) {
+	public Level(String name, Color backgroundColor, String filename, String musicFile, double musicOffset) {
 		// Store the given information
 		this.name = name;
 		this.backgroundColor = backgroundColor;
 		this.filename = filename;
 		this.musicFile = musicFile;
+		this.musicOffset = musicOffset;
 		// Intialize the level progress to 0 in both modes
 		normalProgress = 0f;
 		practiceProgress = 0f;
