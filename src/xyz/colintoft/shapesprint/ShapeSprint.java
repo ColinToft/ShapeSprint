@@ -72,13 +72,17 @@ public class ShapeSprint extends Game {
 		loadProgress();
 		
 		// Set up the window and open the main menu
+		boolean useFullScreen = false;
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		setFrame("Shape Sprint", (int) dim.getWidth(), (int) dim.getHeight());
-		//setSize(640, 480);
 		setFPS(400);
-		setFullscreen(true);
+		if (!useFullScreen) {
+			setSize(640, 480);
+		}
+		setFullscreen(useFullScreen);
 		setScene(new MainMenu());
 	}
+	
 
 	/** Method Name: saveProgress()
 	 * @Author Colin Toft
