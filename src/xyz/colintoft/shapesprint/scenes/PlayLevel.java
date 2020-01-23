@@ -41,7 +41,7 @@ public class PlayLevel extends Scene {
 	
 	private DrawableOutlinedText helpText; // Help text that gives the player tips during the level
 	public boolean needsJumpHelp = true; // True if the player needs help jumping (the jumping tutorial message needs to be displayed)
-	private final String jumpHelpMessage = "Click or tap to jump over obstacles"; // Tip that helps the user learn to jump
+	private final String jumpHelpMessage = "Click or press space to jump over obstacles"; // Tip that helps the user learn to jump
 	private final String triangleHelpMessage = "Hold the mouse or space bar to fly"; // Tip that helps the user learn to use triangle mode
 	private final String pauseMenuHelpMessage = "Press escape for more options"; // Tip that shows the user how to access the pause menu
 	

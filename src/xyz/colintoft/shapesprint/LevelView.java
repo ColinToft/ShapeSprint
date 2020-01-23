@@ -25,7 +25,7 @@ import xyz.colintoft.shapesprint.scenes.PlayLevel;
 ***********************************************
 @Author Colin Toft
 @Date December 30th, 2019
-@Modified December 31st, January 7th, 8th, 9th, 10th, 13th, 14th, 15th, 16th, 17th, 18th, 19th & 21st, 2020
+@Modified December 31st, January 7th, 8th, 9th, 10th, 13th, 14th, 15th, 16th, 17th, 18th, 19th, 21st & 22nd, 2020
 @Description A class that renders the level to the screen, including backgrounds, obstacles and the player, as well as playing the game music.
 ***********************************************
 */
@@ -80,13 +80,16 @@ public class LevelView extends Drawable {
 	private double checkpointY = playerY; // The y coordinate of the most recent practice mode checkpoint, in blocks
 	private double checkpointYSpeed = ySpeed; // The y speed of the player at the most recent practice mode checkpoint, in blocks per second
 	private boolean checkpointTriangleMode = false; // Whether the player was in triangle mode at the most recent checkpoint
+	private boolean checkpointUpsideDownMode = false; // Whether the player was in upside down mode at the most recent checkpoint
 	private int checkpointDeathCount = 0; // How many times the player has died close to the most recent checkpoint
 	private double prevCheckpointX = checkpointX; // The x coordinate of the previous practice mode checkpoint, in blocks
 	private double prevCheckpointY = checkpointY; // The y coordinate of the previous practice mode checkpoint, in blocks
 	private double prevCheckpointYSpeed = checkpointYSpeed; // The y speed of the player at the previous practice mode checkpoint, in blocks per second
 	private boolean prevCheckpointTriangleMode = checkpointTriangleMode; // Whether the player was in triangle mode at the previous checkpoint
+	private boolean prevCheckpointUpsideDownMode = checkpointUpsideDownMode; // Whether the player was in upside down mode at the previous checkpoint
 	
 	private boolean triangleMode = false; // Whether the player is currently in triangle mode
+	private boolean upsideDownMode = false; // Whether the player is currently in upside down mode
 	
 	private BufferedImage playerCircleImage, playerTriangleImage; // Player images
 	private BufferedImage backgroundImage, groundImage, ceilingImage; // Images for the background of the level
@@ -273,7 +276,7 @@ public class LevelView extends Drawable {
 	    g2d.drawLine(0, (int)(pixelHeight() * (1 - groundHeight)) + 2, pixelWidth(), (int)(pixelHeight() * (1 - groundHeight)) + 2);
 	    
 	    // Draw the ceiling in the same way if the player is in triangle mode
-	    if (triangleMode) {
+	    if (triangleMode || upsideDownMode) {
 		    g2d.drawImage(ceilingImage, groundX, (int)(pixelHeight() * (0.5 / levelHeight) - ceilingImage.getHeight()), null);
 		    // Draw a white line at the bottom of the ceiling
 		    g2d.drawLine(0, (int)(pixelHeight() * (0.5 / levelHeight)), pixelWidth(), (int)(pixelHeight() * (0.5 / levelHeight)));
@@ -380,22 +383,30 @@ public class LevelView extends Drawable {
 			playerX += xSpeed * dt;
 		}
 		
-		double minY = getMinY(); // Find the y coordinate of the ground or obstacle beneath the player
+		
 		boolean justLanded = false;
+		double minY = getMinY(); // Find the y coordinate of the ground or obstacle beneath the player
+		double maxY = getMaxY(); // Find the y coordinate of the ground or obstacle beneath the player
 		
 		if (playerY > minY || ySpeed != 0) { // If the player is in the air
 			if (!triangleMode) {
 				// If the player is in circle mode, simulate gravity by lowering their ySpeed
-				ySpeed = Math.max(ySpeed - gravity * dt, minYSpeed);
+				ySpeed = Math.max(ySpeed - gravity * dt * (upsideDownMode ? -1 : 1), minYSpeed);
 			} else if (!jumping) {
 				// If the player is in triangle mode but not holding the mouse or space bar, their y speed is also lowered
-				ySpeed = Math.max(ySpeed - triangleYSpeedIncrease * dt, triangleMode ? triangleMinYSpeed : minYSpeed);
+				if (upsideDownMode) {
+					ySpeed = Math.min(ySpeed + triangleYSpeedIncrease * dt, triangleMode ? -triangleMinYSpeed : -minYSpeed);
+				} else {
+					ySpeed = Math.max(ySpeed - triangleYSpeedIncrease * dt, triangleMode ? triangleMinYSpeed : minYSpeed);
+				}
 			}
 			
 			// Adjust the player's y coordinate based on their y speed
 			playerY += ySpeed * dt;
 		}
 				
+		boolean circleHitCeiling = false; // True if the player is in circle mode and has gone above the max y coordinate (ran into an obstacle above them)
+
 		if (playerY <= minY && ySpeed <= 0) { // If the player is on the ground
 			justLanded = ySpeed < 0; // If the y speed is smaller than 0, the player is falling and must have just landed on the ground
 			
@@ -403,6 +414,10 @@ public class LevelView extends Drawable {
 			ySpeed = 0;
 			playerY = minY;
 			lastGroundY = playerY; // Store the y coordinate of the last time the player was on the ground
+			
+			if (upsideDownMode && justLanded) {
+				circleHitCeiling = true;
+			}
 			
 			if (jumping && !triangleMode) {
 				// If the player is jumping (holding down the mouse or space bar), call the jump method
@@ -415,15 +430,27 @@ public class LevelView extends Drawable {
 			holding = true;
 		}
 		
-		double maxY = getMaxY(); // Find the y coordinate of the ground or obstacle beneath the player
-		boolean circleHitCeiling = false; // True if the player is in circle mode and has gone above the max y coordinate (ran into an obstacle above them)
+		
 		if (playerY >= maxY - playerWidth && ySpeed >= 0) { // If the player is moving upwards and is running into an obstacle above them
 			if (triangleMode) {
 				// If the player hits a ceiling in triangle mode, set their y speed to 0 and make their y coordinate equal to the exact position beneath the obstacle
 				ySpeed = 0;
 				playerY = maxY - playerWidth;
+				
 			} else {
-				circleHitCeiling = true; // The player is in circle mode and hit a ceiling, meaning they should be killed
+				if (upsideDownMode) {
+					ySpeed = 0;
+					playerY = maxY - playerWidth;
+					lastGroundY = playerY;
+					justLanded = ySpeed > 0; // If the y speed is larger than 0, the player is moving upwards and must have just landed on the ceiling
+					
+					if (jumping) {
+						jump();
+						holding = true;
+					}
+				} else {
+					circleHitCeiling = true; // The player is in circle mode and hit a ceiling, meaning they should be killed
+				}
 			}
 		}
 		
@@ -431,7 +458,11 @@ public class LevelView extends Drawable {
 		if (triangleMode) {
 			if (jumping) {
 				// If the player is holding the mouse/space bar in triangle mode, increase their y speed
-				ySpeed = Math.min(triangleMaxYSpeed, ySpeed + triangleYSpeedIncrease * dt);
+				if (upsideDownMode) {
+					ySpeed = Math.max(-triangleMaxYSpeed, ySpeed - triangleYSpeedIncrease * dt);
+				} else {
+					ySpeed = Math.min(triangleMaxYSpeed, ySpeed + triangleYSpeedIncrease * dt);
+				}
 				if (!hasUsedTriangleMode) {
 					hasUsedTriangleMode = true;
 					((ShapeSprint) getGame()).hasUsedTriangleMode = true; // Remember that the player has used triangle mode to avoid showing them help messages for it in the future
@@ -447,11 +478,15 @@ public class LevelView extends Drawable {
 			
 			targetGroundHeight = 0.5 / levelHeight; // In triangle mode the ground height always stays the same
 		} else {
-			// If the player is in circle mode, calculate the ground height based on the player's y coordinate
-			targetGroundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (Math.min(lastGroundY, playerY) * getBlockSize() / pixelHeight()));
+			if (upsideDownMode) {
+				targetGroundHeight = 0.5 / levelHeight; // In upside down mode the ground height always stays the same
+			} else {
+				// If the player is in normal circle mode, calculate the ground height based on the player's y coordinate
+				targetGroundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (Math.min(lastGroundY, playerY) * getBlockSize() / pixelHeight()));
+			}
 		}
 		
-		double groundHeightTolerance = triangleMode ? 0 : 0.1; // It is acceptable if the ground height is within this amount of its target value
+		double groundHeightTolerance = (triangleMode || upsideDownMode) ? 0 : 0.1; // It is acceptable if the ground height is within this amount of its target value
 		
 		// Move the ground height towards the target ground height if necessary
 		if (targetGroundHeight < groundHeight - groundHeightTolerance && !hasBeatLevel && !hasDied) {
@@ -529,7 +564,7 @@ public class LevelView extends Drawable {
 	/** Method Name: createCheckpoint()
 	 * @Author Colin Toft
 	 * @Date January 9th, 2020
-	 * @Modified N/A
+	 * @Modified January 22nd, 2020
 	 * @Description Creates a checkpoint at the current player location.
 	 * @Returns N/A
 	 * Data Type: double, boolean, int
@@ -542,19 +577,21 @@ public class LevelView extends Drawable {
 		prevCheckpointY = checkpointY;
 		prevCheckpointYSpeed = checkpointYSpeed;
 		prevCheckpointTriangleMode = checkpointTriangleMode;
+		prevCheckpointUpsideDownMode = checkpointUpsideDownMode;
 		
 		// Update the checkpoint to current player position
 		checkpointX = playerX;
 		checkpointY = playerY;
 		checkpointYSpeed = ySpeed;
 		checkpointTriangleMode = triangleMode;
+		checkpointUpsideDownMode = upsideDownMode;
 		checkpointDeathCount = 0;
 	}
 	
 	/** Method Name: deleteCheckpoint()
 	 * @Author Colin Toft
 	 * @Date January 17th, 2020
-	 * @Modified N/A
+	 * @Modified January 22nd, 2020
 	 * @Description Deletes the most recent checkpoint.
 	 * @Returns N/A
 	 * Data Type: double, boolean, int
@@ -566,6 +603,7 @@ public class LevelView extends Drawable {
 		checkpointY = prevCheckpointY;
 		checkpointYSpeed = prevCheckpointYSpeed;
 		checkpointTriangleMode = prevCheckpointTriangleMode;
+		checkpointUpsideDownMode = prevCheckpointUpsideDownMode;
 		checkpointDeathCount = 0;
 	}
 	
@@ -626,7 +664,7 @@ public class LevelView extends Drawable {
 		double circleRadius = playerWidth * 0.5; // The radius of the player in blocks
 		double playerCenterX = playerX + circleRadius; // The x coordinate of the center of the player in blocks
 		
-		double maxY = triangleMode ? levelHeight - 1 : 1000000; // The y coordinate of the ceiling or obstacle above the player
+		double maxY = (triangleMode || upsideDownMode) ? levelHeight - 1 : 1000000; // The y coordinate of the ceiling or obstacle above the player
 		
 		// Loop through all obstacles the player could be touching
 		for (int obstacleX = (int) playerX; obstacleX <= (int) playerX + 1; obstacleX++) {
@@ -833,6 +871,16 @@ public class LevelView extends Drawable {
 				playerRotation = 0;
 			}
 		}
+		
+		if (upsideDownMode) { // The player is in upside down mode, so look for a right side up portal
+			if (bottomObstacle != null && bottomObstacle.isRightSideUpPortal() || topObstacle != null && topObstacle.isRightSideUpPortal()) {
+				upsideDownMode = false; // The player is touching a right side up portal, so turn off upside down mode
+			}
+		} else { // The player is in circle mode, so look for a triangle portal
+			if (bottomObstacle != null && bottomObstacle.isUpsideDownPortal() || topObstacle != null && topObstacle.isUpsideDownPortal()) {
+				upsideDownMode = true; // The player is touching an upside down portal, so begin upside down mode
+			}
+		}
 	}
 	
 	/** Method Name: getBlockSize()
@@ -1016,7 +1064,7 @@ public class LevelView extends Drawable {
 	/** Method Name: jump()
 	 * @Author Colin Toft
 	 * @Date December 30th, 2019
-	 * @Modified January 10th & 13th, 2020
+	 * @Modified January 10th, 13th & 22nd, 2020
 	 * @Description Makes the player jump upwards
 	 * @Parameters N/A
 	 * @Returns N/A
@@ -1025,14 +1073,14 @@ public class LevelView extends Drawable {
 	 * Throws/Exceptions: N/A
 	 */
 	private void jump() {
-		ySpeed = jumpYSpeed; // Set the y speed to the jump y speed value to cause the player to move upwards
+		ySpeed = upsideDownMode ? -jumpYSpeed : jumpYSpeed; // Set the y speed to the jump y speed value to cause the player to move upwards
 		jumpCount++; // Setting this to true will remove the jumping tutorial message
 	}
 	
 	/** Method Name: startNextAttempt()
 	 * @Author Colin Toft
 	 * @Date January 7th, 2020
-	 * @Modified January 9th, 13th, 14th, 15th & 18th
+	 * @Modified January 9th, 13th, 14th, 15th, 18th & 22nd
 	 * @Description Restarts the player from the beginning of the level
 	 * @Parameters N/A
 	 * @Returns N/A
@@ -1061,9 +1109,10 @@ public class LevelView extends Drawable {
 			playerY = checkpointY;
 			ySpeed = checkpointYSpeed;
 			triangleMode = checkpointTriangleMode;
+			upsideDownMode = checkpointUpsideDownMode;
 			
 			// Set the starting ground height
-			if (triangleMode) {
+			if (triangleMode || upsideDownMode) {
 				groundHeight = 0.5 / levelHeight;
 			} else {
 				groundHeight = Math.min(baseGroundHeight, groundHeightThreshold - (playerY * getBlockSize() / pixelHeight()));
