@@ -43,6 +43,7 @@ public class PlayLevel extends Scene {
 	public boolean needsJumpHelp = true; // True if the player needs help jumping (the jumping tutorial message needs to be displayed)
 	private final String jumpHelpMessage = "Click or press space to jump over obstacles"; // Tip that helps the user learn to jump
 	private final String triangleHelpMessage = "Hold the mouse or space bar to fly"; // Tip that helps the user learn to use triangle mode
+	private final String ringHelpMessage = "Click or press space on a ring to jump mid-air";
 	private final String pauseMenuHelpMessage = "Press escape for more options"; // Tip that shows the user how to access the pause menu
 	
 	private DrawableOutlinedText pauseMenuHelpText; // The text that displays the pause menu help message
@@ -272,6 +273,15 @@ public class PlayLevel extends Scene {
 		if (levelView.isTriangleMode() && !ss.hasUsedTriangleMode) {
 			helpText.setText(triangleHelpMessage);
 			helpText.show();
+		}
+		
+		if (!needsJumpHelp && level.name.equals("Temporal Nebula")) {
+			if (Math.max(Math.max(level.normalProgress, level.practiceProgress), levelView.getPlayerProgress()) < 0.015) {
+				helpText.setText(ringHelpMessage);
+				helpText.show();
+			} else if (helpText.getText().equals(ringHelpMessage)) {
+				helpText.hide();
+			}
 		}
 		
 		// Hide the pause menu tip if the user has already paused the game before

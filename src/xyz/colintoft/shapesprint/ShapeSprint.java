@@ -72,7 +72,7 @@ public class ShapeSprint extends Game {
 		loadProgress();
 		
 		// Set up the window and open the main menu
-		boolean useFullScreen = false;
+		boolean useFullScreen = true; // Should the window open in full screen
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		setFrame("Shape Sprint", (int) dim.getWidth(), (int) dim.getHeight());
 		setFPS(400);

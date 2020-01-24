@@ -25,7 +25,7 @@ import xyz.colintoft.shapesprint.scenes.PlayLevel;
 ***********************************************
 @Author Colin Toft
 @Date December 30th, 2019
-@Modified December 31st, January 7th, 8th, 9th, 10th, 13th, 14th, 15th, 16th, 17th, 18th, 19th, 21st & 22nd, 2020
+@Modified December 31st, January 7th, 8th, 9th, 10th, 13th, 14th, 15th, 16th, 17th, 18th, 19th, 21st, 22nd & 23nd, 2020
 @Description A class that renders the level to the screen, including backgrounds, obstacles and the player, as well as playing the game music.
 ***********************************************
 */
@@ -365,7 +365,7 @@ public class LevelView extends Drawable {
 	/** Method Name: update()
 	 * @Author Colin Toft
 	 * @Date December 30th, 2019
-	 * @Modified January 7th, 9th, 10th, 13th, 14th, 15th, 17th, 19th & 21st, 2020
+	 * @Modified January 7th, 9th, 10th, 13th, 14th, 15th, 17th, 19th, 21st & 23rd, 2020
 	 * @Description Overrides Drawable.update(): updates the level, including updating player position, handling music and calculating physics
 	 * @Parameters
 	 *      - double dt: The time in seconds since the last time update was called
@@ -419,7 +419,7 @@ public class LevelView extends Drawable {
 			playerY = minY;
 			lastGroundY = playerY; // Store the y coordinate of the last time the player was on the ground
 			
-			if (upsideDownMode && justLanded) {
+			if (upsideDownMode && justLanded && !triangleMode) {
 				circleHitCeiling = true;
 			}
 			
@@ -443,10 +443,10 @@ public class LevelView extends Drawable {
 				
 			} else {
 				if (upsideDownMode) {
+					justLanded = ySpeed > 0; // If the y speed is larger than 0, the player is moving upwards and must have just landed on the ceiling
 					ySpeed = 0;
 					playerY = maxY - playerWidth;
 					lastGroundY = playerY;
-					justLanded = ySpeed > 0; // If the y speed is larger than 0, the player is moving upwards and must have just landed on the ceiling
 					
 					if (jumping) {
 						jump();
@@ -515,7 +515,7 @@ public class LevelView extends Drawable {
 		updateMode(); // Updates the players mode to triangle mode or circle mode if they are traveling through a portal
 		
 		if (isTouchingYellowPad()) {
-			ySpeed = yellowPadYSpeed;
+			ySpeed = upsideDownMode ? -yellowPadYSpeed : yellowPadYSpeed;
 			lastGroundY = playerY;
 		}
 		
