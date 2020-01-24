@@ -331,7 +331,11 @@ public class LevelView extends Drawable {
     			if (o != null) {
     				// If there is an obstacle there, draw it
     				BufferedImage image = images.get(o);
-    				g2d.drawImage(image, blockXToPixelX(obstacleX), blockYToPixelY(obstacleY) - image.getHeight(), null);
+    				if (o == Obstacle.YELLOW_PAD_UPSIDE_DOWN) {
+    					g2d.drawImage(image, blockXToPixelX(obstacleX), blockYToPixelY(obstacleY + 1), null);
+    				} else {
+    					g2d.drawImage(image, blockXToPixelX(obstacleX), blockYToPixelY(obstacleY) - image.getHeight(), null);
+    				}
     			}
 	    	}
 	    }
@@ -798,6 +802,15 @@ public class LevelView extends Drawable {
 							return true; // If there is an intersection, the player is touching the yellow pad
 						}
 					}
+					
+					if (level.obstacles[obstacleX][obstacleY] == Obstacle.YELLOW_PAD_UPSIDE_DOWN) {
+						Area padArea = new Area(new Rectangle2D.Double(obstacleX, obstacleY + 0.75, 1, 0.25)); // If the obstacle is a yellow pad, calculate its area
+						padArea.intersect(playerArea); // Determine if the pad and player intersect
+						
+						if (!padArea.isEmpty()) {
+							return true; // If there is an intersection, the player is touching the yellow pad
+						}
+					}
 				} catch (ArrayIndexOutOfBoundsException e) {}
 			}
 		}
@@ -1136,6 +1149,7 @@ public class LevelView extends Drawable {
 			
 			groundHeight = baseGroundHeight; // Set the starting ground height
 			triangleMode = false; // The level always starts in circle mode, not triangle mode
+			upsideDownMode = false;
 		}
 		
 		lastGroundY = playerY; // Reset the lastGroundY

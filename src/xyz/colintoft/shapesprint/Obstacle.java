@@ -183,7 +183,7 @@ public enum Obstacle {
 	/** Method Name: isSolid()
 	 * @Author Colin Toft
 	 * @Date January 7th, 2020
-	 * @Modified January 15th, 16th, 17th, 19th & 22nd, 2020
+	 * @Modified January 15th, 16th, 17th, 19th 22nd & 23nd, 2020
 	 * @Description Returns whether this Obstacle is solid (player can land on it)
 	 * @Parameters N/A
 	 * @Returns Whether this Obstacle is solid
@@ -193,7 +193,7 @@ public enum Obstacle {
 	 */
 	public boolean isSolid() {
 		// All blocks are solid (the player can land on them) except for portals and triangles
-		return !(killsPlayer() || isCirclePortal() || isTrianglePortal() || isUpsideDownPortal() || isRightSideUpPortal() || this == YELLOW_PAD || this == YELLOW_RING);
+		return !(killsPlayer() || isCirclePortal() || isTrianglePortal() || isUpsideDownPortal() || isRightSideUpPortal() || this == YELLOW_PAD || this == YELLOW_PAD_UPSIDE_DOWN || this == YELLOW_RING);
 	}
 
 	/** Method Name: isCirclePortal()
