@@ -91,7 +91,7 @@ public class LevelView extends Drawable {
 	private boolean triangleMode = false; // Whether the player is currently in triangle mode
 	private boolean upsideDownMode = false; // Whether the player is currently in upside down mode
 	
-	private BufferedImage playerCircleImage, playerTriangleImage; // Player images
+	private BufferedImage playerCircleImage, playerTriangleImage, playerTriangleUpsideDownImage; // Player images
 	private BufferedImage backgroundImage, groundImage, ceilingImage; // Images for the background of the level
 	private BufferedImage checkpointImage; // Image for the practice mode checkpoints
 	private double triangleImagePadding = 0.5 * playerWidth; // How much padding to put around the triangle image (needed so that rotation doesn't cut off the image)
@@ -221,6 +221,13 @@ public class LevelView extends Drawable {
 		g = playerTriangleImage.createGraphics();
 		g.drawImage(originalPlayerImage, (int)(getBlockSize() * triangleImagePadding), (int)(getBlockSize() * triangleImagePadding), (int)(getBlockSize() * 1.5 * playerWidth), (int)(getBlockSize() * playerWidth), null);
 		
+		// Load player upside down triangle image
+		originalPlayerImage = Util.loadImageFromFile(getClass(), "players/playerTriangleUpsideDown.png");
+		// Use a larger image in order to add padding around the triangle images
+		playerTriangleUpsideDownImage = Util.getEmptyImage((int)(getBlockSize() * (1.5 * playerWidth + triangleImagePadding * 2)), (int)(getBlockSize() * (1 * playerWidth + triangleImagePadding * 2)));
+		g = playerTriangleUpsideDownImage.createGraphics();
+		g.drawImage(originalPlayerImage, (int)(getBlockSize() * triangleImagePadding), (int)(getBlockSize() * triangleImagePadding), (int)(getBlockSize() * 1.5 * playerWidth), (int)(getBlockSize() * playerWidth), null);
+		
 		// Load Obstacle Images
 		images = new HashMap<Obstacle, BufferedImage>();
 		BufferedImage image;
@@ -309,7 +316,7 @@ public class LevelView extends Drawable {
 					rotate = AffineTransform.getRotateInstance(playerRotation, playerTriangleImage.getWidth() / 2.0, playerTriangleImage.getHeight() / 2.0);
 				    AffineTransformOp op = new AffineTransformOp(rotate, AffineTransformOp.TYPE_BILINEAR);
 					int padding = (int)(triangleImagePadding * getBlockSize());
-			    	g2d.drawImage(op.filter(playerTriangleImage, null), playerImageX - padding, playerImageY - padding, null);
+			    	g2d.drawImage(op.filter(upsideDownMode ? playerTriangleUpsideDownImage : playerTriangleImage, null), playerImageX - padding, playerImageY - padding, null);
 				} else {
 					// Rotate the player then draw it the at the previously calculated coordinates
 					rotate = AffineTransform.getRotateInstance(playerRotation, playerCircleImage.getWidth() / 2.0, playerCircleImage.getHeight() / 2.0);
@@ -378,7 +385,7 @@ public class LevelView extends Drawable {
 	public void update(double dt) {
 		if (!triangleMode) {
 			// If the player is in circle mode, rotate them to simulate rolling along the ground
-			playerRotation += playerRotationSpeed * dt;
+			playerRotation += (upsideDownMode ? -playerRotationSpeed : playerRotationSpeed) * dt;
 			playerRotation %= 2 * Math.PI;
 		}
 		
@@ -392,7 +399,7 @@ public class LevelView extends Drawable {
 		double minY = getMinY(); // Find the y coordinate of the ground or obstacle beneath the player
 		double maxY = getMaxY(); // Find the y coordinate of the ground or obstacle beneath the player
 		
-		if (playerY > minY || ySpeed != 0) { // If the player is in the air
+		if ((playerY > minY || ySpeed != 0) && !hasBeatLevel) { // If the player is in the air
 			if (!triangleMode) {
 				// If the player is in circle mode, simulate gravity by lowering their ySpeed
 				ySpeed = Math.max(ySpeed - gravity * dt * (upsideDownMode ? -1 : 1), minYSpeed);
@@ -472,7 +479,7 @@ public class LevelView extends Drawable {
 					((ShapeSprint) getGame()).hasUsedTriangleMode = true; // Remember that the player has used triangle mode to avoid showing them help messages for it in the future
 				}
 			}
-			if (playerY == 0) {
+			if (playerY == minY) {
 				playerRotation = Math.max(playerRotation - playerRotationSpeed * 0.5 * dt, 0); // If the player is on the ground, gradually move their rotation to 0
 			} else if (playerY == maxY - playerWidth) {
 				playerRotation = Math.min(playerRotation + playerRotationSpeed * 0.5 * dt, 0); // If the player is on the ceiling, gradually move their rotation to 0
