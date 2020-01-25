@@ -11,6 +11,13 @@ import javax.imageio.ImageIO;
 import xyz.colintoft.cgraphics.Game;
 import xyz.colintoft.cgraphics.Util;
 
+/**
+ * A class that represents some type of Drawable object like a shape or sprite.
+ * This code was originally based on code from Marston Connell's MCLib:
+ * https://github.com/TheMarstonConnell/MCLib/blob/master/src/xyz/marstonconnell/graphics/engine/drawing/Drawable.java
+ * @author Colin Toft
+ *
+ */
 public class Drawable implements KeyListener, MouseListener {
 
 	protected BufferedImage currentImage;

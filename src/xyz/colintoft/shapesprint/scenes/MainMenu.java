@@ -24,19 +24,7 @@ import xyz.colintoft.shapesprint.ShapeSprint;
 @Description The main menu scene that allows the user to select a level to play.
 ***********************************************
 */
-public class MainMenu extends Scene {
-	
-	// TODO alignment of text being weird
-	// TODO rocket collision physics??
-	// TODO different backgrounds for each level
-
-	// TODO finish levels
-	// TODO Comment CGraphics
-	// TODO resizing windows is weird
-	
-	// TODO rings
-	// TODO upsideDown portals
-	// TODO editing checkpoints?
+public class MainMenu extends Scene {	
 	
 	private int currentLevel; // The level that is being displayed
 

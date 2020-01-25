@@ -69,7 +69,7 @@ public class Util {
 		}
 	}
 	
-	// 8
+	/** Returns true if the file at the given filepath exists, otherwise false. */
 	public static boolean fileExists(Class resourceGrabber, String filename) {
 		return resourceGrabber.getResourceAsStream(filename) != null;
 	}
@@ -99,6 +99,8 @@ public class Util {
 		return getEmptyImage(width, height, true);
 	} 
 	
+	/** Creates a new BufferedImage using the configuration that works best with the system the program is being run on.
+	 * This code was originally based on a StackOverflow post, but I am unable to locate the exact post.  */
 	public static BufferedImage getEmptyImage(int width, int height, boolean fixSides) {
 		if (config == null) {
 			env = GraphicsEnvironment.getLocalGraphicsEnvironment();
